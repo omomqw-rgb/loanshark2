@@ -1,0 +1,151 @@
+/* base.css - Reset + html/body base typography/background */
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  
+  
+}
+
+
+
+
+
+/* =========================================================
+   Bright mirror theme overrides (high-contrast glass look)
+   ========================================================= */
+
+/* Global */
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--space-4);
+  
+  
+}
+
+
+
+/* v021 B – Mid Gradient Mint/Blue GPT Mirror Skin
+   적용 범위: 전체 공통 스킨 (색/배경/광택). 레이아웃은 기존 유지.
+   주의: 밝은 배경에는 어두운 글씨, 어두운 배경에는 밝은 글씨를 강제해서 가독성 확보.
+*/
+
+/* 1) 전체 배경 – GPT 다크 + 민트/블루 미드 그라데이션 */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  
+  
+}
+
+
+
+
+
+
+
+/* =======================================================================
+   v024_GPT_ultra_dark_mint_navigation
+   - GPT 울트라 다크 100% (무채색 기반)
+   - 상단 탭 active + 채무자관리 헤더에만 민트 사용
+   - 블루 전역 제거 (상태값 제외)
+   ======================================================================= */
+
+/* -----------------------------
+   Global background / text
+   ----------------------------- */
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  
+  
+}
+
+
+
+
+
+/* === v025: Bright neutral white theme (no blue/mint) ===================== */
+
+/* 1. Global background */
+body {
+  
+  
+}
+
+
+
+
+/* ============================================================
+   v026_skin_charcoal_white
+   Tesla / Premium SaaS inspired neutral skin
+   Base: project_v025_color_reset
+   ------------------------------------------------------------
+   Palette:
+     Body background: var(--charcoal-bg-body)
+     Surface:         var(--charcoal-bg-surface)
+     Elevated:        var(--charcoal-bg-elevated)
+     Border subtle:   var(--charcoal-border-subtle)
+     Border strong:   var(--charcoal-border-strong)
+     Text primary:    var(--charcoal-text-primary)
+     Text secondary:  var(--charcoal-text-secondary)
+     Text muted:      var(--charcoal-text-muted)
+     Accent:          #2C4A76
+     Accent soft:     #E0E6F2
+   ============================================================ */
+
+
+
+/* Global */
+
+html,
+body {
+  background: radial-gradient(circle at top, var(--charcoal-bg-surface) 0%, var(--charcoal-bg-body) 48%, #F2F4F7 100%);
+  color: var(--charcoal-text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+
+/* Do not override explicit status / badge colors (kept from color_reset base) */
+
+
+/* ============================================================
+   v026_skin_charcoal_white_fix1
+   Minimal + Deep Shadow premium refinement layer
+   Base: v026_skin_charcoal_white
+   ------------------------------------------------------------
+   This layer tightens the palette and deepens elevation:
+   - Slightly deeper accent color
+   - Refined 3-level elevation shadows
+   - More tactile hover/active states
+   - Subtle background refinement
+   ============================================================ */
+
+/* Override key theme tokens */
+
+
+/* Body background: even smoother studio gradient */
+html,
+body {
+  background:
+    radial-gradient(circle at top, var(--charcoal-bg-surface) 0%, #F9FAFB 32%, #F5F7FA 66%, #F1F3F7 100%);
+}
+
+
+
+/* 5) Global typography system ------------------------------------------ */
+
+
+
+body {
+  color: var(--text-primary);
+  line-height: 1.4;
+}

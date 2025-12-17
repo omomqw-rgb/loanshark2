@@ -1,0 +1,87 @@
+{
+  "version": "v333_schedules_engine_stage1",
+  "base_version": "v332_schedules_engine_unify_architect_audit",
+  "engine": {
+    "file": "js/core/schedules.engine.js",
+    "apis": [
+      "list",
+      "initEmpty",
+      "fromSnapshot",
+      "toSnapshot",
+      "rebuildForLoan",
+      "rebuildForClaim",
+      "updateSchedule",
+      "bulkUpdateFromLoanForm",
+      "bulkUpdateFromClaimForm",
+      "removeByDebtorId",
+      "removeByLoanId",
+      "removeByClaimId",
+      "normalizeAll",
+      "getAll",
+      "getByLoanId",
+      "getByClaimId",
+      "getByDebtorId"
+    ],
+    "aliasContract": "After every mutating call, App.state.schedules and App.data.schedules reference App.schedulesEngine.list."
+  },
+  "writePathsMigrated": [
+    "App.db.rebuildSchedulesForLoan",
+    "App.db.rebuildSchedulesForClaim",
+    "normalizeAllSchedules",
+    "handleLoanScheduleSave",
+    "handleClaimScheduleSave",
+    "handleDebtorDelete",
+    "handleLoanDelete",
+    "handleClaimDelete"
+  ],
+  "checks": [
+    {
+      "file": "js/core/db.js",
+      "function": "rebuildSchedulesForLoan",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/core/db.js",
+      "function": "rebuildSchedulesForClaim",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/core/data.js",
+      "function": "normalizeAllSchedules",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "function": "handleLoanScheduleSave",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "function": "handleClaimScheduleSave",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "function": "handleDebtorDelete",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "function": "handleLoanDelete",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "function": "handleClaimDelete",
+      "hasDirectScheduleMutation": false,
+      "usesSchedulesEngine": true
+    }
+  ]
+}

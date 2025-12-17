@@ -1,0 +1,4104 @@
+{
+  "version": "v302_overview_legacy_audit_stage2",
+  "base_version": "v301_overview_legacy_audit_stage1",
+  "html_usage": {
+    "classes": [
+      "account-area",
+      "app",
+      "auth-actions",
+      "auth-btn",
+      "auth-btn-primary",
+      "auth-btn-secondary",
+      "auth-error",
+      "auth-field",
+      "auth-form",
+      "auth-label",
+      "auth-modal",
+      "auth-modal-backdrop",
+      "auth-modal-dialog",
+      "auth-modal-title",
+      "auth-status",
+      "badge-version",
+      "body-row",
+      "brand",
+      "card",
+      "debtor-list-panel",
+      "debtor-sidepanel",
+      "debtor-sidepanel-body",
+      "debtor-sidepanel-content",
+      "debtor-sidepanel-header",
+      "debtor-sidepanel-tabs",
+      "debtor-sidepanel-title",
+      "debtor-sidepanel-toggle-icon",
+      "debtor-tab-btn",
+      "dlist-add-btn",
+      "dlist-body",
+      "dlist-page-label",
+      "dlist-page-next",
+      "dlist-page-prev",
+      "dlist-pagination",
+      "dlist-search-input",
+      "dlist-topbar",
+      "donut-wrap",
+      "is-active",
+      "is-expanded",
+      "label",
+      "left",
+      "legend-box",
+      "legend-color-chip",
+      "legend-color-inflow",
+      "legend-color-net",
+      "legend-color-outflow",
+      "legend-color-velocity",
+      "legend-item",
+      "main",
+      "main-card",
+      "meta-item",
+      "meta-label",
+      "meta-value",
+      "overdue",
+      "overview-metrics",
+      "overview-metrics-grid",
+      "overview-panel",
+      "overview-panel-body",
+      "overview-panel-header",
+      "overview-panel-portfolio",
+      "overview-panel-recovery-new",
+      "overview-panel-title",
+      "overview-portfolio-cards",
+      "overview-portfolio-donut",
+      "overview-portfolio-types",
+      "paid",
+      "partial",
+      "period-apply-btn",
+      "period-from",
+      "period-input",
+      "period-separator",
+      "period-to",
+      "planned",
+      "portfolio-flex",
+      "portfolio-legend",
+      "portfolio-type-chip",
+      "recovery-flow-chart-box",
+      "recovery-flow-insight-box",
+      "recovery-flow-nav",
+      "recovery-kpi-grid",
+      "recovery-kpi-item",
+      "report-kpi-card",
+      "report-kpi-grid",
+      "report-kpi-header",
+      "report-kpi-icon",
+      "report-kpi-label",
+      "report-kpi-main",
+      "report-kpi-row",
+      "report-kpi-submetrics",
+      "report-kpi-title",
+      "report-kpi-value",
+      "report-overview",
+      "report-period-controls",
+      "report-section",
+      "report-section-body",
+      "report-section-desc",
+      "report-section-header",
+      "report-section-header-main",
+      "report-section-overview",
+      "report-section-risk",
+      "report-section-statistics",
+      "report-section-title",
+      "report-section-trends",
+      "report-statistics",
+      "report-subpanel",
+      "report-subtab-btn",
+      "report-subtabs",
+      "right",
+      "risk-aging-panel",
+      "risk-concentration-panel",
+      "risk-kpi-card",
+      "risk-kpi-label",
+      "risk-kpi-row",
+      "risk-kpi-value",
+      "risk-layout",
+      "risk-left",
+      "risk-panel",
+      "risk-right",
+      "risk-section-title",
+      "risk-table",
+      "risk-table-aging",
+      "risk-table-concentration",
+      "risk-table-topdebtors",
+      "risk-topdebtors-panel",
+      "side",
+      "stats-kpi-card",
+      "stats-kpi-grid",
+      "stats-kpi-label",
+      "stats-kpi-meta",
+      "stats-kpi-row",
+      "stats-kpi-value",
+      "stats-section",
+      "stats-section-title",
+      "stats-subtitle",
+      "stats-table",
+      "stats-table-amount",
+      "stats-table-debtor",
+      "stats-table-topdebtors",
+      "stats-toplist",
+      "submetric",
+      "submetric-label",
+      "submetric-value",
+      "summary-collection-arrears",
+      "summary-debtor",
+      "summary-loan-claim",
+      "tab-btn",
+      "tab-panel",
+      "tab-strip",
+      "text-btn",
+      "top-tabs",
+      "topbar",
+      "topbar-main",
+      "topbar-meta",
+      "trend-chart-card",
+      "trend-chart-header",
+      "trend-chart-title",
+      "trend-chart-wrapper",
+      "trend-legend",
+      "trend-legend-item",
+      "trend-summary-card",
+      "trend-summary-grid",
+      "trend-summary-label",
+      "trend-summary-value",
+      "value"
+    ],
+    "ids": [
+      "account-area",
+      "auth-error",
+      "auth-login-form",
+      "auth-modal",
+      "calendar-root",
+      "debtor-list-root",
+      "debtor-panel-root",
+      "debtor-sidepanel",
+      "kpi-daily-actual",
+      "kpi-daily-planned",
+      "kpi-monthly-actual",
+      "kpi-monthly-planned",
+      "modal-root",
+      "monitoring-root",
+      "overview-metrics",
+      "recoveryFlowChart",
+      "report-root",
+      "tab-calendar",
+      "tab-monitoring",
+      "tab-report",
+      "trend-main-chart"
+    ],
+    "attr_pairs": [
+      [
+        "charset",
+        "utf-8"
+      ],
+      [
+        "class",
+        "account-area"
+      ],
+      [
+        "class",
+        "app"
+      ],
+      [
+        "class",
+        "auth-actions"
+      ],
+      [
+        "class",
+        "auth-btn"
+      ],
+      [
+        "class",
+        "auth-btn-primary"
+      ],
+      [
+        "class",
+        "auth-btn-secondary"
+      ],
+      [
+        "class",
+        "auth-error"
+      ],
+      [
+        "class",
+        "auth-field"
+      ],
+      [
+        "class",
+        "auth-form"
+      ],
+      [
+        "class",
+        "auth-label"
+      ],
+      [
+        "class",
+        "auth-modal"
+      ],
+      [
+        "class",
+        "auth-modal-backdrop"
+      ],
+      [
+        "class",
+        "auth-modal-dialog"
+      ],
+      [
+        "class",
+        "auth-modal-title"
+      ],
+      [
+        "class",
+        "auth-status"
+      ],
+      [
+        "class",
+        "badge-version"
+      ],
+      [
+        "class",
+        "body-row"
+      ],
+      [
+        "class",
+        "brand"
+      ],
+      [
+        "class",
+        "card main-card"
+      ],
+      [
+        "class",
+        "debtor-list-panel"
+      ],
+      [
+        "class",
+        "debtor-sidepanel is-expanded"
+      ],
+      [
+        "class",
+        "debtor-sidepanel-body"
+      ],
+      [
+        "class",
+        "debtor-sidepanel-content"
+      ],
+      [
+        "class",
+        "debtor-sidepanel-header"
+      ],
+      [
+        "class",
+        "debtor-sidepanel-tabs"
+      ],
+      [
+        "class",
+        "debtor-sidepanel-title"
+      ],
+      [
+        "class",
+        "debtor-sidepanel-toggle-icon"
+      ],
+      [
+        "class",
+        "debtor-tab-btn"
+      ],
+      [
+        "class",
+        "debtor-tab-btn is-active"
+      ],
+      [
+        "class",
+        "dlist-body"
+      ],
+      [
+        "class",
+        "dlist-page-label"
+      ],
+      [
+        "class",
+        "dlist-page-next"
+      ],
+      [
+        "class",
+        "dlist-page-prev"
+      ],
+      [
+        "class",
+        "dlist-pagination"
+      ],
+      [
+        "class",
+        "dlist-search-input"
+      ],
+      [
+        "class",
+        "dlist-topbar"
+      ],
+      [
+        "class",
+        "donut-wrap"
+      ],
+      [
+        "class",
+        "label"
+      ],
+      [
+        "class",
+        "legend-box overdue"
+      ],
+      [
+        "class",
+        "legend-box paid"
+      ],
+      [
+        "class",
+        "legend-box partial"
+      ],
+      [
+        "class",
+        "legend-box planned"
+      ],
+      [
+        "class",
+        "legend-color-chip legend-color-inflow"
+      ],
+      [
+        "class",
+        "legend-color-chip legend-color-net"
+      ],
+      [
+        "class",
+        "legend-color-chip legend-color-outflow"
+      ],
+      [
+        "class",
+        "legend-color-chip legend-color-velocity"
+      ],
+      [
+        "class",
+        "legend-item"
+      ],
+      [
+        "class",
+        "main"
+      ],
+      [
+        "class",
+        "meta-item"
+      ],
+      [
+        "class",
+        "meta-label"
+      ],
+      [
+        "class",
+        "meta-value"
+      ],
+      [
+        "class",
+        "overview-metrics"
+      ],
+      [
+        "class",
+        "overview-metrics-grid"
+      ],
+      [
+        "class",
+        "overview-panel overview-panel-portfolio"
+      ],
+      [
+        "class",
+        "overview-panel overview-panel-recovery-new"
+      ],
+      [
+        "class",
+        "overview-panel-body"
+      ],
+      [
+        "class",
+        "overview-panel-header"
+      ],
+      [
+        "class",
+        "overview-panel-title"
+      ],
+      [
+        "class",
+        "overview-portfolio-cards"
+      ],
+      [
+        "class",
+        "overview-portfolio-donut"
+      ],
+      [
+        "class",
+        "overview-portfolio-types"
+      ],
+      [
+        "class",
+        "period-apply-btn"
+      ],
+      [
+        "class",
+        "period-input period-from"
+      ],
+      [
+        "class",
+        "period-input period-to"
+      ],
+      [
+        "class",
+        "period-separator"
+      ],
+      [
+        "class",
+        "portfolio-flex"
+      ],
+      [
+        "class",
+        "portfolio-legend"
+      ],
+      [
+        "class",
+        "portfolio-type-chip"
+      ],
+      [
+        "class",
+        "portfolio-type-chip is-active"
+      ],
+      [
+        "class",
+        "recovery-flow-chart-box"
+      ],
+      [
+        "class",
+        "recovery-flow-insight-box"
+      ],
+      [
+        "class",
+        "recovery-flow-nav left"
+      ],
+      [
+        "class",
+        "recovery-flow-nav right"
+      ],
+      [
+        "class",
+        "recovery-kpi-grid"
+      ],
+      [
+        "class",
+        "recovery-kpi-item"
+      ],
+      [
+        "class",
+        "report-kpi-card"
+      ],
+      [
+        "class",
+        "report-kpi-grid"
+      ],
+      [
+        "class",
+        "report-kpi-header"
+      ],
+      [
+        "class",
+        "report-kpi-icon"
+      ],
+      [
+        "class",
+        "report-kpi-label"
+      ],
+      [
+        "class",
+        "report-kpi-main"
+      ],
+      [
+        "class",
+        "report-kpi-row"
+      ],
+      [
+        "class",
+        "report-kpi-submetrics"
+      ],
+      [
+        "class",
+        "report-kpi-title"
+      ],
+      [
+        "class",
+        "report-kpi-value"
+      ],
+      [
+        "class",
+        "report-overview"
+      ],
+      [
+        "class",
+        "report-period-controls"
+      ],
+      [
+        "class",
+        "report-section report-section-overview is-active"
+      ],
+      [
+        "class",
+        "report-section report-section-risk"
+      ],
+      [
+        "class",
+        "report-section report-section-statistics"
+      ],
+      [
+        "class",
+        "report-section report-section-trends"
+      ],
+      [
+        "class",
+        "report-section-body"
+      ],
+      [
+        "class",
+        "report-section-desc"
+      ],
+      [
+        "class",
+        "report-section-header"
+      ],
+      [
+        "class",
+        "report-section-header-main"
+      ],
+      [
+        "class",
+        "report-section-title"
+      ],
+      [
+        "class",
+        "report-statistics"
+      ],
+      [
+        "class",
+        "report-subpanel"
+      ],
+      [
+        "class",
+        "report-subtab-btn"
+      ],
+      [
+        "class",
+        "report-subtab-btn is-active"
+      ],
+      [
+        "class",
+        "report-subtabs"
+      ],
+      [
+        "class",
+        "risk-kpi-card"
+      ],
+      [
+        "class",
+        "risk-kpi-label"
+      ],
+      [
+        "class",
+        "risk-kpi-row"
+      ],
+      [
+        "class",
+        "risk-kpi-value"
+      ],
+      [
+        "class",
+        "risk-layout"
+      ],
+      [
+        "class",
+        "risk-left"
+      ],
+      [
+        "class",
+        "risk-panel risk-aging-panel"
+      ],
+      [
+        "class",
+        "risk-panel risk-concentration-panel"
+      ],
+      [
+        "class",
+        "risk-panel risk-topdebtors-panel"
+      ],
+      [
+        "class",
+        "risk-right"
+      ],
+      [
+        "class",
+        "risk-section-title"
+      ],
+      [
+        "class",
+        "risk-table risk-table-aging"
+      ],
+      [
+        "class",
+        "risk-table risk-table-concentration"
+      ],
+      [
+        "class",
+        "risk-table risk-table-topdebtors"
+      ],
+      [
+        "class",
+        "side"
+      ],
+      [
+        "class",
+        "stats-kpi-card"
+      ],
+      [
+        "class",
+        "stats-kpi-grid"
+      ],
+      [
+        "class",
+        "stats-kpi-label"
+      ],
+      [
+        "class",
+        "stats-kpi-meta"
+      ],
+      [
+        "class",
+        "stats-kpi-row"
+      ],
+      [
+        "class",
+        "stats-kpi-value"
+      ],
+      [
+        "class",
+        "stats-section"
+      ],
+      [
+        "class",
+        "stats-section-title"
+      ],
+      [
+        "class",
+        "stats-subtitle"
+      ],
+      [
+        "class",
+        "stats-table stats-table-amount summary-collection-arrears"
+      ],
+      [
+        "class",
+        "stats-table stats-table-amount summary-loan-claim"
+      ],
+      [
+        "class",
+        "stats-table stats-table-debtor summary-debtor"
+      ],
+      [
+        "class",
+        "stats-table stats-table-topdebtors"
+      ],
+      [
+        "class",
+        "stats-toplist"
+      ],
+      [
+        "class",
+        "submetric"
+      ],
+      [
+        "class",
+        "submetric-label"
+      ],
+      [
+        "class",
+        "submetric-value"
+      ],
+      [
+        "class",
+        "tab-btn"
+      ],
+      [
+        "class",
+        "tab-btn is-active"
+      ],
+      [
+        "class",
+        "tab-panel"
+      ],
+      [
+        "class",
+        "tab-panel is-active"
+      ],
+      [
+        "class",
+        "tab-strip top-tabs"
+      ],
+      [
+        "class",
+        "text-btn dlist-add-btn"
+      ],
+      [
+        "class",
+        "topbar"
+      ],
+      [
+        "class",
+        "topbar-main"
+      ],
+      [
+        "class",
+        "topbar-meta"
+      ],
+      [
+        "class",
+        "trend-chart-card"
+      ],
+      [
+        "class",
+        "trend-chart-header"
+      ],
+      [
+        "class",
+        "trend-chart-title"
+      ],
+      [
+        "class",
+        "trend-chart-wrapper"
+      ],
+      [
+        "class",
+        "trend-legend"
+      ],
+      [
+        "class",
+        "trend-legend-item is-active"
+      ],
+      [
+        "class",
+        "trend-summary-card"
+      ],
+      [
+        "class",
+        "trend-summary-grid"
+      ],
+      [
+        "class",
+        "trend-summary-label"
+      ],
+      [
+        "class",
+        "trend-summary-value"
+      ],
+      [
+        "class",
+        "value"
+      ],
+      [
+        "content",
+        "width=device-width, initial-scale=1"
+      ],
+      [
+        "data-action",
+        "apply-risk-period"
+      ],
+      [
+        "data-action",
+        "auth-close-modal"
+      ],
+      [
+        "data-action",
+        "auth-open-modal"
+      ],
+      [
+        "data-action",
+        "debtor-add"
+      ],
+      [
+        "data-action",
+        "debtor-panel-toggle"
+      ],
+      [
+        "data-bucket",
+        "0_7"
+      ],
+      [
+        "data-bucket",
+        "31_90"
+      ],
+      [
+        "data-bucket",
+        "8_30"
+      ],
+      [
+        "data-bucket",
+        "90p"
+      ],
+      [
+        "data-debtor-tab",
+        "history"
+      ],
+      [
+        "data-debtor-tab",
+        "list"
+      ],
+      [
+        "data-debtor-tab",
+        "stats"
+      ],
+      [
+        "data-kpi",
+        "avail"
+      ],
+      [
+        "data-kpi",
+        "claim"
+      ],
+      [
+        "data-kpi",
+        "loan"
+      ],
+      [
+        "data-kpi",
+        "ops"
+      ],
+      [
+        "data-period-target",
+        "risk"
+      ],
+      [
+        "data-portfolio-mode",
+        "claim"
+      ],
+      [
+        "data-portfolio-mode",
+        "loan"
+      ],
+      [
+        "data-report-section",
+        "overview"
+      ],
+      [
+        "data-report-section",
+        "risk"
+      ],
+      [
+        "data-report-section",
+        "statistics"
+      ],
+      [
+        "data-report-section",
+        "trends"
+      ],
+      [
+        "data-risk-kpi",
+        "highrisk-count"
+      ],
+      [
+        "data-risk-kpi",
+        "max-overdue-days"
+      ],
+      [
+        "data-risk-kpi",
+        "overdue-amount"
+      ],
+      [
+        "data-risk-kpi",
+        "overdue-rate"
+      ],
+      [
+        "data-row",
+        "arrears-total"
+      ],
+      [
+        "data-row",
+        "avg-claim-per-debtor"
+      ],
+      [
+        "data-row",
+        "avg-loan-per-debtor"
+      ],
+      [
+        "data-row",
+        "claim-amount"
+      ],
+      [
+        "data-row",
+        "collected-month"
+      ],
+      [
+        "data-row",
+        "collected-total"
+      ],
+      [
+        "data-row",
+        "debtor-count"
+      ],
+      [
+        "data-row",
+        "loan-principal"
+      ],
+      [
+        "data-row",
+        "loan-total-repay"
+      ],
+      [
+        "data-row",
+        "partial-total"
+      ],
+      [
+        "data-series",
+        "inflow"
+      ],
+      [
+        "data-series",
+        "net"
+      ],
+      [
+        "data-series",
+        "outflow"
+      ],
+      [
+        "data-series",
+        "velocity"
+      ],
+      [
+        "data-stats-kpi",
+        "total-arrears"
+      ],
+      [
+        "data-stats-kpi",
+        "total-claim-amount"
+      ],
+      [
+        "data-stats-kpi",
+        "total-collected"
+      ],
+      [
+        "data-stats-kpi",
+        "total-loan-principal"
+      ],
+      [
+        "data-summary",
+        "avg3"
+      ],
+      [
+        "data-summary",
+        "min"
+      ],
+      [
+        "data-summary",
+        "peak"
+      ],
+      [
+        "data-tab",
+        "calendar"
+      ],
+      [
+        "data-tab",
+        "monitoring"
+      ],
+      [
+        "data-tab",
+        "report"
+      ],
+      [
+        "data-tab-root",
+        ""
+      ],
+      [
+        "href",
+        "css/app.css"
+      ],
+      [
+        "href",
+        "css/debtorDetail.css"
+      ],
+      [
+        "id",
+        "account-area"
+      ],
+      [
+        "id",
+        "auth-error"
+      ],
+      [
+        "id",
+        "auth-login-form"
+      ],
+      [
+        "id",
+        "auth-modal"
+      ],
+      [
+        "id",
+        "calendar-root"
+      ],
+      [
+        "id",
+        "debtor-list-root"
+      ],
+      [
+        "id",
+        "debtor-panel-root"
+      ],
+      [
+        "id",
+        "debtor-sidepanel"
+      ],
+      [
+        "id",
+        "kpi-daily-actual"
+      ],
+      [
+        "id",
+        "kpi-daily-planned"
+      ],
+      [
+        "id",
+        "kpi-monthly-actual"
+      ],
+      [
+        "id",
+        "kpi-monthly-planned"
+      ],
+      [
+        "id",
+        "modal-root"
+      ],
+      [
+        "id",
+        "monitoring-root"
+      ],
+      [
+        "id",
+        "overview-metrics"
+      ],
+      [
+        "id",
+        "recoveryFlowChart"
+      ],
+      [
+        "id",
+        "report-root"
+      ],
+      [
+        "id",
+        "tab-calendar"
+      ],
+      [
+        "id",
+        "tab-monitoring"
+      ],
+      [
+        "id",
+        "tab-report"
+      ],
+      [
+        "id",
+        "trend-main-chart"
+      ],
+      [
+        "lang",
+        "ko"
+      ],
+      [
+        "name",
+        "email"
+      ],
+      [
+        "name",
+        "password"
+      ],
+      [
+        "name",
+        "viewport"
+      ],
+      [
+        "placeholder",
+        "시작일"
+      ],
+      [
+        "placeholder",
+        "종료일"
+      ],
+      [
+        "placeholder",
+        "채무자 검색"
+      ],
+      [
+        "rel",
+        "stylesheet"
+      ],
+      [
+        "src",
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"
+      ],
+      [
+        "src",
+        "js/app.js"
+      ],
+      [
+        "src",
+        "js/components/claimCard.js"
+      ],
+      [
+        "src",
+        "js/components/loanCard.js"
+      ],
+      [
+        "src",
+        "js/core/auth.js"
+      ],
+      [
+        "src",
+        "js/core/data.js"
+      ],
+      [
+        "src",
+        "js/core/db.js"
+      ],
+      [
+        "src",
+        "js/core/state.js"
+      ],
+      [
+        "src",
+        "js/core/supabase.js"
+      ],
+      [
+        "src",
+        "js/core/util.js"
+      ],
+      [
+        "src",
+        "js/features/calendar.js"
+      ],
+      [
+        "src",
+        "js/features/debtors.handlers.js"
+      ],
+      [
+        "src",
+        "js/features/debtors.js"
+      ],
+      [
+        "src",
+        "js/features/debtors_domlist.js"
+      ],
+      [
+        "src",
+        "js/features/monitoring.js"
+      ],
+      [
+        "src",
+        "js/features/report.compute.trends_risk.js"
+      ],
+      [
+        "src",
+        "js/features/report.js"
+      ],
+      [
+        "src",
+        "js/features/report.render.recovery.js"
+      ],
+      [
+        "src",
+        "js/features/report.render.trends_risk.js"
+      ],
+      [
+        "src",
+        "js/features/report.state.js"
+      ],
+      [
+        "src",
+        "js/modules/debtorDetail.dom.js"
+      ],
+      [
+        "src",
+        "js/modules/debtorDetail.info.js"
+      ],
+      [
+        "src",
+        "js/modules/debtorDetail.kpi.js"
+      ],
+      [
+        "src",
+        "js/modules/debtordetail.js"
+      ],
+      [
+        "src",
+        "js/ui/debtorBack.dom.js"
+      ],
+      [
+        "src",
+        "js/ui/debtorPanel.dom.js"
+      ],
+      [
+        "src",
+        "js/ui/events.js"
+      ],
+      [
+        "src",
+        "js/ui/layout.js"
+      ],
+      [
+        "src",
+        "js/ui/modalManager.debtors.js"
+      ],
+      [
+        "src",
+        "js/vendor/chart.umd.min.js"
+      ],
+      [
+        "type",
+        "button"
+      ],
+      [
+        "type",
+        "date"
+      ],
+      [
+        "type",
+        "email"
+      ],
+      [
+        "type",
+        "password"
+      ],
+      [
+        "type",
+        "submit"
+      ],
+      [
+        "type",
+        "text"
+      ]
+    ]
+  },
+  "js_created_selectors": {
+    "classes": [
+      "arrow-down",
+      "arrow-up",
+      "badge-claim",
+      "badge-loan",
+      "badge-overdue",
+      "badge-paid",
+      "badge-partial",
+      "badge-planned",
+      "btn",
+      "btn-cancel",
+      "btn-icon",
+      "btn-primary",
+      "btn-sm",
+      "calendar-day",
+      "calendar-day-detail",
+      "calendar-day-header",
+      "calendar-day-metric",
+      "calendar-day-metrics",
+      "calendar-day-number",
+      "calendar-header",
+      "calendar-header-center",
+      "calendar-header-right",
+      "calendar-main",
+      "calendar-main-body",
+      "calendar-metric-count",
+      "calendar-metric-dot",
+      "calendar-month-label-btn",
+      "calendar-month-view",
+      "calendar-nav-btn",
+      "calendar-nav-next",
+      "calendar-nav-prev",
+      "calendar-shell",
+      "calendar-sidepanel",
+      "calendar-today-btn",
+      "calendar-view-btn",
+      "calendar-view-toggle",
+      "calendar-week-arrow",
+      "calendar-week-arrows",
+      "calendar-week-row",
+      "calendar-weekday",
+      "calendar-weekdays-row",
+      "calendar-weeks",
+      "card-status-",
+      "chip-overdue",
+      "chip-paid",
+      "chip-partial",
+      "chip-planned",
+      "claim-card",
+      "claim-card-amount",
+      "claim-card-template",
+      "claim-card-title",
+      "collapsed",
+      "day-detail-empty",
+      "day-detail-header",
+      "day-detail-item",
+      "day-detail-list",
+      "day-detail-summary",
+      "day-detail-title",
+      "day-detail-today",
+      "day-item-amount",
+      "day-item-installment",
+      "day-item-name",
+      "day-item-right",
+      "day-sort-toggle",
+      "day-status-text-badge",
+      "day-summary-chip",
+      "day-type-text-badge",
+      "dd-card",
+      "dd-info-card",
+      "dd-info-grid",
+      "dd-summary-label",
+      "dd-summary-row",
+      "dd-summary-section",
+      "dd-summary-value",
+      "dlist-bullet",
+      "dlist-col-center",
+      "dlist-col-left",
+      "dlist-col-right",
+      "dlist-counts",
+      "dlist-item",
+      "dlist-name",
+      "dlist-status-dot",
+      "dow-",
+      "empty-text",
+      "field-text",
+      "form-row",
+      "has-week-detail",
+      "is-active",
+      "is-active-week",
+      "is-collapsed",
+      "is-current-week",
+      "is-expanded",
+      "is-highlight",
+      "is-month-mode",
+      "is-outside",
+      "is-overdue",
+      "is-paid",
+      "is-partial",
+      "is-saturday",
+      "is-selected",
+      "is-sunday",
+      "is-today",
+      "is-week-mode",
+      "label",
+      "loan-card",
+      "loan-card-amount",
+      "loan-card-template",
+      "loan-card-title",
+      "metric-",
+      "modal",
+      "modal-actions",
+      "modal-backdrop",
+      "modal-body",
+      "modal-header",
+      "modal-title",
+      "overview-placeholder",
+      "overview-portfolio-donut-segment",
+      "overview-portfolio-donut-svg",
+      "partial-input",
+      "table",
+      "value",
+      "week-detail-empty",
+      "week-detail-item",
+      "week-detail-items",
+      "week-detail-main",
+      "week-detail-meta",
+      "week-item-amount",
+      "week-item-debtor",
+      "week-item-pill",
+      "week-item-pill-",
+      "week-item-status"
+    ],
+    "ids": [
+      "debtor-detail-root"
+    ]
+  },
+  "css_files": {
+    "css/components.css": {
+      "total_selectors": 645,
+      "dead_selectors": [
+        {
+          "selector": "/* Amount System v113 – Shared Layout * - .amount-row / .amount-label / .amount-value are neutral layout helpers. * - Do NOT put module-specific colors or behaviors here. */ /* components.css - auto-reorganized structural CSS (v101) */ *",
+          "line": 1,
+          "class_tokens": [
+            "amount-label",
+            "amount-row",
+            "amount-value",
+            "css"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "min-width: 0; }.btn-text",
+          "line": 42,
+          "class_tokens": [
+            "btn-text"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border: none; background: none; padding: 0; margin: 0; font-size: var(--font-xs); color: #e5e7eb; cursor: pointer; }.btn-text.btn-text + .btn-text",
+          "line": 44,
+          "class_tokens": [
+            "btn-text"
+          ],
+          "id_tokens": [
+            "e5e7eb"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; gap: var(--radius-sm); margin-bottom: var(--radius-sm); }.pagination",
+          "line": 74,
+          "class_tokens": [
+            "pagination"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); font-size: var(--font-xs); }.page-btn",
+          "line": 78,
+          "class_tokens": [
+            "9",
+            "page-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.page-btn:disabled",
+          "line": 96,
+          "class_tokens": [
+            "page-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "opacity: 0.35; cursor: default; }.kpi-grid",
+          "line": 97,
+          "class_tokens": [
+            "35",
+            "kpi-grid"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "1fr)); gap: var(--radius-sm); margin: var(--radius-sm) 0 var(--radius-md); }.form-section",
+          "line": 100,
+          "class_tokens": [
+            "form-section"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-top: var(--radius-md); padding-top: var(--space-3); border-top: 1px solid var(--state-active); }.form-section-title",
+          "line": 105,
+          "class_tokens": [
+            "form-section-title"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--space-4); margin-bottom: var(--space-2); }.loan-list",
+          "line": 109,
+          "class_tokens": [
+            "loan-list"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".claim-list",
+          "line": 109,
+          "class_tokens": [
+            "claim-list"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; flex-direction: column; gap: var(--radius-sm); }.loan-header-line",
+          "line": 113,
+          "class_tokens": [
+            "loan-header-line"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".claim-header-line",
+          "line": 113,
+          "class_tokens": [
+            "claim-header-line"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); }.loan-principal-label",
+          "line": 118,
+          "class_tokens": [
+            "loan-principal-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".claim-amount-label",
+          "line": 118,
+          "class_tokens": [
+            "claim-amount-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--space-4); font-weight: 600; }.badge-status",
+          "line": 125,
+          "class_tokens": [
+            "badge-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #22c55e; color: #bbf7d0; background: rgba(22",
+          "line": 134,
+          "class_tokens": [],
+          "id_tokens": [
+            "22c55e",
+            "bbf7d0"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #38bdf8; color: #e0f2fe; background: rgba(37",
+          "line": 138,
+          "class_tokens": [],
+          "id_tokens": [
+            "38bdf8",
+            "e0f2fe"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #f97316; color: #fed7aa; background: rgba(194",
+          "line": 142,
+          "class_tokens": [],
+          "id_tokens": [
+            "f97316",
+            "fed7aa"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.25); }.loan-amounts",
+          "line": 142,
+          "class_tokens": [
+            "25",
+            "loan-amounts"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; flex-wrap: wrap; gap: var(--radius-sm) var(--space-4); margin-bottom: var(--space-2); }.loan-amounts-vertical",
+          "line": 146,
+          "class_tokens": [
+            "loan-amounts-vertical"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-2); font-size: var(--font-xs); /* ========== Amount / Metrics Base (v110 structured) ========== */ }.amount-row",
+          "line": 152,
+          "class_tokens": [
+            "amount-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; justify-content: space-between; width: 100%; }.amount-label",
+          "line": 161,
+          "class_tokens": [
+            "amount-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "flex: 1 1 auto; }.amount-value",
+          "line": 165,
+          "class_tokens": [
+            "amount-value"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "flex: 0 0 auto; min-width: 90px; text-align: right; font-variant-numeric: tabular-nums; }.btn-plain",
+          "line": 168,
+          "class_tokens": [
+            "btn-plain"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border: none; padding: 0; margin: 0; font-size: var(--font-xs); cursor: pointer; }.schedule-btn",
+          "line": 174,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); background: rgba(255",
+          "line": 271,
+          "class_tokens": [
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".schedule-btn",
+          "line": 292,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-weight: 600; }.btn-text",
+          "line": 304,
+          "class_tokens": [
+            "btn-text"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".btn-plain",
+          "line": 304,
+          "class_tokens": [
+            "btn-plain"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border: none; padding: 0; margin: 0; cursor: pointer; font-weight: 600; }.btn-text.accent",
+          "line": 308,
+          "class_tokens": [
+            "accent",
+            "btn-text"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.form-section-title",
+          "line": 327,
+          "class_tokens": [
+            "form-section-title"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".loan-principal-label",
+          "line": 327,
+          "class_tokens": [
+            "loan-principal-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".claim-amount-label",
+          "line": 327,
+          "class_tokens": [
+            "claim-amount-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-weight: 700; }.badge-status",
+          "line": 331,
+          "class_tokens": [
+            "badge-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.95); padding: var(--space-1) 7px; font-size: var(--radius-md); color: #0f172a; background: rgba(255",
+          "line": 333,
+          "class_tokens": [
+            "95"
+          ],
+          "id_tokens": [
+            "0f172a"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #22c55e; background: rgba(220",
+          "line": 340,
+          "class_tokens": [],
+          "id_tokens": [
+            "22c55e"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.95); }.week-detail-header",
+          "line": 346,
+          "class_tokens": [
+            "95",
+            "week-detail-header"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: flex; flex-direction: column; row-gap: var(--space-1); }.week-detail-label",
+          "line": 349,
+          "class_tokens": [
+            "week-detail-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "text-decoration: underline; }.week-detail-summary",
+          "line": 359,
+          "class_tokens": [
+            "week-detail-summary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-pill",
+          "line": 385,
+          "class_tokens": [
+            "day-item-pill"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); font-size: var(--radius-md); font-weight: 500; letter-spacing: 0.02em; background: radial-gradient(circle at top",
+          "line": 391,
+          "class_tokens": [
+            "02em",
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.22)",
+          "line": 391,
+          "class_tokens": [
+            "22"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.96); color: #e5f2ff; }.week-item-pill-loan",
+          "line": 391,
+          "class_tokens": [
+            "96",
+            "week-item-pill-loan"
+          ],
+          "id_tokens": [
+            "e5f2ff"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-pill-loan",
+          "line": 391,
+          "class_tokens": [
+            "day-item-pill-loan"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.96); }.week-item-pill-claim",
+          "line": 406,
+          "class_tokens": [
+            "96",
+            "week-item-pill-claim"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-pill-claim",
+          "line": 406,
+          "class_tokens": [
+            "day-item-pill-claim"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-status",
+          "line": 413,
+          "class_tokens": [
+            "day-item-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-pill",
+          "line": 423,
+          "class_tokens": [
+            "day-item-pill"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-status",
+          "line": 423,
+          "class_tokens": [
+            "day-item-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.85); background: radial-gradient(circle at top left",
+          "line": 456,
+          "class_tokens": [
+            "85"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.95)",
+          "line": 456,
+          "class_tokens": [
+            "95"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-pill",
+          "line": 516,
+          "class_tokens": [
+            "day-item-pill"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".day-item-status",
+          "line": 516,
+          "class_tokens": [
+            "day-item-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-bottom: none; }.day-type-badge",
+          "line": 533,
+          "class_tokens": [
+            "day-type-badge"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.15); color: #3b82f6; border: 1px solid rgba(96",
+          "line": 565,
+          "class_tokens": [
+            "15"
+          ],
+          "id_tokens": [
+            "3b82f6"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.15); color: #fb923c; border: 1px solid rgba(251",
+          "line": 569,
+          "class_tokens": [
+            "15"
+          ],
+          "id_tokens": [
+            "fb923c"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-left: auto; }.form-section",
+          "line": 624,
+          "class_tokens": [
+            "form-section"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-bottom: var(--space-5); }.form-section-header",
+          "line": 626,
+          "class_tokens": [
+            "form-section-header"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.3); padding-bottom: var(--space-2); margin-bottom: var(--space-2); }.form-section-title",
+          "line": 634,
+          "class_tokens": [
+            "3",
+            "form-section-title"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 13px; font-weight: 600; }.section-toggle-btn",
+          "line": 638,
+          "class_tokens": [
+            "section-toggle-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border: none; padding: var(--space-2) var(--radius-sm); border-radius: 999px; backdrop-filter: blur(var(--space-2)); -webkit-backdrop-filter: blur(var(--space-2)); cursor: pointer; font-size: var(--space-4); line-height: 1; transition: transform 0.3s ease",
+          "line": 642,
+          "class_tokens": [
+            "3s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "box-shadow 0.2s ease; display: flex; align-items: center; justify-content: center; }.section-toggle-btn:hover",
+          "line": 642,
+          "class_tokens": [
+            "2s",
+            "section-toggle-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "transform: rotate(180deg); }.form-section-body",
+          "line": 659,
+          "class_tokens": [
+            "form-section-body"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "max-height: 999px; opacity: 1; overflow: hidden; transition: max-height 0.25s ease",
+          "line": 661,
+          "class_tokens": [
+            "25s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-left: auto; text-align: right; }.section-toggle-btn",
+          "line": 686,
+          "class_tokens": [
+            "section-toggle-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "transition: transform 0.25s ease",
+          "line": 689,
+          "class_tokens": [
+            "25s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.7); transition: background 0.15s ease-out",
+          "line": 742,
+          "class_tokens": [
+            "15s",
+            "7"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "box-shadow 0.15s ease-out",
+          "line": 742,
+          "class_tokens": [
+            "15s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "transform 0.15s ease-out",
+          "line": 742,
+          "class_tokens": [
+            "15s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color 0.15s ease-out",
+          "line": 742,
+          "class_tokens": [
+            "15s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.btn-secondary",
+          "line": 764,
+          "class_tokens": [
+            "btn-secondary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".btn-ghost",
+          "line": 764,
+          "class_tokens": [
+            "btn-ghost"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); background: radial-gradient(circle at 0% 0%",
+          "line": 775,
+          "class_tokens": [
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.98)",
+          "line": 775,
+          "class_tokens": [
+            "98"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-weight: 600; }.loan-header-line",
+          "line": 803,
+          "class_tokens": [
+            "loan-header-line"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".claim-header-line",
+          "line": 803,
+          "class_tokens": [
+            "claim-header-line"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.loan-amounts",
+          "line": 808,
+          "class_tokens": [
+            "loan-amounts"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".claim-amounts",
+          "line": 808,
+          "class_tokens": [
+            "claim-amounts"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.badge-status",
+          "line": 811,
+          "class_tokens": [
+            "badge-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #e5e7eb; background: #ffffff; color: #4b5563; }.week-detail-label",
+          "line": 855,
+          "class_tokens": [
+            "week-detail-label"
+          ],
+          "id_tokens": [
+            "4b5563",
+            "e5e7eb",
+            "ffffff"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.week-detail-summary",
+          "line": 864,
+          "class_tokens": [
+            "week-detail-summary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.badge-status",
+          "line": 867,
+          "class_tokens": [
+            "badge-status"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #16a34a; color: #166534; background: rgba(22",
+          "line": 875,
+          "class_tokens": [],
+          "id_tokens": [
+            "166534",
+            "16a34a"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color: #4b5563; color: #374151; background: rgba(156",
+          "line": 879,
+          "class_tokens": [],
+          "id_tokens": [
+            "374151",
+            "4b5563"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.btn-text.accent",
+          "line": 895,
+          "class_tokens": [
+            "accent",
+            "btn-text"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "#3C5E9C 0%",
+          "line": 913,
+          "class_tokens": [],
+          "id_tokens": [
+            "3C5E9C"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "#2C4A76 36%",
+          "line": 913,
+          "class_tokens": [],
+          "id_tokens": [
+            "2C4A76"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "#223654 100%); color: var(--charcoal-bg-surface); box-shadow: 0 var(--radius-sm) var(--space-5) rgba(24",
+          "line": 913,
+          "class_tokens": [],
+          "id_tokens": [
+            "223654"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "filter: brightness(1.03); box-shadow: 0 var(--space-3) var(--font-xl) rgba(24",
+          "line": 922,
+          "class_tokens": [
+            "03"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.45); }.btn-secondary",
+          "line": 925,
+          "class_tokens": [
+            "45",
+            "btn-secondary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".schedule-btn",
+          "line": 925,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.03); }.btn-secondary:hover",
+          "line": 929,
+          "class_tokens": [
+            "03",
+            "btn-secondary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".schedule-btn:hover",
+          "line": 929,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #F3F4F7; }.btn-secondary:active",
+          "line": 939,
+          "class_tokens": [
+            "btn-secondary"
+          ],
+          "id_tokens": [
+            "F3F4F7"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".schedule-btn:active",
+          "line": 939,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #E8EAF0; }.btn-plain",
+          "line": 942,
+          "class_tokens": [
+            "btn-plain"
+          ],
+          "id_tokens": [
+            "E8EAF0"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border: none; background: transparent; color: var(--charcoal-text-secondary); }.btn-plain:hover",
+          "line": 944,
+          "class_tokens": [
+            "btn-plain"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "input[type=\"number\"]",
+          "line": 956,
+          "class_tokens": [],
+          "id_tokens": [],
+          "attr_tokens": [
+            {
+              "name": "type",
+              "value": "number"
+            }
+          ],
+          "reasons": [
+            "no_matching_attribute_in_html"
+          ]
+        },
+        {
+          "selector": "input[type=\"search\"]",
+          "line": 956,
+          "class_tokens": [],
+          "id_tokens": [],
+          "attr_tokens": [
+            {
+              "name": "type",
+              "value": "search"
+            }
+          ],
+          "reasons": [
+            "no_matching_attribute_in_html"
+          ]
+        },
+        {
+          "selector": "0.22)",
+          "line": 975,
+          "class_tokens": [
+            "22"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".week-detail-title",
+          "line": 975,
+          "class_tokens": [
+            "week-detail-title"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "color: var(--charcoal-text-primary); }.day-detail-meta",
+          "line": 982,
+          "class_tokens": [
+            "day-detail-meta"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "color: var(--charcoal-text-muted); }.kpi-title",
+          "line": 985,
+          "class_tokens": [
+            "kpi-title"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--font-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--charcoal-text-muted); }.kpi-value",
+          "line": 987,
+          "class_tokens": [
+            "08em",
+            "kpi-value"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 22px; font-weight: 600; color: var(--charcoal-text-primary); }.kpi-subvalue",
+          "line": 992,
+          "class_tokens": [
+            "kpi-subvalue"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--font-xs); color: var(--charcoal-text-secondary); }.table-header",
+          "line": 996,
+          "class_tokens": [
+            "table-header"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".list-header",
+          "line": 996,
+          "class_tokens": [
+            "list-header"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: var(--charcoal-bg-elevated); border-bottom: 1px solid var(--charcoal-border-subtle); }.table-header-cell",
+          "line": 1000,
+          "class_tokens": [
+            "table-header-cell"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".list-header-cell",
+          "line": 1000,
+          "class_tokens": [
+            "list-header-cell"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--font-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--charcoal-text-muted); }.table-row",
+          "line": 1004,
+          "class_tokens": [
+            "06em",
+            "table-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".list-row",
+          "line": 1004,
+          "class_tokens": [
+            "list-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-bottom: 1px solid #ECEFF4; }.table-row:hover",
+          "line": 1010,
+          "class_tokens": [
+            "table-row"
+          ],
+          "id_tokens": [
+            "ECEFF4"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".list-row:hover",
+          "line": 1010,
+          "class_tokens": [
+            "list-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #F6F7FA; }.muted",
+          "line": 1013,
+          "class_tokens": [
+            "muted"
+          ],
+          "id_tokens": [
+            "F6F7FA"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".helper-text",
+          "line": 1013,
+          "class_tokens": [
+            "helper-text"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".field-hint",
+          "line": 1013,
+          "class_tokens": [
+            "field-hint"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.25)",
+          "line": 1021,
+          "class_tokens": [
+            "25"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "#32486F 0%",
+          "line": 1025,
+          "class_tokens": [],
+          "id_tokens": [
+            "32486F"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "#182235 100%); box-shadow: 0 var(--radius-md) var(--space-6) rgba(10",
+          "line": 1025,
+          "class_tokens": [],
+          "id_tokens": [
+            "182235"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.40)",
+          "line": 1025,
+          "class_tokens": [
+            "40"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "filter: brightness(1.02); box-shadow: 0 var(--font-md) 30px rgba(10",
+          "line": 1031,
+          "class_tokens": [
+            "02"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.45)",
+          "line": 1031,
+          "class_tokens": [
+            "45"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.40)",
+          "line": 1036,
+          "class_tokens": [
+            "40"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.90); }.btn-secondary",
+          "line": 1036,
+          "class_tokens": [
+            "90",
+            "btn-secondary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".schedule-btn",
+          "line": 1036,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.04)",
+          "line": 1042,
+          "class_tokens": [
+            "04"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.06); }.btn-secondary:hover",
+          "line": 1042,
+          "class_tokens": [
+            "06",
+            "btn-secondary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".schedule-btn:hover",
+          "line": 1042,
+          "class_tokens": [
+            "schedule-btn"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.05)",
+          "line": 1049,
+          "class_tokens": [
+            "05"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "input[type=\"number\"]",
+          "line": 1049,
+          "class_tokens": [],
+          "id_tokens": [],
+          "attr_tokens": [
+            {
+              "name": "type",
+              "value": "number"
+            }
+          ],
+          "reasons": [
+            "no_matching_attribute_in_html"
+          ]
+        },
+        {
+          "selector": "input[type=\"search\"]",
+          "line": 1049,
+          "class_tokens": [],
+          "id_tokens": [],
+          "attr_tokens": [
+            {
+              "name": "type",
+              "value": "search"
+            }
+          ],
+          "reasons": [
+            "no_matching_attribute_in_html"
+          ]
+        },
+        {
+          "selector": "0.02); }input:focus",
+          "line": 1058,
+          "class_tokens": [
+            "02"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.30)",
+          "line": 1062,
+          "class_tokens": [
+            "30"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.10); }.table-row:hover",
+          "line": 1062,
+          "class_tokens": [
+            "10",
+            "table-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".list-row:hover",
+          "line": 1062,
+          "class_tokens": [
+            "list-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #EEF1F6; }.kpi-value",
+          "line": 1067,
+          "class_tokens": [
+            "kpi-value"
+          ],
+          "id_tokens": [
+            "EEF1F6"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-top: 3px; }.kpi-title",
+          "line": 1081,
+          "class_tokens": [
+            "kpi-title"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--font-xs); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7280; }.kpi-value",
+          "line": 1083,
+          "class_tokens": [
+            "06em",
+            "kpi-value"
+          ],
+          "id_tokens": [
+            "6B7280"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-weight: 600; letter-spacing: 0.01em; }.kpi-subvalue",
+          "line": 1089,
+          "class_tokens": [
+            "01em",
+            "kpi-subvalue"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-top: var(--space-1); font-size: var(--font-xs); color: var(--text-muted); }.drawer",
+          "line": 1092,
+          "class_tokens": [
+            "drawer"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.35); transform: translateY(var(--space-4)); opacity: 0; transition: opacity 180ms ease-out",
+          "line": 1096,
+          "class_tokens": [
+            "35"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "transform 180ms ease-out; }.drawer.is-open",
+          "line": 1096,
+          "class_tokens": [
+            "drawer",
+            "is-open"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-radius: 999px; border: 1px solid #CBD2E1; font-size: var(--space-4); padding: 5px var(--radius-md); cursor: pointer; transition: background 120ms ease-out",
+          "line": 1113,
+          "class_tokens": [],
+          "id_tokens": [
+            "CBD2E1"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "#1D4ED8",
+          "line": 1129,
+          "class_tokens": [],
+          "id_tokens": [
+            "1D4ED8"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "var(--accent)); color: #F9FAFB; font-weight: 500; box-shadow: 0 var(--radius-md) var(--space-6) rgba(10",
+          "line": 1129,
+          "class_tokens": [],
+          "id_tokens": [
+            "F9FAFB"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.40)",
+          "line": 1129,
+          "class_tokens": [
+            "40"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "filter: brightness(1.02); box-shadow: 0 var(--font-md) 30px rgba(10",
+          "line": 1137,
+          "class_tokens": [
+            "02"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.45)",
+          "line": 1137,
+          "class_tokens": [
+            "45"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.38)",
+          "line": 1142,
+          "class_tokens": [
+            "38"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.92); }.btn-secondary",
+          "line": 1142,
+          "class_tokens": [
+            "92",
+            "btn-secondary"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: transparent; color: #6B7280; box-shadow: none; transform: none; }.muted",
+          "line": 1155,
+          "class_tokens": [
+            "muted"
+          ],
+          "id_tokens": [
+            "6B7280"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".helper-text",
+          "line": 1155,
+          "class_tokens": [
+            "helper-text"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".field-hint",
+          "line": 1155,
+          "class_tokens": [
+            "field-hint"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-weight: 300; color: var(--text-muted); }.table-header-cell",
+          "line": 1162,
+          "class_tokens": [
+            "table-header-cell"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".list-header-cell",
+          "line": 1162,
+          "class_tokens": [
+            "list-header-cell"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "letter-spacing: 0.07em; }.ui-label",
+          "line": 1166,
+          "class_tokens": [
+            "07em",
+            "ui-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "letter-spacing: 0.03em; }.kpi-card-small",
+          "line": 1170,
+          "class_tokens": [
+            "03em",
+            "kpi-card-small"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.95); padding: var(--radius-sm) var(--space-3); font-size: var(--font-xs); }.kpi-card-small-label",
+          "line": 1172,
+          "class_tokens": [
+            "95",
+            "kpi-card-small-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-bottom: var(--space-1); }.kpi-card-small-value",
+          "line": 1180,
+          "class_tokens": [
+            "kpi-card-small-value"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 13px; font-weight: 600; }.kpi-card-small",
+          "line": 1182,
+          "class_tokens": [
+            "kpi-card-small"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.95); font-size: var(--font-xs); }.kpi-card-small-label",
+          "line": 1185,
+          "class_tokens": [
+            "95",
+            "kpi-card-small-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "margin-bottom: var(--space-1); font-weight: 600; /* bold label */ }.kpi-card-small-value",
+          "line": 1192,
+          "class_tokens": [
+            "kpi-card-small-value"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: var(--font-md); font-weight: 700; /* bold main KPI value */ }.kpi-card-small",
+          "line": 1195,
+          "class_tokens": [
+            "kpi-card-small"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-radius: var(--space-4); }.kpi-card-small-label",
+          "line": 1198,
+          "class_tokens": [
+            "kpi-card-small-label"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-weight: 600; }.kpi-card-small-value",
+          "line": 1203,
+          "class_tokens": [
+            "kpi-card-small-value"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.kpi-card-small",
+          "line": 1206,
+          "class_tokens": [
+            "kpi-card-small"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-radius: var(--font-md); border: 1px solid #111218; }.kpi-card-small-label",
+          "line": 1207,
+          "class_tokens": [
+            "kpi-card-small-label"
+          ],
+          "id_tokens": [
+            "111218"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.kpi-card-small-value",
+          "line": 1213,
+          "class_tokens": [
+            "kpi-card-small-value"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "}.kpi-card-small",
+          "line": 1215,
+          "class_tokens": [
+            "kpi-card-small"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "padding: var(--space-4) var(--font-md); }.kpi-card",
+          "line": 1216,
+          "class_tokens": [
+            "kpi-card"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": ".kpi-card-small",
+          "line": 1216,
+          "class_tokens": [
+            "kpi-card-small"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #FAFBFC; box-shadow: 0 var(--font-md) 40px rgba(15",
+          "line": 1219,
+          "class_tokens": [],
+          "id_tokens": [
+            "FAFBFC"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.16); border-radius: var(--font-md); }.kpi-card::before",
+          "line": 1219,
+          "class_tokens": [
+            "16",
+            "kpi-card"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.35)",
+          "line": 1223,
+          "class_tokens": [
+            "35"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "table tr.highlight-row td",
+          "line": 1223,
+          "class_tokens": [
+            "highlight-row"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        }
+      ]
+    },
+    "css/report.css": {
+      "total_selectors": 312,
+      "dead_selectors": [
+        {
+          "selector": "background-color: #ffffff; border: 1px solid rgba(15",
+          "line": 22,
+          "class_tokens": [],
+          "id_tokens": [
+            "ffffff"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.08); border-radius: 8px; padding: 0.75rem 0.9rem; display: flex; flex-direction: column; cursor: pointer; transition: box-shadow 0.15s ease",
+          "line": 22,
+          "class_tokens": [
+            "08",
+            "15s",
+            "75rem",
+            "9rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "transform 0.15s ease",
+          "line": 22,
+          "class_tokens": [
+            "15s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.45); box-shadow: 0 4px 10px rgba(15",
+          "line": 33,
+          "class_tokens": [
+            "45"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "1.1fr) minmax(0",
+          "line": 147,
+          "class_tokens": [
+            "1fr"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 0.8rem; font-weight: 600; color: #111827; } /* Responsive tweaks */ @media (max-width: 1200px)",
+          "line": 266,
+          "class_tokens": [
+            "8rem"
+          ],
+          "id_tokens": [
+            "111827"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 0.75rem; color: #6b7280; } border-radius: 8px; border: 1px dashed rgba(148",
+          "line": 340,
+          "class_tokens": [
+            "75rem"
+          ],
+          "id_tokens": [
+            "6b7280"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); box-shadow: 0 0 0 1px rgba(209",
+          "line": 475,
+          "class_tokens": [
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border: none; background: transparent; font-size: 0.78rem; padding: 0.3rem 0.7rem; border-radius: 9999px; cursor: pointer; color: #6b7280; transition: background-color 0.16s ease",
+          "line": 483,
+          "class_tokens": [
+            "16s",
+            "3rem",
+            "78rem",
+            "7rem"
+          ],
+          "id_tokens": [
+            "6b7280"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "color 0.16s ease",
+          "line": 483,
+          "class_tokens": [
+            "16s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #ffffff; color: #111827; box-shadow: 0 1px 3px rgba(15",
+          "line": 494,
+          "class_tokens": [],
+          "id_tokens": [
+            "111827",
+            "ffffff"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-radius: 0.75rem; border: 1px solid rgba(209",
+          "line": 500,
+          "class_tokens": [
+            "75rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); background: radial-gradient(circle at top left",
+          "line": 500,
+          "class_tokens": [
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9)",
+          "line": 500,
+          "class_tokens": [
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.55rem; border-radius: 9999px; border: 1px solid transparent; background: #f9fafb; font-size: 0.72rem; color: #4b5563; cursor: pointer; transition: background-color 0.16s ease",
+          "line": 519,
+          "class_tokens": [
+            "16s",
+            "28rem",
+            "35rem",
+            "55rem",
+            "72rem"
+          ],
+          "id_tokens": [
+            "4b5563",
+            "f9fafb"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color 0.16s ease",
+          "line": 519,
+          "class_tokens": [
+            "16s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "background: #ffffff; color: #111827; border-color: rgba(156",
+          "line": 540,
+          "class_tokens": [],
+          "id_tokens": [
+            "111827",
+            "ffffff"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-radius: 0.75rem; border: 1px solid rgba(209",
+          "line": 568,
+          "class_tokens": [
+            "75rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); background: linear-gradient(to bottom right",
+          "line": 568,
+          "class_tokens": [
+            "9"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.98)",
+          "line": 568,
+          "class_tokens": [
+            "98"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 0.9rem; font-weight: 700; color: #111827; } /* ============================ ============================ */ display: flex; flex-direction: column; gap: 0.85rem; } display: grid; grid-template-columns: repeat(4",
+          "line": 784,
+          "class_tokens": [
+            "85rem",
+            "9rem"
+          ],
+          "id_tokens": [
+            "111827"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "1fr)); gap: 0.5rem; } border-radius: 8px; border: 1px solid rgba(248",
+          "line": 784,
+          "class_tokens": [
+            "5rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.6); background-color: #fef2f2; padding: 0.6rem 0.7rem; } font-size: 0.75rem; font-weight: 600; color: #b91c1c; margin-bottom: 0.25rem; } font-size: 0.95rem; font-weight: 700; color: #7f1d1d; } display: grid; grid-template-columns: repeat(2",
+          "line": 784,
+          "class_tokens": [
+            "25rem",
+            "6",
+            "6rem",
+            "75rem",
+            "7rem",
+            "95rem"
+          ],
+          "id_tokens": [
+            "7f1d1d",
+            "b91c1c",
+            "fef2f2"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "1fr)); gap: 0.7rem; } border-radius: 8px; border: 1px solid rgba(248",
+          "line": 784,
+          "class_tokens": [
+            "7rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.6); background-color: #fff7ed; padding: 0.55rem 0.6rem 0.6rem; } font-size: 0.8rem; font-weight: 600; color: #7f1d1d; } width: 100%; border-collapse: collapse; } padding: 0.25rem 0.25rem; font-size: 0.7rem; font-weight: 600; color: #7f1d1d; border-bottom: 1px solid rgba(248",
+          "line": 784,
+          "class_tokens": [
+            "25rem",
+            "55rem",
+            "6",
+            "6rem",
+            "7rem",
+            "8rem"
+          ],
+          "id_tokens": [
+            "7f1d1d",
+            "fff7ed"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.6); text-align: left; } padding: 0.24rem 0.25rem; font-size: 0.7rem; color: #7c2d12; border-bottom: 1px dashed rgba(248",
+          "line": 784,
+          "class_tokens": [
+            "24rem",
+            "25rem",
+            "6",
+            "7rem"
+          ],
+          "id_tokens": [
+            "7c2d12"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "1.6fr) minmax(0",
+          "line": 920,
+          "class_tokens": [
+            "6fr"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "padding: 0.28rem 0.4rem; border-bottom: 1px solid rgba(229",
+          "line": 947,
+          "class_tokens": [
+            "28rem",
+            "4rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "font-size: 0.75rem; padding: 0.2rem 0.35rem; border-radius: 6px; border: 1px solid rgba(209",
+          "line": 991,
+          "class_tokens": [
+            "2rem",
+            "35rem",
+            "75rem"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "outline: none; border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59",
+          "line": 999,
+          "class_tokens": [],
+          "id_tokens": [
+            "3b82f6"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "0.9); background-color: #ffffff; padding: 0.18rem 0.55rem; font-size: 0.7rem; cursor: pointer; color: #374151; transition: background-color 0.12s ease",
+          "line": 1010,
+          "class_tokens": [
+            "12s",
+            "18rem",
+            "55rem",
+            "7rem",
+            "9"
+          ],
+          "id_tokens": [
+            "374151",
+            "ffffff"
+          ],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js",
+            "no_matching_id_in_html_or_js"
+          ]
+        },
+        {
+          "selector": "border-color 0.12s ease",
+          "line": 1010,
+          "class_tokens": [
+            "12s"
+          ],
+          "id_tokens": [],
+          "attr_tokens": [],
+          "reasons": [
+            "no_matching_class_in_html_or_js"
+          ]
+        }
+      ]
+    }
+  },
+  "patterns": {
+    "legacy_class_patterns": [
+      "dd-header-legacy-*",
+      "debtorDetail-legacy-*",
+      "dd-legacy-grid",
+      "report-debtordetail-box"
+    ]
+  }
+}

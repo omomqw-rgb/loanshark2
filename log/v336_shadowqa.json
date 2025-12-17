@@ -1,0 +1,51 @@
+{
+  "version": "v336_public_latest_snapshot_read",
+  "description": "Allow anonymous users to read the latest public snapshot from app_states. Logged-in users still load their own latest snapshot.",
+  "scenarios": [
+    {
+      "id": "anonymous_latest_snapshot",
+      "user": null,
+      "supabase_policy": "SELECT: public, INSERT/UPDATE/DELETE: authenticated only",
+      "expected_query": {
+        "from": "app_states",
+        "select": [
+          "state",
+          "updated_at"
+        ],
+        "filters": [],
+        "order": {
+          "column": "updated_at",
+          "ascending": false
+        },
+        "limit": 1
+      },
+      "notes": "익명 사용자는 user_id 필터 없이 테이블 전체에서 최신 1건을 읽는다."
+    },
+    {
+      "id": "authenticated_user_latest_snapshot",
+      "user": "user_123",
+      "supabase_policy": "SELECT: public, INSERT/UPDATE/DELETE: authenticated only",
+      "expected_query": {
+        "from": "app_states",
+        "select": [
+          "state",
+          "updated_at"
+        ],
+        "filters": [
+          {
+            "column": "user_id",
+            "op": "eq",
+            "value": "user_123"
+          }
+        ],
+        "order": {
+          "column": "updated_at",
+          "ascending": false
+        },
+        "limit": 1
+      },
+      "notes": "로그인 사용자는 자신의 user_id 에 해당하는 최신 1건만 읽는다."
+    }
+  ],
+  "note": "이 파일은 코드 변경 요약 및 예상 쿼리 동작을 설명하는 메타데이터이며, 실제 런타임 테스트 로그는 아님."
+}

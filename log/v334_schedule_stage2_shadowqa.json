@@ -1,0 +1,38 @@
+{
+  "version": "v334",
+  "stage": "schedules_engine_stage2_read_cloudstate",
+  "checks": {
+    "engine_alias_consistency": {
+      "description": "App.schedulesEngine.list is kept in sync with App.state.schedules and App.data.schedules via _syncAlias after all write/update/remove/normalize operations.",
+      "expected": true,
+      "source": "js/core/schedules.engine.js::_syncAlias"
+    },
+    "cloudState_build": {
+      "description": "CloudState.build prefers App.schedulesEngine.getAll() for schedules snapshot; falls back to App.data/App.state when engine is unavailable.",
+      "canonical_source": "App.schedulesEngine.getAll()",
+      "fallback": "App.data.schedules / App.state.schedules"
+    },
+    "cloudState_apply": {
+      "description": "CloudState.apply restores schedules via App.schedulesEngine.fromSnapshot(list) when available; otherwise populates App.data.schedules and App.state.schedules directly.",
+      "canonical_target": "App.schedulesEngine",
+      "fallback": "App.data.schedules / App.state.schedules"
+    },
+    "loadAllFromSupabase": {
+      "description": "After Supabase load, schedules passed into buildDebtorsDetailed come from App.schedulesEngine.getAll() when available, otherwise from App.data/App.state.",
+      "debtor_bridge_source": "App.schedulesEngine.getAll() with state/data fallback"
+    },
+    "read_paths": {
+      "statistics.engine": "buildContext() uses App.schedulesEngine.getAll() with App.state.schedules as fallback.",
+      "monitoring": "getSchedules() helper uses App.schedulesEngine.getAll() with App.state.schedules as fallback.",
+      "calendar": "buildCalendarData() and handleDayItemClick() read schedules via App.schedulesEngine.getAll() with App.state.schedules as fallback.",
+      "capitalflow.engine": "getSchedules() returns App.schedulesEngine.getAll().slice() with App.state.schedules as fallback.",
+      "report.compute.capitalflow": "computeReportAggregates() and computeTrendSeries() read schedules via App.schedulesEngine.getAll() with App.state.schedules fallback.",
+      "core.data": "computePortfolioSummary / computeRecoveryFlowSummary / computeRecoveryFlowSeries / getLoanSummary / getClaimSummary all use App.schedulesEngine.getAll().slice() with App.state.schedules fallback.",
+      "debtordetail": "getSchedulesForLoan / getSchedulesForClaim / computeClaimSummary use App.schedulesEngine.getByLoanId/getByClaimId with state/data.schedules fallback."
+    }
+  },
+  "notes": [
+    "This shadow QA log is static and based on code-level wiring, not runtime assertion.",
+    "Stage 2 ensures all primary schedule read paths prefer App.schedulesEngine APIs; direct App.state/App.data.schedules reads remain only as fallbacks."
+  ]
+}

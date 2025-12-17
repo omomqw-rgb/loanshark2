@@ -1,0 +1,339 @@
+{
+  "version": "v303_overview_legacy_cleanup_stage3",
+  "base": "v302_overview_legacy_audit_stage2.zip",
+  "timestamp_utc": "2025-12-07T09:37:54.892687Z",
+  "removed_functions": [
+    {
+      "file": "js/features/report.compute.trends_risk.js",
+      "name": "computeReportAggregates",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 6,
+        "column": 9
+      },
+      "origin": "report_dead_candidates_stage2",
+      "reason": "stage2_dead_candidate_no_call_like_usage"
+    },
+    {
+      "file": "js/features/report.compute.trends_risk.js",
+      "name": "getTrendBucketKey",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 573,
+        "column": 9
+      },
+      "origin": "report_dead_candidates_stage2",
+      "reason": "stage2_dead_candidate_no_call_like_usage"
+    },
+    {
+      "file": "js/features/report.render.recovery.js",
+      "name": "addYears",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 40,
+        "column": 13
+      },
+      "origin": "report_dead_candidates_stage2",
+      "reason": "stage2_dead_candidate_no_call_like_usage"
+    },
+    {
+      "file": "js/features/report.render.recovery.js",
+      "name": "callback",
+      "full_name": null,
+      "type": "object_method_function",
+      "defined_at": {
+        "line": 318,
+        "column": 16
+      },
+      "origin": "report_dead_candidates_stage2",
+      "reason": "stage2_dead_candidate_no_call_like_usage"
+    },
+    {
+      "file": "js/features/report.render.trends_risk.js",
+      "name": "callback",
+      "full_name": null,
+      "type": "object_method_function",
+      "defined_at": {
+        "line": 173,
+        "column": 14
+      },
+      "origin": "report_dead_candidates_stage2",
+      "reason": "stage2_dead_candidate_no_call_like_usage"
+    },
+    {
+      "file": "js/features/report.render.trends_risk.js",
+      "name": "callback",
+      "full_name": null,
+      "type": "object_method_function",
+      "defined_at": {
+        "line": 187,
+        "column": 14
+      },
+      "origin": "report_dead_candidates_stage2",
+      "reason": "stage2_dead_candidate_no_call_like_usage"
+    }
+  ],
+  "removed_selectors": [
+    {
+      "file": "css/components.css",
+      "selector_header": ".kpi-card-small",
+      "reason": "stage2_dead_selector_exact_match"
+    },
+    {
+      "file": "css/components.css",
+      "selector_header": ".kpi-card-small",
+      "reason": "stage2_dead_selector_exact_match"
+    },
+    {
+      "file": "css/components.css",
+      "selector_header": ".kpi-card-small",
+      "reason": "stage2_dead_selector_exact_match"
+    },
+    {
+      "file": "css/components.css",
+      "selector_header": ".kpi-card-small",
+      "reason": "stage2_dead_selector_exact_match"
+    },
+    {
+      "file": "css/components.css",
+      "selector_header": ".kpi-card-small",
+      "reason": "stage2_dead_selector_exact_match"
+    }
+  ],
+  "kept_debtorDetail_functions": [
+    {
+      "file": "js/modules/debtorDetail.dom.js",
+      "name": "render",
+      "full_name": "App.debtorDetail.render",
+      "type": "app_method_function",
+      "defined_at": {
+        "line": 7,
+        "column": 0
+      },
+      "reason": "kept_public_api"
+    },
+    {
+      "file": "js/modules/debtorDetail.dom.js",
+      "name": "show",
+      "full_name": "App.debtorDetail.show",
+      "type": "app_method_function",
+      "defined_at": {
+        "line": 50,
+        "column": 0
+      },
+      "reason": "kept_public_api"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "extractNum",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 8,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "el",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 17,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "appendChildren",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 24,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "formatCurrency",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 31,
+        "column": 11
+      },
+      "reason": "kept_used_in_report_engine"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "formatISODate",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 39,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "getSchedulesForLoan",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 48,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "getSchedulesForClaim",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 68,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "computeClaimSummary",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 88,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "computeDebtorSummary",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 108,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "buildContext",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 221,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createTopbar",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 264,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createMainRow",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 278,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createStatusSelect",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 313,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createAmountRow",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 335,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createLoanCard",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 345,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createClaimCard",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 433,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createLoanSection",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 526,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "createClaimSection",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 580,
+        "column": 11
+      },
+      "reason": "kept_due_to_unknown_internal_usage"
+    },
+    {
+      "file": "js/modules/debtordetail.js",
+      "name": "render",
+      "full_name": null,
+      "type": "function_declaration",
+      "defined_at": {
+        "line": 637,
+        "column": 11
+      },
+      "reason": "kept_used_in_report_engine"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "version": "v335B_schedules_engine_stage3_read_unify",
+  "base_version": "v335A_schedules_engine_stage3_legacy_mutation_cleanup",
+  "note": "All schedule read paths for statistics/monitoring/calendar/capitalflow/report/debtordetail/core summaries now use App.schedulesEngine exclusively. No residual App.state.schedules/App.data.schedules reads remain in these modules.",
+  "files": {
+    "statistics.engine.js": "buildContext now reads schedules only from App.schedulesEngine.getAll()",
+    "monitoring.js": "getSchedules now returns App.schedulesEngine.getAll() (or []) with no state/data fallback",
+    "calendar.js": "buildCalendarData/handleDayItemClick use App.schedulesEngine.getAll() only",
+    "capitalflow.engine.js": "internal getSchedules uses App.schedulesEngine.getAll() only",
+    "report.compute.capitalflow.js": "computeReportAggregates/computeTrendSeries use App.schedulesEngine.getAll() only",
+    "debtordetail.js": "getSchedulesForLoan/getSchedulesForClaim/computeClaimSummary use engine getByLoanId/getByClaimId only",
+    "core/data.js": "recomputeDerivedLoanFields/computePortfolioSummary/getLoanSummary/getClaimSummary/loadAllFromSupabase/computeRecoveryFlowSummary/Series all use App.schedulesEngine.getAll() without state/data fallback"
+  }
+}

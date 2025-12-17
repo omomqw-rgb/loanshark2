@@ -1,0 +1,27 @@
+{
+  "version": "v335C_schedules_engine_stage3_cloudstate_finalize",
+  "base_version": "v335B_schedules_engine_stage3_read_unify",
+  "checks": {
+    "cloudState_uses_toSnapshot": true,
+    "cloudState_build_no_pickArray_schedules": true,
+    "cloudState_apply_uses_fromSnapshot_only": true,
+    "loadAllFromSupabase_no_state_data_schedules": true,
+    "debtorDetail_uses_engine_getByLoanId": true,
+    "debtorDetail_uses_engine_getByClaimId": true,
+    "debtorDetail_no_state_data_schedules": true,
+    "statistics_uses_engine_only": true,
+    "monitoring_uses_engine_only": true,
+    "calendar_uses_engine_only": true,
+    "capitalflow_uses_engine_only": true,
+    "report_capitalflow_uses_engine_only": true,
+    "recovery_summary_uses_core_flows": true,
+    "engine_syncAlias_sets_state_data": true,
+    "cloudState_shadowQA_has_aliasConsistency": true
+  },
+  "notes": [
+    "CloudState.build now uses App.schedulesEngine.toSnapshot() for data.schedules and no longer inspects App.state.schedules/App.data.schedules directly.",
+    "CloudState.apply routes schedules exclusively through App.schedulesEngine.fromSnapshot(); state/data schedules arrays are maintained only via schedulesEngine._syncAlias.",
+    "All major read paths (statistics, monitoring, calendar, capitalflow, report, debtor detail) consume schedules from App.schedulesEngine.* APIs only.",
+    "runShadowQA in cloudState now records aliasConsistency, checking that App.state.schedules and App.data.schedules share the same array reference as App.schedulesEngine.list."
+  ]
+}

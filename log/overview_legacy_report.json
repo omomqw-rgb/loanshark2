@@ -1,0 +1,395 @@
+{
+  "version": "v301_overview_legacy_audit_stage1",
+  "base_version": "v248_overview_kpi_donuts",
+  "summary": {
+    "total_files": 49,
+    "total_js_files": 34,
+    "total_css_files": 14,
+    "status_counts": {
+      "active": 26,
+      "withheld": 18,
+      "legacy_removed": 5
+    },
+    "legacy_files_removed": [
+      "js/modules/legacy/debtorDetail/debtorDetail.dom.skeleton.js",
+      "js/modules/legacy/debtorDetail/debtorDetail.dom.ui.map.js",
+      "js/modules/legacy/debtorDetail/debtorDetail.header.js",
+      "js/modules/legacy/debtorDetail/debtorDetail.sections.js",
+      "js/modules/legacy/debtorList/debtorList.engine.js"
+    ],
+    "withheld_files": [
+      "css/app.css",
+      "css/base.css",
+      "css/calendar.css",
+      "css/card.css",
+      "css/components.css",
+      "css/debtorDetail.css",
+      "css/debtorDetail.level5.css",
+      "css/debtors.css",
+      "css/layout.css",
+      "css/modal.css",
+      "css/monitoring.css",
+      "css/report.css",
+      "css/theme.css",
+      "css/utilities.css",
+      "js/modules/debtorDetail.dom.js",
+      "js/modules/debtorDetail.info.js",
+      "js/modules/debtorDetail.kpi.js",
+      "js/modules/debtordetail.js"
+    ],
+    "active_files": [
+      "index.html",
+      "js/app.js",
+      "js/components/claimCard.js",
+      "js/components/loanCard.js",
+      "js/core/auth.js",
+      "js/core/data.js",
+      "js/core/db.js",
+      "js/core/state.js",
+      "js/core/supabase.js",
+      "js/core/util.js",
+      "js/features/calendar.js",
+      "js/features/debtors.handlers.js",
+      "js/features/debtors.js",
+      "js/features/debtors_domlist.js",
+      "js/features/monitoring.js",
+      "js/features/report.compute.trends_risk.js",
+      "js/features/report.js",
+      "js/features/report.render.recovery.js",
+      "js/features/report.render.trends_risk.js",
+      "js/features/report.state.js",
+      "js/ui/debtorBack.dom.js",
+      "js/ui/debtorPanel.dom.js",
+      "js/ui/events.js",
+      "js/ui/layout.js",
+      "js/ui/modalManager.debtors.js",
+      "js/vendor/chart.umd.min.js"
+    ]
+  },
+  "index_html": {
+    "script_src_order": [
+      "js/core/state.js",
+      "js/core/util.js",
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js",
+      "js/core/supabase.js",
+      "js/core/auth.js",
+      "js/core/data.js",
+      "js/core/db.js",
+      "js/components/loanCard.js",
+      "js/components/claimCard.js",
+      "js/vendor/chart.umd.min.js",
+      "js/ui/layout.js",
+      "js/ui/events.js",
+      "js/modules/debtorDetail.info.js",
+      "js/modules/debtorDetail.kpi.js",
+      "js/modules/debtordetail.js",
+      "js/ui/modalManager.debtors.js",
+      "js/features/debtors.handlers.js",
+      "js/features/debtors.js",
+      "js/features/calendar.js",
+      "js/features/monitoring.js",
+      "js/features/report.state.js",
+      "js/features/report.compute.trends_risk.js",
+      "js/features/report.render.trends_risk.js",
+      "js/features/report.render.recovery.js",
+      "js/features/report.js",
+      "js/ui/debtorPanel.dom.js",
+      "js/features/debtors_domlist.js",
+      "js/ui/debtorBack.dom.js",
+      "js/modules/debtorDetail.dom.js",
+      "js/app.js"
+    ],
+    "script_src_local": [
+      "js/core/state.js",
+      "js/core/util.js",
+      "js/core/supabase.js",
+      "js/core/auth.js",
+      "js/core/data.js",
+      "js/core/db.js",
+      "js/components/loanCard.js",
+      "js/components/claimCard.js",
+      "js/vendor/chart.umd.min.js",
+      "js/ui/layout.js",
+      "js/ui/events.js",
+      "js/modules/debtorDetail.info.js",
+      "js/modules/debtorDetail.kpi.js",
+      "js/modules/debtordetail.js",
+      "js/ui/modalManager.debtors.js",
+      "js/features/debtors.handlers.js",
+      "js/features/debtors.js",
+      "js/features/calendar.js",
+      "js/features/monitoring.js",
+      "js/features/report.state.js",
+      "js/features/report.compute.trends_risk.js",
+      "js/features/report.render.trends_risk.js",
+      "js/features/report.render.recovery.js",
+      "js/features/report.js",
+      "js/ui/debtorPanel.dom.js",
+      "js/features/debtors_domlist.js",
+      "js/ui/debtorBack.dom.js",
+      "js/modules/debtorDetail.dom.js",
+      "js/app.js"
+    ],
+    "script_src_cdn": [
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"
+    ],
+    "data_report_sections": [
+      "overview",
+      "risk",
+      "statistics",
+      "trends"
+    ],
+    "overview_section_snippet": "<section class=\"report-section report-section-overview is-active\" data-report-section=\"overview\">\n<section class=\"report-overview\">\n<div class=\"report-kpi-row\">\n  <div class=\"report-kpi-grid\">\n    <!-- ① 대출규모 -->\n    <div class=\"report-kpi-card\" data-kpi=\"loan\">\n      <div class=\"report-kpi-header\">\n        <div class=\"report-kpi-icon\"></div>\n        <div class=\"report-kpi-title\">대출규모</div>\n      </div>\n      <div class=\"report-kpi-main\">\n        <div class=\"report-kpi-label\">대출원리금합계</div>\n        <div class=\"report-kpi-value\">--원</div>\n      </div>\n      <div class=\"report-kpi-submetrics\">\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">상환금합계</div>\n          <div class=\"submetric-value\">--원</div>\n        </div>\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">상환예정금합계</div>\n          <div class=\"submetric-value\">--원</div>\n        </div>\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">미납금합계</div>\n          <div class=\"submetric-value\">--원</div>\n        </div>\n      </div>\n    </div>\n    <!-- ② 채권규모 -->\n    <div class=\"report-kpi-card\" data-kpi=\"claim\">\n      <div class=\"report-kpi-header\">\n        <div class=\"report-kpi-icon\"></div>\n        <div class=\"report-kpi-title\">채권규모</div>\n      </div>\n      <div class=\"report-kpi-main\">\n        <div class=\"report-kpi-label\">채권금합계</div>\n        <div class=\"report-kpi-value\">--원</div>\n      </div>\n      <div class=\"report-kpi-submetrics\">\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">회수금합계</div>\n          <div class=\"submetric-value\">--원</div>\n        </div>\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">회수예정금합계</div>\n          <div class=\"submetric-value\">--원</div>\n        </div>\n      </div>\n    </div>\n    <!-- ③ 운영현황 -->\n    <div class=\"report-kpi-card\" data-kpi=\"ops\">\n      <div class=\"report-kpi-header\">\n        <div class=\"report-kpi-icon\"></div>\n        <div class=\"report-kpi-title\">운영현황</div>\n      </div>\n      <div class=\"report-kpi-submetrics\">\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">신규대출금액</div>\n          <div class=\"submetric-value\">--원 / --건</div>\n        </div>\n        <div class=\"submetric\">\n          <div class=\"submetric-label\">신규채권금액</div>\n          <div class=\"submetric-value\">--원 / --건</div>\n        </div>\n      </div>\n    </div>\n    <!-- ④ 가용자산 -->\n    <div class=\"report-kpi-card\" data-kpi=\"avail\">\n      <div class=\"report-kpi-header\">\n        <div class=\"report-kpi-icon\"></div>\n        <div class=\"report-kpi-title\">가용자산</div>\n      </div>\n      <div class=\"report-kpi-main\">\n        <div class=\"report-kpi-label\">가용자산</div>\n        <div class=\"report-kpi-value\">--원</div>\n      </div>\n    </div>\n  </div>\n\n        <section id=\"overview-metrics\" class=\"overview-metrics\">\n          <div class=\"overview-metrics-grid\">\n            <!-- 좌측 4: 포트폴리오 -->\n            <section class=\"overview-panel overview-panel-portfolio\">\n              <div class=\"overview-panel-header\">\n                <h3 class=\"overview-panel-title\">포트폴리오</h3>\n                <div class=\"overview-portfolio-types\">\n                  <button type=\"button\" class=\"portfolio-type-chip is-active\" data-portfolio-mode=\"loan\">대출</button>\n                  <button type=\"button\" class=\"portfolio-type-chip\" data-portfolio-mode=\"claim\">채권</button>\n                </div>\n              </div>\n              <div class=\"overview-panel-body\">\n                <div class=\"portfolio-flex\">\n                  <div class=\"donut-wrap\">\n                    <div class=\"overview-portfolio-donut\">\n                      <!-- TODO: vLater에서 실제 도넛 그래프 렌더링 연결 -->\n                      \n                    </div>\n                  </div>\n                  <div class=\"portfolio-legend\">\n                    <div class=\"legend-item\"><span class=\"legend-box planned\"></span> 예정</div>\n                    <div class=\"legend-item\"><span class=\"legend-box paid\"></span> 완납</div>\n                    <div class=\"legend-item\"><span class=\"legend-box partial\"></span> 부분납</div>\n                    <div class=\"legend-item\"><span class=\"legend-box overdue\"></span> 미납</div>\n                  </div>\n                </div>\n                <div class=\"overview-portfolio-cards\">\n                  \n                </div>\n              </div>\n            \n\n</section>"
+  },
+  "legacy_files_stage1": {
+    "js/modules/legacy/debtorDetail/debtorDetail.header.js": {
+      "key_tokens": [
+        "DDHeader",
+        "debtorDetail.header"
+      ],
+      "referenced_by": {},
+      "loaded_in_index_html": false
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.sections.js": {
+      "key_tokens": [
+        "App.debtorDetail.dom.buildClaimCard",
+        "App.debtorDetail.dom.buildLoanCard",
+        "DDSections",
+        "debtorDetail.sections"
+      ],
+      "referenced_by": {
+        "js/modules/legacy/debtorDetail/debtorDetail.dom.skeleton.js": [
+          "App.debtorDetail.dom.buildClaimCard",
+          "App.debtorDetail.dom.buildLoanCard"
+        ]
+      },
+      "loaded_in_index_html": false
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.dom.skeleton.js": {
+      "key_tokens": [
+        "App.debtorDetail.dom.buildClaimCard",
+        "App.debtorDetail.dom.buildLoanCard",
+        "debtorDetail.dom.skeleton"
+      ],
+      "referenced_by": {
+        "js/modules/legacy/debtorDetail/debtorDetail.sections.js": [
+          "App.debtorDetail.dom.buildClaimCard",
+          "App.debtorDetail.dom.buildLoanCard"
+        ]
+      },
+      "loaded_in_index_html": false
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.dom.ui.map.js": {
+      "key_tokens": [
+        "debtorDetail.dom.ui.map"
+      ],
+      "referenced_by": {},
+      "loaded_in_index_html": false
+    },
+    "js/modules/legacy/debtorList/debtorList.engine.js": {
+      "key_tokens": [
+        "debtorList.engine"
+      ],
+      "referenced_by": {},
+      "loaded_in_index_html": false
+    }
+  },
+  "files": {
+    "js/app.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/components/claimCard.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/components/loanCard.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/core/auth.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/core/data.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/core/db.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/core/state.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/core/supabase.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/core/util.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/calendar.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/debtors.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/debtors_domlist.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/monitoring.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/report.compute.trends_risk.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/report.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/report.render.recovery.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/report.render.trends_risk.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/report.state.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/features/debtors.handlers.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/modules/debtorDetail.dom.js": {
+      "status": "withheld",
+      "reason": "DebtorDetail shared module; loaded in index.html and may be cross-linked across sections. Held for Stage2 analysis."
+    },
+    "js/modules/debtorDetail.info.js": {
+      "status": "withheld",
+      "reason": "DebtorDetail shared module; loaded in index.html and may be cross-linked across sections. Held for Stage2 analysis."
+    },
+    "js/modules/debtordetail.js": {
+      "status": "withheld",
+      "reason": "DebtorDetail shared module; loaded in index.html and may be cross-linked across sections. Held for Stage2 analysis."
+    },
+    "js/modules/debtorDetail.kpi.js": {
+      "status": "withheld",
+      "reason": "DebtorDetail shared module; loaded in index.html and may be cross-linked across sections. Held for Stage2 analysis."
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.header.js": {
+      "status": "legacy_removed",
+      "reason": "Isolated legacy module under js/modules/legacy; not loaded in index.html and not referenced by non-legacy JS."
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.sections.js": {
+      "status": "legacy_removed",
+      "reason": "Isolated legacy module under js/modules/legacy; not loaded in index.html and not referenced by non-legacy JS."
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.dom.skeleton.js": {
+      "status": "legacy_removed",
+      "reason": "Isolated legacy module under js/modules/legacy; not loaded in index.html and not referenced by non-legacy JS."
+    },
+    "js/modules/legacy/debtorDetail/debtorDetail.dom.ui.map.js": {
+      "status": "legacy_removed",
+      "reason": "Isolated legacy module under js/modules/legacy; not loaded in index.html and not referenced by non-legacy JS."
+    },
+    "js/modules/legacy/debtorList/debtorList.engine.js": {
+      "status": "legacy_removed",
+      "reason": "Isolated legacy module under js/modules/legacy; not loaded in index.html and not referenced by non-legacy JS."
+    },
+    "js/ui/debtorBack.dom.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/ui/debtorPanel.dom.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/ui/events.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/ui/layout.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/ui/modalManager.debtors.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "js/vendor/chart.umd.min.js": {
+      "status": "active",
+      "reason": "Loaded by index.html via <script src>; part of current runtime."
+    },
+    "index.html": {
+      "status": "active",
+      "reason": "Main HTML shell; entry point; includes Overview sections and script bootstrap."
+    },
+    "css/app.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/base.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/calendar.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/card.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/components.css": {
+      "status": "withheld",
+      "reason": "CSS asset for report/components; deletion forbidden in Stage1; held for potential cleanup in Stage2+."
+    },
+    "css/debtorDetail.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/debtorDetail.level5.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/debtors.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/layout.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/modal.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/monitoring.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/report.css": {
+      "status": "withheld",
+      "reason": "CSS asset for report/components; deletion forbidden in Stage1; held for potential cleanup in Stage2+."
+    },
+    "css/theme.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    },
+    "css/utilities.css": {
+      "status": "withheld",
+      "reason": "CSS asset; not part of JS legacy audit. Kept as-is."
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "version": "v335A_schedules_engine_stage3_legacy_mutation_cleanup",
+  "base_version": "v334_schedules_engine_stage2_read_cloudstate",
+  "before": [
+    {
+      "file": "js/core/auth.js",
+      "line": 92,
+      "code": "App.state.schedules = [];"
+    },
+    {
+      "file": "js/core/cloudState.js",
+      "line": 344,
+      "code": "App.data.schedules = [];"
+    },
+    {
+      "file": "js/core/cloudState.js",
+      "line": 345,
+      "code": "App.state.schedules = [];"
+    },
+    {
+      "file": "js/core/cloudState.js",
+      "line": 381,
+      "code": "App.data.schedules = snapshotSchedules;"
+    },
+    {
+      "file": "js/core/cloudState.js",
+      "line": 383,
+      "code": "App.state.schedules = App.data.schedules;"
+    },
+    {
+      "file": "js/core/data.js",
+      "line": 489,
+      "code": "App.data.schedules = [];"
+    },
+    {
+      "file": "js/core/data.js",
+      "line": 496,
+      "code": "App.state.schedules = [];"
+    },
+    {
+      "file": "js/core/data.js",
+      "line": 518,
+      "code": "App.state.schedules = schedules;"
+    },
+    {
+      "file": "js/core/db.js",
+      "line": 363,
+      "code": "state.schedules = [];"
+    },
+    {
+      "file": "js/core/db.js",
+      "line": 365,
+      "code": "App.data.schedules = [];"
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "line": 288,
+      "code": "if (!state.schedules) state.schedules = [];"
+    },
+    {
+      "file": "js/features/debtors.handlers.js",
+      "line": 535,
+      "code": "if (!state.schedules) state.schedules = [];"
+    },
+    {
+      "file": "js/core/schedules.engine.js",
+      "line": 54,
+      "code": "state.schedules = this.list || [];"
+    },
+    {
+      "file": "js/core/schedules.engine.js",
+      "line": 55,
+      "code": "data.schedules = this.list || [];"
+    }
+  ],
+  "after": [
+    {
+      "file": "js/core/schedules.engine.js",
+      "line": 54,
+      "code": "state.schedules = this.list || [];"
+    },
+    {
+      "file": "js/core/schedules.engine.js",
+      "line": 55,
+      "code": "data.schedules = this.list || [];"
+    }
+  ],
+  "note": "After Stage 3-A cleanup, all direct App.state/App.data schedules mutations have been removed from app code. Only schedules.engine _syncAlias keeps the alias contract."
+}

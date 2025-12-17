@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<title>Loan Shark v1.0 · Loan & Claim Scheduler</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="css/app.css" rel="stylesheet"/>
+<link rel="stylesheet" href="css/debtorDetail.css" />
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+<div class="topbar-main">
+<div class="brand">
+    Loan Shark v1.0
+</div>
+<nav class="tab-strip top-tabs" data-tab-root="">
+<button class="tab-btn is-active" data-tab="calendar" type="button">Calendar</button>
+<button class="tab-btn" data-tab="monitoring" type="button">Monitoring</button>
+<button class="tab-btn" data-tab="report" type="button">Report</button>
+</nav>
+</div>
+<div class="topbar-meta">
+  <div class="account-area" id="account-area">
+    <span class="auth-status" data-auth-status>오프라인 모드</span>
+    <button type="button" class="auth-btn" data-action="auth-open-modal">로그인</button>
+  </div>
+
+  <div class="save-load-controls">
+    <button id="local-save-btn" class="nav-btn">Local Save</button>
+    <button id="local-load-trigger" class="nav-btn">Local Load</button>
+    <input id="local-load-file" type="file" style="display:none">
+
+    <button id="cloud-save-btn" class="nav-btn highlight">Cloud Save</button>
+    <button id="cloud-load-btn" class="nav-btn">Cloud Load</button>
+  </div>
+</div>
+</header>
+<section class="body-row">
+<aside class="side">
+  <div id="debtor-sidepanel" class="debtor-sidepanel is-expanded">
+    <div class="debtor-sidepanel-header" data-action="debtor-panel-toggle">
+      <span class="debtor-sidepanel-title">채무자관리</span>
+      <span class="debtor-sidepanel-toggle-icon">⟨</span>
+    </div>
+    <div class="debtor-sidepanel-body">
+      <nav class="debtor-sidepanel-tabs">
+        <button class="debtor-tab-btn is-active" data-debtor-tab="list" type="button">DebtorList</button>
+        <button class="debtor-tab-btn" data-debtor-tab="stats" type="button" disabled>DebtorStats</button>
+        <button class="debtor-tab-btn" data-debtor-tab="history" type="button" disabled>DebtorHistory</button>
+      </nav>
+      <div class="debtor-sidepanel-content">
+  <div class="debtor-list-panel">
+    <div class="dlist-topbar">
+      <input type="text" class="dlist-search-input" placeholder="채무자 검색" />
+      <button class="text-btn dlist-add-btn" data-action="debtor-add">+ 채무자</button>
+    </div>
+
+    <div class="dlist-pagination">
+      <button class="dlist-page-prev">◀</button>
+      <span class="dlist-page-label">1 / 1</span>
+      <button class="dlist-page-next">▶</button>
+    </div>
+
+    <div class="dlist-body" id="debtor-list-root"></div>
+    <div id="debtor-panel-root"></div>
+  </div>
+</div>
+    </div>
+  </div>
+</aside>
+<main class="main">
+<section class="card main-card">
+<section class="tab-panel is-active" id="tab-calendar">
+<div id="calendar-root"></div>
+</section>
+<section class="tab-panel" id="tab-monitoring">
+<div id="monitoring-root"></div>
+</section>
+<section class="tab-panel" id="tab-report">
+<div id="report-root">
+<div class="report-subtabs">
+<button class="report-subtab-btn is-active" data-report-section="overview" type="button">Overview</button>
+<button class="report-subtab-btn" data-report-section="statistics" type="button">Statistics</button>
+<button class="report-subtab-btn" data-report-section="capitalflow" type="button">Capital Flow</button>
+<button class="report-subtab-btn" data-report-section="risk" type="button">Risk</button>
+</div>
+<div class="report-subpanel">
+<section class="report-section report-section-overview is-active" data-report-section="overview">
+<section class="report-overview">
+<div class="report-kpi-row">
+  <div class="report-kpi-grid">
+    <!-- ① 대출규모 -->
+    <div class="report-kpi-card" data-kpi="loan">
+      <div class="report-kpi-header">
+        <div class="report-kpi-icon"></div>
+        <div class="report-kpi-title">대출규모</div>
+      </div>
+      <div class="report-kpi-main">
+        <div class="report-kpi-label">대출원리금합계</div>
+        <div class="report-kpi-value">--원</div>
+      </div>
+      <div class="report-kpi-submetrics">
+        <div class="submetric">
+          <div class="submetric-label">상환금합계</div>
+          <div class="submetric-value">--원</div>
+        </div>
+        <div class="submetric">
+          <div class="submetric-label">상환예정금합계</div>
+          <div class="submetric-value">--원</div>
+        </div>
+        <div class="submetric">
+          <div class="submetric-label">미납금합계</div>
+          <div class="submetric-value">--원</div>
+        </div>
+      </div>
+    </div>
+    <!-- ② 채권규모 -->
+    <div class="report-kpi-card" data-kpi="claim">
+      <div class="report-kpi-header">
+        <div class="report-kpi-icon"></div>
+        <div class="report-kpi-title">채권규모</div>
+      </div>
+      <div class="report-kpi-main">
+        <div class="report-kpi-label">채권금합계</div>
+        <div class="report-kpi-value">--원</div>
+      </div>
+      <div class="report-kpi-submetrics">
+        <div class="submetric">
+          <div class="submetric-label">회수금합계</div>
+          <div class="submetric-value">--원</div>
+        </div>
+        <div class="submetric">
+          <div class="submetric-label">회수예정금합계</div>
+          <div class="submetric-value">--원</div>
+        </div>
+      </div>
+    </div>
+    <!-- ③ 운영현황 -->
+    <div class="report-kpi-card" data-kpi="ops">
+      <div class="report-kpi-header">
+        <div class="report-kpi-icon"></div>
+        <div class="report-kpi-title">운영현황</div>
+      </div>
+      <div class="report-kpi-submetrics">
+        <div class="submetric">
+          <div class="submetric-label">신규대출금액</div>
+          <div class="submetric-value">--원 / --건</div>
+        </div>
+        <div class="submetric">
+          <div class="submetric-label">신규채권금액</div>
+          <div class="submetric-value">--원 / --건</div>
+        </div>
+      </div>
+    </div>
+    <!-- ④ 가용자산 -->
+    <div class="report-kpi-card" data-kpi="avail">
+      <div class="report-kpi-header">
+        <div class="report-kpi-icon"></div>
+        <div class="report-kpi-title">가용자산</div>
+      </div>
+      <div class="report-kpi-main">
+        <div class="report-kpi-label">가용자산</div>
+        <div class="report-kpi-value">--원</div>
+      </div>
+    </div>
+  </div>
+
+        <section id="overview-metrics" class="overview-metrics">
+          <div class="overview-metrics-grid">
+            <!-- 좌측 4: 포트폴리오 -->
+            <section class="overview-panel overview-panel-portfolio">
+              <div class="overview-panel-header">
+                <h3 class="overview-panel-title">포트폴리오</h3>
+                <div class="overview-portfolio-types">
+                  <button type="button" class="portfolio-type-chip is-active" data-portfolio-mode="loan">대출</button>
+                  <button type="button" class="portfolio-type-chip" data-portfolio-mode="claim">채권</button>
+                </div>
+              </div>
+              <div class="overview-panel-body">
+                <div class="portfolio-flex">
+                  <div class="donut-wrap">
+                    <div class="overview-portfolio-donut">
+                      <!-- TODO: vLater에서 실제 도넛 그래프 렌더링 연결 -->
+                      
+                    </div>
+                  </div>
+                  <div class="portfolio-legend">
+                    <div class="legend-item"><span class="legend-box planned"></span> 예정</div>
+                    <div class="legend-item"><span class="legend-box paid"></span> 완납</div>
+                    <div class="legend-item"><span class="legend-box partial"></span> 부분납</div>
+                    <div class="legend-item"><span class="legend-box overdue"></span> 미납</div>
+                  </div>
+                </div>
+                <div class="overview-portfolio-cards">
+                  
+                </div>
+              </div>
+            
+
+</section>
+<section class="overview-panel overview-panel-recovery-new">
+  <div class="overview-panel-header">
+    <h3 class="overview-panel-title">회수 흐름</h3>
+  </div>
+  <div class="overview-panel-body">
+    <div class="recovery-kpi-grid">
+      <div class="recovery-kpi-item">
+        <div class="label">일평균 회수예정액</div>
+        <div class="value" id="kpi-daily-planned">₩0</div>
+      </div>
+      <div class="recovery-kpi-item">
+        <div class="label">일평균 회수액</div>
+        <div class="value" id="kpi-daily-actual">₩0</div>
+      </div>
+      <div class="recovery-kpi-item">
+        <div class="label">월평균 회수예정액</div>
+        <div class="value" id="kpi-monthly-planned">₩0</div>
+      </div>
+      <div class="recovery-kpi-item">
+        <div class="label">월평균 회수액</div>
+        <div class="value" id="kpi-monthly-actual">₩0</div>
+      </div>
+    </div>
+
+    <div class="recovery-flow-chart-box">
+      <div class="recovery-interval-switch">
+        <button class="switch-btn active" data-mode="daily">일</button>
+        <button class="switch-btn" data-mode="monthly">월</button>
+        <button class="switch-btn" data-mode="yearly">연</button>
+      </div>
+      <div class="recovery-flow-nav left">◀</div>
+      <div class="recovery-flow-nav right">▶</div>
+      <canvas id="recoveryFlowChart"></canvas>
+    </div>
+
+    <div class="recovery-flow-insight-box"></div>
+  </div>
+</section>
+
+
+            
+          </div>
+        </section>
+
+
+</div>
+
+</section>
+
+
+
+</section>
+<section class="report-section report-section-statistics" data-report-section="statistics">
+  <div class="statistics-layout">
+
+    <!-- SECTION 1 — Debt Snapshot -->
+    <section class="statistics-section statistics-section-snapshot">
+      <div class="statistics-header">
+        <h3 class="statistics-title">오늘 기준 스냅샷</h3>
+      </div>
+      <div class="statistics-kpi-grid statistics-kpi-row">
+        <div class="statistics-kpi-card" data-kpi="debttotal"></div>
+        <div class="statistics-kpi-card" data-kpi="debtpaid"></div>
+        <div class="statistics-kpi-card" data-kpi="debtplanned"></div>
+        <div class="statistics-kpi-card" data-kpi="debtoverdue"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 — Loan / Claim 구조 -->
+    <section class="statistics-section statistics-section-portfolio">
+      <div class="statistics-header">
+        <h3 class="statistics-title">Loan / Claim 구조</h3>
+      </div>
+      <table class="statistics-table" data-table="portfolio">
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>건수</th>
+            <th>채무금합계</th>
+            <th>상환금합계</th>
+            <th>예정금합계</th>
+            <th>미납금합계</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 3 & 4 — Loan / Claim 구조 (병렬) -->
+    <section class="statistics-section statistics-section-row">
+      <section class="statistics-section statistics-section-loan statistics-span-half">
+      <div class="statistics-header">
+        <h3 class="statistics-title">대출 구조</h3>
+      </div>
+      <table class="statistics-table" data-table="loan-structure">
+        <thead><tr><th>항목</th><th>값</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+      <section class="statistics-section statistics-section-claim statistics-span-half">
+      <div class="statistics-header">
+        <h3 class="statistics-title">채권 구조</h3>
+      </div>
+      <table class="statistics-table" data-table="claim-structure">
+        <thead><tr><th>항목</th><th>값</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+    </section>
+
+    <!-- SECTION 5 — 스케줄 상태 요약 -->
+    <section class="statistics-section statistics-section-schedule">
+      <div class="statistics-header">
+        <h3 class="statistics-title">스케줄 상태</h3>
+      </div>
+
+      <table class="statistics-table" data-table="schedule-counts">
+        <thead><tr><th>상태</th><th>회차수</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <table class="statistics-table" data-table="schedule-amounts">
+        <thead><tr><th>상태</th><th>금액합계</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 6 — 채무자 통계 -->
+    <section class="statistics-section statistics-section-debtors">
+      <div class="statistics-header">
+        <h3 class="statistics-title">채무자 통계</h3>
+      </div>
+      <table class="statistics-table" data-table="debtors">
+        <thead><tr><th>항목</th><th>값</th></tr></thead>
+        <tbody>
+          <!-- JS에서 채움 -->
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+</section>
+
+
+
+<section class="report-section report-section-capitalflow" data-report-section="capitalflow">
+
+  <div class="report-section-header">
+    <div class="report-section-header-main">
+      <h3 class="report-section-title">Capital Flow Timeline</h3>
+    </div>
+
+  </div>
+
+  <div class="report-section-body">
+    <div class="capitalflow-chart-card">
+      <div class="capitalflow-chart-header">
+        <div class="capitalflow-chart-title">자본 흐름 추세</div>
+      </div>
+
+      <div class="capitalflow-chart-wrapper">
+        <canvas id="capitalflow-main-chart"></canvas>
+        
+      </div>
+
+      <div class="capitalflow-legend" data-capitalflow-legend>
+        <button type="button" class="capitalflow-legend-item is-active" data-series="velocity">
+          <span class="legend-color-chip legend-color-velocity"></span>
+          <span>회전률</span>
+        </button>
+        <button type="button" class="capitalflow-legend-item is-active" data-series="inflow">
+          <span class="legend-color-chip legend-color-inflow"></span>
+          <span>자본 유입</span>
+        </button>
+        <button type="button" class="capitalflow-legend-item is-active" data-series="outflow">
+          <span class="legend-color-chip legend-color-outflow"></span>
+          <span>자본 유출</span>
+        </button>
+        <button type="button" class="capitalflow-legend-item is-active" data-series="net">
+          <span class="legend-color-chip legend-color-net"></span>
+          <span>순자본 흐름</span>
+        </button>
+      </div>
+
+      <div class="capitalflow-summary-grid">
+        <div class="capitalflow-summary-card">
+          <div class="capitalflow-summary-label">피크 회전률</div>
+          <div class="capitalflow-summary-value" data-summary="peak">0%</div>
+        </div>
+        <div class="capitalflow-summary-card">
+          <div class="capitalflow-summary-label">최저 회전률</div>
+          <div class="capitalflow-summary-value" data-summary="min">0%</div>
+        </div>
+        <div class="capitalflow-summary-card">
+          <div class="capitalflow-summary-label">최근 3개 구간 평균 회전률</div>
+          <div class="capitalflow-summary-value" data-summary="avg3">0%</div>
+        </div>
+        <div class="capitalflow-summary-card">
+          <div class="capitalflow-summary-label">기준</div>
+          <div class="capitalflow-summary-value">월 기준 자본 흐름</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<section class="report-section report-section-risk" data-report-section="risk">
+
+  <div class="report-section-header">
+    <div class="report-section-header-main">
+      <h3 class="report-section-title">Risk</h3>
+      <p class="report-section-desc">연체·미납 중심 포트폴리오 위험도 요약</p>
+    </div>
+    <div class="report-period-controls" data-period-target="risk">
+      <input type="date" class="period-input period-from" placeholder="시작일" />
+      <span class="period-separator">~</span>
+      <input type="date" class="period-input period-to" placeholder="종료일" />
+      <button type="button" class="period-apply-btn" data-action="apply-risk-period">적용</button>
+    </div>
+  </div>
+
+  <div class="report-section-body">
+
+    <div class="risk-kpi-row">
+      <div class="risk-kpi-card" data-risk-kpi="overdue-amount">
+        <div class="risk-kpi-label">총 미납금액</div>
+        <div class="risk-kpi-value">--원</div>
+      </div>
+      <div class="risk-kpi-card" data-risk-kpi="overdue-rate">
+        <div class="risk-kpi-label">미납률(대출원리금 기준)</div>
+        <div class="risk-kpi-value">--%</div>
+      </div>
+      <div class="risk-kpi-card" data-risk-kpi="max-overdue-days">
+        <div class="risk-kpi-label">최장 연체일수</div>
+        <div class="risk-kpi-value">--일</div>
+      </div>
+      <div class="risk-kpi-card" data-risk-kpi="highrisk-count">
+        <div class="risk-kpi-label">고위험 채무자 수</div>
+        <div class="risk-kpi-value">--명</div>
+      </div>
+    </div>
+
+    <div class="risk-layout">
+      <div class="risk-left">
+        <div class="risk-panel risk-aging-panel">
+          <h4 class="risk-section-title">연체 기간별 분포</h4>
+          <table class="risk-table risk-table-aging">
+            <thead>
+              <tr>
+                <th>구간</th>
+                <th>건수</th>
+                <th>금액</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-bucket="0_7">
+                <td>0~7일</td><td>--건</td><td>--원</td>
+              </tr>
+              <tr data-bucket="8_30">
+                <td>8~30일</td><td>--건</td><td>--원</td>
+              </tr>
+              <tr data-bucket="31_90">
+                <td>31~90일</td><td>--건</td><td>--원</td>
+              </tr>
+              <tr data-bucket="90p">
+                <td>90일+</td><td>--건</td><td>--원</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="risk-panel risk-concentration-panel">
+          <h4 class="risk-section-title">집중도 (상위 5명)</h4>
+          <table class="risk-table risk-table-concentration">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>미납금액</th>
+                <th>비중</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>상위 5명 합계</td><td>--원</td><td>--%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="risk-right">
+        <div class="risk-panel risk-topdebtors-panel">
+          <h4 class="risk-section-title">고위험 채무자 TOP 5</h4>
+          <table class="risk-table risk-table-topdebtors">
+            <thead>
+              <tr>
+                <th>채무자</th>
+                <th>미납금액</th>
+                <th>최장 연체일</th>
+                <th>건수</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>--</td><td>--원</td><td>--일</td><td>--건</td>
+              </tr>
+              <tr>
+                <td>--</td><td>--원</td><td>--일</td><td>--건</td>
+              </tr>
+              <tr>
+                <td>--</td><td>--원</td><td>--일</td><td>--건</td>
+              </tr>
+              <tr>
+                <td>--</td><td>--원</td><td>--일</td><td>--건</td>
+              </tr>
+              <tr>
+                <td>--</td><td>--원</td><td>--일</td><td>--건</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+</div>
+</div>
+</section>
+</section></main></section></div>
+
+
+
+
+
+<div class="auth-modal" id="auth-modal" hidden>
+  <div class="auth-modal-backdrop" data-action="auth-close-modal"></div>
+  <div class="auth-modal-dialog">
+    <h3 class="auth-modal-title">Supabase 로그인</h3>
+    <form class="auth-form" id="auth-login-form">
+      <label class="auth-field">
+        <span class="auth-label">이메일</span>
+        <input type="email" name="email" required />
+      </label>
+      <label class="auth-field">
+        <span class="auth-label">비밀번호</span>
+        <input type="password" name="password" required />
+      </label>
+      <div class="auth-actions">
+        <button type="submit" class="auth-btn-primary">로그인</button>
+        <button type="button" class="auth-btn-secondary" data-action="auth-close-modal">취소</button>
+      </div>
+      <p class="auth-error" id="auth-error" hidden></p>
+    </form>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+
+
+<script src="js/core/state.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/date.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+<script src="js/core/supabase.js"></script>
+<script src="js/core/auth.js"></script>
+<script src="js/core/cloudState.js"></script>
+<script src="js/core/data.js"></script>
+<script src="js/infra/viewKeys.js"></script>
+<script src="js/infra/renderCoordinator.js"></script>
+<script src="js/infra/derived.js"></script>
+<script src="js/infra/stateIO.js"></script>
+<script src="js/infra/api.js"></script>
+<script src="js/core/saveload.local.js"></script>
+<script src="js/core/db.js"></script>
+    <script src="js/core/schedules.engine.js"></script>
+<script src="js/components/loanCard.js"></script>
+<script src="js/components/claimCard.js"></script>
+
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/ui/layout.js"></script>
+<script src="js/ui/events.js"></script>
+<script src="js/modules/debtorDetail.info.js"></script>
+<script src="js/modules/debtorDetail.kpi.js"></script>
+<script src="js/modules/debtordetail.js"></script>
+    <script src="js/ui/modalManager.debtors.js"></script>
+<script src="js/features/debtors.handlers.js"></script>
+<script src="js/features/debtors.js"></script>
+<script src="js/features/calendar.js"></script>
+<script src="js/features/monitoring.js"></script>
+<script src="js/features/report.state.js"></script>
+<script src="js/features/report.compute.capitalflow.js"></script>
+<script src="js/features/report.render.capitalflow.js"></script>
+    <script src="js/features/recovery.summary.engine.js"></script>
+    <script src="js/features/capitalflow.engine.js"></script>
+<script src="js/features/report.render.recovery.js"></script>
+<script src="js/features/statistics.engine.js"></script>
+<script src="js/features/report.js"></script>
+<script src="js/ui/debtorPanel.dom.js"></script>
+<script src="js/features/debtors_domlist.js"></script>
+<script src="js/ui/debtorBack.dom.js"></script>
+<script src="js/modules/debtorDetail.dom.js"></script>
+<script src="js/app.js"></script>
+</div>
+<div id="toast" class="toast"></div>
+</body>
+</html>

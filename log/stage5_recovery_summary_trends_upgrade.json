@@ -1,0 +1,15 @@
+{
+  "version": "v305_overview_recovery_summary_trends_upgrade",
+  "base": "v304_overview_recovery_trends_refactor.zip",
+  "updated_files": [
+    "js/features/recovery.summary.engine.js",
+    "js/features/recovery.trends.engine.js"
+  ],
+  "changes": {
+    "summary_formula": "refined_30_90_day_method",
+    "graph_style": "planned_dashed_gray_vs_actual_solid_blue",
+    "tooltip": "multi-line_currency",
+    "legend": "enabled"
+  },
+  "timestamp_utc": "2025-12-07T10:34:33.733696Z"
+}

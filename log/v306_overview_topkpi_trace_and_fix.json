@@ -1,0 +1,174 @@
+{
+  "version": "v306_overview_topkpi_trace_and_fix",
+  "base": "v305_overview_recovery_summary_trends_upgrade.zip",
+  "compute_functions": [
+    {
+      "name": "App.reportCompute.computeAggregates",
+      "defined_in": "js/features/report.compute.trends_risk.js",
+      "reads": [
+        "App.state.loans",
+        "App.state.claims",
+        "App.state.schedules",
+        "App.state.debtors",
+        "App.data.computePortfolioSummary",
+        "App.data.computeRecoveryFlowSummary"
+      ],
+      "writes": [
+        "agg.totals.*",
+        "agg.counts.*",
+        "agg.period.*",
+        "agg.statusBuckets.PARTIAL.partialAmount",
+        "agg.debtorStats.*",
+        "agg.overallRecoveryRate",
+        "agg.today",
+        "agg.monthStart"
+      ]
+    },
+    {
+      "name": "App.data.computePortfolioSummary",
+      "defined_in": "js/core/data.js",
+      "role": "Portfolio level loan/claim breakdown used by overview KPI"
+    },
+    {
+      "name": "App.data.computeRecoveryFlowSummary",
+      "defined_in": "js/core/data.js",
+      "role": "Weekly/monthly expected & actual recovery, used by recovery tiles"
+    }
+  ],
+  "state_writes": [
+    {
+      "state_object": "App.state",
+      "defined_in": "js/core/state.js",
+      "fields": [
+        "debtors",
+        "loans",
+        "claims",
+        "schedules",
+        "cashLogs"
+      ]
+    }
+  ],
+  "render_mappings": [
+    {
+      "kpi_group": "overview_top_loan",
+      "kpi_key": "loanTotal",
+      "selector": ".report-kpi-card[data-kpi=\"loan\"] .report-kpi-main .report-kpi-value",
+      "label_text": "대출원리금합계",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "overview_top_loan",
+      "kpi_key": "loanPaid",
+      "selector": ".report-kpi-card[data-kpi=\"loan\"] .report-kpi-submetrics .submetric-label == '상환금합계'",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "overview_top_loan",
+      "kpi_key": "loanPlanned",
+      "selector": ".report-kpi-card[data-kpi=\"loan\"] .report-kpi-submetrics .submetric-label == '상환예정금합계'",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "overview_top_loan",
+      "kpi_key": "loanOverdue",
+      "selector": ".report-kpi-card[data-kpi=\"loan\"] .report-kpi-submetrics .submetric-label == '미납금합계'",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "overview_top_claim",
+      "kpi_key": "claimTotal",
+      "selector": ".report-kpi-card[data-kpi=\"claim\"] .report-kpi-main .report-kpi-value",
+      "label_text": "채권금합계",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "overview_top_claim",
+      "kpi_key": "claimPaid",
+      "selector": ".report-kpi-card[data-kpi=\"claim\"] .report-kpi-submetrics .submetric-label == '회수금합계'",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "overview_top_claim",
+      "kpi_key": "claimPlanned",
+      "selector": ".report-kpi-card[data-kpi=\"claim\"] .report-kpi-submetrics .submetric-label == '회수예정금합계'",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateOverviewKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "statistics_totals",
+      "kpi_key": "total-loan-principal",
+      "selector": ".report-section-statistics .stats-kpi-card[data-stats-kpi=\"total-loan-principal\"] .stats-kpi-value",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateStatisticsKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "statistics_totals",
+      "kpi_key": "total-claim-amount",
+      "selector": ".report-section-statistics .stats-kpi-card[data-stats-kpi=\"total-claim-amount\"] .stats-kpi-value",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateStatisticsKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "statistics_totals",
+      "kpi_key": "total-collected",
+      "selector": ".report-section-statistics .stats-kpi-card[data-stats-kpi=\"total-collected\"] .stats-kpi-value",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateStatisticsKPI"
+      },
+      "status": "ok"
+    },
+    {
+      "kpi_group": "statistics_totals",
+      "kpi_key": "total-arrears",
+      "selector": ".report-section-statistics .stats-kpi-card[data-stats-kpi=\"total-arrears\"] .stats-kpi-value",
+      "defined_at": {
+        "file": "js/features/report.js",
+        "function": "updateStatisticsKPI"
+      },
+      "status": "ok"
+    }
+  ],
+  "dom_mismatch_fixed": [],
+  "root_cause_before_fix": [
+    {
+      "kpi_group": "overview_top_and_statistics",
+      "cause": "state_not_updated",
+      "details": "App.reportCompute.computeAggregates was not implemented. updateReportView() aborted early, so updateOverviewKPI / updateRecoveryTiles / updateStatisticsKPI never received a populated agg object and top KPIs remained at their placeholder values."
+    }
+  ],
+  "timestamp_utc": "2025-12-07T11:04:27Z"
+}

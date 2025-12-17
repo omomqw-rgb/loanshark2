@@ -1,0 +1,210 @@
+[
+  {
+    "file": "js/core/cloudState.js",
+    "location": "normalizeScheduleIdsInPlace",
+    "fields": [
+      "claimId",
+      "claim_id",
+      "debtorId",
+      "debtor_id",
+      "id",
+      "loanId",
+      "loan_id"
+    ]
+  },
+  {
+    "file": "js/core/cloudState.js",
+    "location": "runShadowQA",
+    "fields": [
+      "claimId",
+      "claim_id",
+      "kind",
+      "loanId",
+      "loan_id"
+    ]
+  },
+  {
+    "file": "js/core/data.js",
+    "location": "recomputeDerivedLoanFields",
+    "fields": [
+      "kind",
+      "loanId"
+    ]
+  },
+  {
+    "file": "js/core/data.js",
+    "location": "buildDebtorsDetailed",
+    "fields": [
+      "amount",
+      "debtorId",
+      "paidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/core/data.js",
+    "location": "computePortfolioSummary",
+    "fields": [
+      "amount",
+      "dueDate",
+      "due_date",
+      "kind",
+      "paidAmount",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/core/data.js",
+    "location": "toKey",
+    "fields": [
+      "amount",
+      "dueDate",
+      "due_date",
+      "paidAmount",
+      "partialPaidAmount"
+    ]
+  },
+  {
+    "file": "js/core/data.js",
+    "location": "computeRecoveryFlowSeries",
+    "fields": [
+      "amount",
+      "dueDate",
+      "due_date",
+      "kind",
+      "paidAmount",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/features/calendar.js",
+    "location": "buildCalendarData",
+    "fields": [
+      "amount",
+      "claimId",
+      "debtorId",
+      "dueDate",
+      "id",
+      "installmentNo",
+      "kind",
+      "loanId",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/features/calendar.js",
+    "location": "handleDayItemClick",
+    "fields": [
+      "claimId",
+      "id",
+      "kind",
+      "loanId"
+    ]
+  },
+  {
+    "file": "js/features/capitalflow.engine.js",
+    "location": "buildRecoveryCache",
+    "fields": [
+      "actualAmount",
+      "amount",
+      "date",
+      "dueDate",
+      "paidAmount"
+    ]
+  },
+  {
+    "file": "js/features/debtors.handlers.js",
+    "location": "handleLoanScheduleSave",
+    "fields": [
+      "amount",
+      "id",
+      "paidAmount",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/features/debtors.handlers.js",
+    "location": "handleClaimScheduleSave",
+    "fields": [
+      "amount",
+      "id",
+      "paidAmount",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/features/monitoring.js",
+    "location": "groupByDebtor",
+    "fields": [
+      "debtorId"
+    ]
+  },
+  {
+    "file": "js/features/statistics.engine.js",
+    "location": "computeOverdueMetrics",
+    "fields": [
+      "amount",
+      "claimId",
+      "kind",
+      "loanId",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/modules/debtordetail.js",
+    "location": "computeClaimSummary",
+    "fields": [
+      "amount",
+      "claimId",
+      "claim_id",
+      "kind",
+      "status"
+    ]
+  },
+  {
+    "file": "js/modules/debtordetail.js",
+    "location": "computeDebtorSummary",
+    "fields": [
+      "amount",
+      "date",
+      "dueDate",
+      "due_date",
+      "paidAmount",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/ui/modalManager.debtors.js",
+    "location": "openLoanScheduleModal",
+    "fields": [
+      "amount",
+      "dueDate",
+      "id",
+      "installmentNo",
+      "kind",
+      "loanId",
+      "partialPaidAmount",
+      "status"
+    ]
+  },
+  {
+    "file": "js/ui/modalManager.debtors.js",
+    "location": "openClaimScheduleModal",
+    "fields": [
+      "amount",
+      "claimId",
+      "dueDate",
+      "id",
+      "installmentNo",
+      "kind",
+      "status"
+    ]
+  }
+]

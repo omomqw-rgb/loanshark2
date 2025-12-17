@@ -1,0 +1,9 @@
+{
+  "version": "v335D_schedules_engine_stage3_architecture_final",
+  "base_version": "v335C_schedules_engine_stage3_cloudstate_finalize",
+  "engineListAlias": true,
+  "fallbackRemoved": {
+    "ensureInitialized_no_state_data_base": true,
+    "loadAllFromSupabase_no_state_data_fallback": true
+  }
+}

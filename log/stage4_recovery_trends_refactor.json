@@ -1,0 +1,34 @@
+{
+  "version": "v304_overview_recovery_trends_refactor",
+  "base": "v303_overview_legacy_cleanup_stage3.zip",
+  "created_files": [
+    "js/features/recovery.summary.engine.js",
+    "js/features/recovery.trends.engine.js"
+  ],
+  "updated_files": [
+    {
+      "file": "js/features/report.render.recovery.js",
+      "changes": [
+        "Refactored into thin orchestrator delegating to App.features.recoverySummary and App.features.recoveryTrends"
+      ]
+    },
+    {
+      "file": "index.html",
+      "changes": [
+        "Injected script tags for recovery summary/trends engines before report.render.recovery.js"
+      ]
+    }
+  ],
+  "removed_legacy_blocks": [
+    {
+      "file": "js/features/report.render.recovery.js",
+      "description": "Inlined recovery state, cache, series builders, KPI update, insights, and Chart wiring were moved into App.features.recoveryTrends and App.features.recoverySummary engines.",
+      "note": "Legacy monolithic recovery render logic replaced by dedicated summary/trends engines."
+    }
+  ],
+  "mapping": {
+    "summary_engine": "js/features/recovery.summary.engine.js",
+    "trends_engine": "js/features/recovery.trends.engine.js"
+  },
+  "timestamp_utc": "2025-12-07T10:16:39.826656Z"
+}

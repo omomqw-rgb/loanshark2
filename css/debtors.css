@@ -1,0 +1,673 @@
+/* Amount System v113 – Debtor Panel
+ * - .panel-amount / .debtor-panel .amount are panel-only amount hooks.
+ * - Do not reuse these selectors for calendar or cards.
+ */
+
+/* debtors.css - auto-reorganized structural CSS (v101) */
+
+#debtors-root .debtor-panel {
+  
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148,163,184,0.7);
+  
+  padding:8px 10px;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+#debtors-root }.debtor-header-main {
+  width: 100%;
+  padding:8px 10px;
+  margin-bottom: var(--space-2);
+#debtors-root }.debtor-header-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding:8px 10px;
+  border-radius: 999px;
+  
+  border: 1px solid rgba(251,191,36,0.45);
+  
+  
+#debtors-root }.debtor-topbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+#debtors-root }.debtor-topbar-msg {
+  font-size: var(--font-xs);
+  
+#debtors-root }.debtor-search-row {
+  margin-bottom: var(--radius-sm);
+#debtors-root }.debtor-list-meta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+#debtors-root }.debtor-list {
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+#debtors-root }.debtor-card {
+  border-radius: var(--space-4);
+  border: 1px solid rgba(15,23,42,0.85);
+  
+  padding:8px 10px;
+  margin-bottom: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+#debtors-root }.debtor-card:hover {
+  
+  
+  transform: translateY(-1px);
+#debtors-root }.debtor-card-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--space-4);
+#debtors-root }.debtor-name {
+  font-weight: 600;
+#debtors-root }.debtor-phone {
+  font-size: var(--font-xs);
+  
+#debtors-root }.debtor-detail-mainrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--radius-sm);
+  margin-bottom: var(--radius-sm);
+  padding:8px 10px;
+  border-radius: var(--space-4);
+  
+  border: 1px solid rgba(15,23,42,0.9);
+#debtors-root }.debtor-detail-mainrow .debtor-detail-phone {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: var(--space-4);
+  
+#debtors-root }.debtor-detail-mainrow .debtor-detail-name {
+  font-weight: 700;
+  font-size: var(--font-md);
+  
+#debtors-root }.debtor-detail-line {
+  display: flex;
+  align-items: center;
+  gap: var(--radius-sm);
+  font-size: 13px;
+#debtors-root }.debtor-detail-name {
+  font-weight: 600;
+#debtors-root }.debtor-detail-phone {
+  font-size: var(--space-4);
+  
+#debtors-root }.debtor-panel {
+  
+  
+  padding:8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--radius-md); /* separation between internal blocks */
+#debtors-root }.debtor-header-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding:8px 10px;
+  border-radius: 999px;
+  
+  border: 1px solid rgba(209, 213, 219, 0.98);
+  
+  
+}.debtor-topbar-row,
+.debtor-search-row,
+#debtors-root .debtor-list {
+  border-radius: var(--font-md);
+  
+  
+  border: 1px solid rgba(226, 232, 240, 0.95);
+#debtors-root }.debtor-topbar-row {
+  padding:8px 10px;
+  margin-bottom: var(--radius-sm);
+#debtors-root }.debtor-search-row {
+  padding:8px 10px;
+  margin-bottom: var(--space-3);
+#debtors-root }.debtor-list {
+  padding:8px 10px;
+#debtors-root }.debtor-card {
+  border-radius: var(--space-4);
+  border: 1px solid rgba(209, 213, 219, 0.95);
+  
+  padding:8px 10px;
+  margin-bottom: var(--radius-sm);
+  
+#debtors-root }.debtor-card:hover {
+  transform: translateY(-1px);
+  
+}.debtor-topbar-msg,
+.debtor-phone,
+.debtor-detail-phone,
+.loan-amounts,
+.badge-status,
+.debtor-panel .btn-text,
+.debtor-panel .field-text select,
+#debtors-root .debtor-panel .table td select {
+  color: var(--state-active);
+}.week-item-debtor,
+#debtors-root .day-item-name {
+  
+}.week-detail-item.is-paid .week-item-debtor,
+.week-detail-item.is-paid .week-item-amount,
+.day-detail-item.is-paid .day-item-name,
+#debtors-root .day-detail-item.is-paid .day-item-amount {
+  color: #22c55e;
+}.week-detail-item.is-overdue .week-item-debtor,
+.week-detail-item.is-overdue .week-item-amount,
+.day-detail-item.is-overdue .day-item-name,
+#debtors-root .day-detail-item.is-overdue .day-item-amount {
+  color: var(--state-overdue);
+}.week-detail-item.is-paid .week-item-debtor,
+.week-detail-item.is-paid .week-item-amount,
+.day-detail-item.is-paid .day-item-name,
+#debtors-root .day-detail-item.is-paid .day-item-amount {
+  color: #22c55e;
+}.week-detail-item.is-overdue .week-item-debtor,
+.week-detail-item.is-overdue .week-item-amount,
+.day-detail-item.is-overdue .day-item-name,
+#debtors-root .day-detail-item.is-overdue .day-item-amount {
+  color: var(--state-overdue);
+}.week-detail-item.is-partial .week-item-debtor,
+.week-detail-item.is-partial .week-item-amount,
+.day-detail-item.is-partial .day-item-name,
+#debtors-root .day-detail-item.is-partial .day-item-amount {
+  
+}.week-detail-item .week-item-debtor,
+.day-detail-item .day-item-name,
+.week-detail-item .week-item-amount,
+.day-detail-item .day-item-amount,
+.week-detail-item.is-paid .week-item-debtor,
+.week-detail-item.is-paid .week-item-amount,
+.day-detail-item.is-paid .day-item-name,
+.day-detail-item.is-paid .day-item-amount,
+.week-detail-item.is-overdue .week-item-debtor,
+.week-detail-item.is-overdue .week-item-amount,
+.day-detail-item.is-overdue .day-item-name,
+.day-detail-item.is-overdue .day-item-amount,
+.week-detail-item.is-partial .week-item-debtor,
+.week-detail-item.is-partial .week-item-amount,
+.day-detail-item.is-partial .day-item-name,
+#debtors-root .day-detail-item.is-partial .day-item-amount {
+  color: inherit !important;
+#debtors-root }.debtor-panel {
+  
+  border-radius: var(--font-xl);
+  border: 1px solid #111218;
+  
+#debtors-root }.debtor-header-title {
+  letter-spacing: 0.03em;
+  padding:8px 10px;
+  border-radius: 999px;
+  
+  border: none;
+  
+  
+#debtors-root }.debtor-item {
+  
+  border-radius: var(--font-md);
+  border: 1px solid #111218;
+  
+#debtors-root }.debtor-item:hover {
+  
+  
+#debtors-root }.debtor-panel {
+  transition:
+    opacity 160ms ease-out,
+    transform 160ms ease-out;
+}.debtor-panel.is-open,
+#debtors-root .debtor-panel.is-ready {
+  opacity: 1;
+  transform: translateX(0);
+#debtors-root }.debtor-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+#debtors-root }.debtor-card {
+  border-radius: var(--space-4);
+  border: 1px solid rgba(148, 163, 184, 0.70);
+  padding:8px 10px;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.02);
+  transition:
+    background 140ms ease-out,
+    box-shadow 160ms ease-out,
+    transform 120ms ease-out,
+    color 140ms ease-out;
+#debtors-root }.debtor-card:hover {
+  background: rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 var(--radius-md) 26px rgba(15, 23, 42, 0.30),
+    0 0 0 1px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+#debtors-root }.debtor-card:hover .debtor-name {
+  color: var(--state-active);
+#debtors-root }.debtor-card:hover .debtor-phone {
+  color: #4B5563;
+}.debtor-info-grid .kpi-card,
+#debtors-root .debtor-info-grid .kpi-card-small {
+  padding:8px 10px;
+  box-sizing: border-box;
+#debtors-root }.debtor-info-grid .kpi-value {
+  font-size: var(--space-5) !important;
+  font-weight: 600;
+#debtors-root }.debtor-info-grid {
+  gap: var(--radius-md) !important;
+}
+
+/* ========== Debtor Panel Amount helpers (v104 manual) ========== */
+/* Semantic alias for legacy .amount usage inside debtor panel. */
+.panel-amount,
+#debtors-root .debtor-panel .amount {
+  /* Intentionally minimal; semantic hook only – visual behavior defined by shared rules. */
+}
+
+
+
+
+
+
+    /* v115 – restore v028_fix1 debtor panel/card skin */
+    #debtors-root .debtor-panel {
+
+  border-radius: 18px;
+  border: 1px solid rgba(148,163,184,0.7);
+
+  padding:8px 10px;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+    #debtors-root .debtor-card {
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.85);
+
+  padding:8px 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+    /* v115 – compact pill buttons for debtor actions (+대출 / +채권) */
+    #debtors-root .debtor-list-meta .btn-primary {
+      border-radius: 999px;
+      border-width: 1px;
+      padding:8px 10px;
+      font-size: 10px;
+    }
+
+
+
+/* v120 topbar layout */
+#debtors-root .debtor-topbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#debtors-root .debtor-topbar-row > div:last-child {
+  display: flex;
+  gap: 10px;
+}
+
+
+/* v120 remove circle background for +대출 +채권 */
+#debtors-root .btn-text.accent {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding:8px 10px;
+}
+
+
+/* v120 amount state colors */
+.week-detail-item .week-item-amount,
+#debtors-root .day-detail-item .day-item-amount {
+  color:#60a5fa !important;
+}
+.week-detail-item.is-overdue .week-item-amount,
+#debtors-root .day-detail-item.is-overdue .day-item-amount {
+  color:#ef4444 !important;
+}
+.week-detail-item.is-partial .week-item-amount,
+#debtors-root .day-detail-item.is-partial .day-item-amount {
+  color:#facc15 !important;
+}
+.week-detail-item.is-paid .week-item-amount,
+#debtors-root .day-detail-item.is-paid .day-item-amount {
+  color:#22c55e !important;
+}
+/* v107 tight debtor detail panel */
+.debtor-panel { padding: 6px 8px !important; }
+
+.topbar-row1 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.topbar-row2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.debtor-topbar-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.topbar-actions button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Debtor detail header actions */
+.debtor-header-actions .debtor-header-edit {
+  margin-right: 20px;
+}
+.debtor-header-edit,
+.debtor-header-delete {
+  color: #000;
+}
+
+/* 4x4 grid for loan/claim cards */
+.card-grid-4x4 {
+  display: grid;
+  grid-template-columns: 50px 80px 50px 80px;
+  column-gap: 10px;
+  row-gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+.card-grid-label {
+  text-align: left;
+  font-weight: 600;
+  color: #111827;
+}
+.card-grid-value {
+  text-align: right;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Inline +대출 / +채권 buttons (text only) */
+.form-section-actions .btn-inline {
+  padding: 0;
+  margin-left: 25px;
+  background: none !important;
+  border: none !important;
+  font-size: 13px;
+  color: #0a0a0a !important;
+  font-weight: 500;
+  cursor: pointer;
+}
+.form-section-actions .btn-inline:hover {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Tighten layout for cards inside panel */
+.debtor-detail-mainrow {
+  margin: 4px 0;
+}
+.loan-card,
+.claim-card {
+  padding: 10px 12px;
+  margin-top: 6px;
+}
+
+/* v113: header alignment */
+.form-section-header {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+}
+.form-section-actions .btn-inline {
+  margin-left:auto !important;
+  margin-right:6px !important;
+  background:none !important;
+  border:none !important;
+  padding:0 !important;
+}
+
+/* grid widths */
+.card-grid-4x4 {
+  grid-template-columns:55px 70px 50px 65px !important;
+}
+
+/* fix header buttons visibility */
+.debtor-header-edit,
+.debtor-header-delete {
+  color:#000 !important;
+  
+}
+
+/* status + schedule alignment */
+.card-actions {
+  display:flex !important;
+  justify-content:space-between !important;
+}
+
+
+.debtor-header-edit,
+.debtor-header-delete {
+  position: relative;
+  z-index: 999;
+}
+
+
+
+/* Added by v153 */
+.debtor-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+
+.dlist-topbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dlist-search-input {
+  flex: 1 1 auto;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(148,163,184,0.7);
+  font-size: 12px;
+  background: var(--surface, #0b1120);
+  color: inherit;
+}
+
+.text-btn.dlist-add-btn {
+  padding: 0;
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.text-btn.dlist-add-btn:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.dlist-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.dlist-pagination button {
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: rgba(148,163,184,0.08);
+  border: 1px solid rgba(148,163,184,0.6);
+  color: rgba(226,232,240,0.95);
+}
+
+.dlist-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding-right:4px;
+}
+
+#debtor-panel-root { display:none; }
+
+/* -------------------------------------------------
+ * DebtorList v240 – 금융앱 스타일 1줄 리스트
+ * ------------------------------------------------- */
+
+#debtor-sidepanel .debtor-list-panel .dlist-body {
+  /* 기존 .dlist-body 보다 우선순위를 높여 플랫 리스트 레이아웃으로 변경 */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;              /* 카드 간격 제거 → 플랫 리스트 */
+  padding-right: 0;
+  margin-top: 4px;
+}
+
+/* 한 줄 리스트 항목 기본 레이아웃 */
+#debtor-sidepanel .debtor-list-panel .dlist-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #f3f4f6; /* 실버/라이트 그레이 톤 */
+  border-bottom: 1px solid rgba(148,163,184,0.55); /* 얇은 하단 라인만 */
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+
+/* 마지막 항목은 하단 라인 제거(선택사항) */
+#debtor-sidepanel .debtor-list-panel .dlist-item:last-child {
+  border-bottom: none;
+}
+
+/* hover 시 배경만 살짝 진하게 */
+#debtor-sidepanel .debtor-list-panel .dlist-item:hover {
+  background: #e5e7eb; /* 살짝 진한 그레이 */
+}
+
+/* 좌측: 점 + 이름 */
+#debtor-sidepanel .debtor-list-panel .dlist-col-left {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+#debtor-sidepanel .debtor-list-panel .dlist-bullet {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #000000; /* 6px 검정 점 */
+}
+
+#debtor-sidepanel .debtor-list-panel .dlist-name {
+  flex: 1 1 auto;
+  font-weight: 500;           /* 반굵기 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;    /* 긴 이름 말줄임 처리 */
+}
+
+/* 가운데: L{loanCount} · C{claimCount} */
+#debtor-sidepanel .debtor-list-panel .dlist-col-center {
+  flex: 0 0 auto;
+  text-align: center;
+  padding: 0 4px;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+#debtor-sidepanel .debtor-list-panel .dlist-counts {
+  white-space: nowrap;
+}
+
+/* 오른쪽: 상태 점 */
+#debtor-sidepanel .debtor-list-panel .dlist-col-right {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 22px;
+}
+
+#debtor-sidepanel .debtor-list-panel .dlist-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #9ca3af; /* 기본 회색 */
+}
+
+/* 진행 & 미납 없음 → 초록 */
+#debtor-sidepanel .debtor-list-panel .dlist-status-dot.dlist-status--active-ok {
+  background: #22c55e;
+}
+
+/* 진행 & 미납 있음 → 주황 */
+#debtor-sidepanel .debtor-list-panel .dlist-status-dot.dlist-status--active-overdue {
+  background: #f97316;
+}
+
+/* 진행 아님(완료/보류 등) → 회색 */
+#debtor-sidepanel .debtor-list-panel .dlist-status-dot.dlist-status--inactive {
+  background: #9ca3af;
+}
+
+
+/* === DebtorList v240_scale12 – 1.2x size + micro line gap === */
+#debtor-sidepanel .debtor-list-panel .dlist-item {
+  padding: 7px 10px !important;   /* 1.2x padding */
+  font-size: 14px !important;      /* 1.2x font */
+  margin-bottom: 2px !important;   /* micro line gap */
+}
+
+#debtor-sidepanel .debtor-list-panel .dlist-bullet {
+  width: 7px !important;
+  height: 7px !important;
+}
+
+#debtor-sidepanel .debtor-list-panel .dlist-status-dot {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+
+/* === DebtorList Panel padding 8px (v241) === */
+.debtor-list-panel {
+  padding: 8px !important;
+}

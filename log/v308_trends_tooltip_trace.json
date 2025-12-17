@@ -1,0 +1,12 @@
+{
+  "tooltip_enabled": true,
+  "point_radius": 0,
+  "chartjs_version": "4.5.1",
+  "hitbox_issue_detected": true,
+  "dom_overlay_issue": false,
+  "pointer_events_issue": false,
+  "metadata_issue": false,
+  "interaction_config_present_before_fix": false,
+  "root_cause": "Chart.js 4.5.1 line chart with pointRadius=0, no hitRadius/hoverRadius and default interaction caused effectively no hoverable points, so tooltips were not triggered.",
+  "recommendation": "Give points a small visible radius and larger hover hitbox, explicitly configure interaction.mode='nearest' with intersect=false, and ensure the canvas can receive pointer events."
+}

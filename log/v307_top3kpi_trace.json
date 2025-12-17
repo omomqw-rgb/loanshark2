@@ -1,0 +1,113 @@
+{
+  "version": "v307_overview_top3kpi_trace_and_fix",
+  "base": "v306_overview_topkpi_trace_and_fix.zip",
+  "compute_functions": [
+    {
+      "name": "App.reportCompute.computeAggregates",
+      "defined_in": "js/features/report.compute.trends_risk.js",
+      "returns": [
+        "totals.loanPrincipal",
+        "totals.loanTotalRepay",
+        "totals.claimAmount",
+        "totals.claimOutstanding",
+        "totals.allCollectedTotal",
+        "totals.allOutstandingTotal",
+        "totals.debtTotal",
+        "counts.totalLoans",
+        "counts.totalClaims",
+        "counts.totalDebtors",
+        "period.weekExpected",
+        "period.weekCollected",
+        "period.monthExpected",
+        "period.monthCollected",
+        "statusBuckets.PARTIAL.partialAmount",
+        "debtorStats.avgLoanPerDebtor",
+        "debtorStats.avgClaimPerDebtor",
+        "debtorStats.topDebtors[]",
+        "overallRecoveryRate",
+        "today",
+        "monthStart"
+      ]
+    }
+  ],
+  "render_mappings": [
+    {
+      "card": "loan",
+      "card_title": "대출규모",
+      "kpi_main": {
+        "kpi_key": "loanTotal",
+        "agg_field_primary": "loanSummary.totalAmount",
+        "agg_field_fallback": "totals.loanTotalRepay",
+        "selector": ".report-kpi-card[data-kpi=\"loan\"] .report-kpi-main .report-kpi-value"
+      },
+      "kpi_sub": [
+        {
+          "label": "상환금합계",
+          "kpi_key": "loanPaid",
+          "agg_field_primary": "loanSummary.paidAmount",
+          "selector_hint": ".report-kpi-card[data-kpi=\"loan\"] .submetric-label == '상환금합계'"
+        },
+        {
+          "label": "상환예정금합계",
+          "kpi_key": "loanPlanned",
+          "agg_field_primary": "loanSummary.plannedAmount",
+          "selector_hint": ".report-kpi-card[data-kpi=\"loan\"] .submetric-label == '상환예정금합계'"
+        },
+        {
+          "label": "미납금합계",
+          "kpi_key": "loanOverdue",
+          "agg_field_primary": "loanSummary.overdueAmount",
+          "selector_hint": ".report-kpi-card[data-kpi=\"loan\"] .submetric-label == '미납금합계'"
+        }
+      ]
+    },
+    {
+      "card": "claim",
+      "card_title": "채권규모",
+      "kpi_main": {
+        "kpi_key": "claimTotal",
+        "agg_field_primary": "claimSummary.totalAmount",
+        "agg_field_fallback": "totals.claimAmount",
+        "selector": ".report-kpi-card[data-kpi=\"claim\"] .report-kpi-main .report-kpi-value"
+      },
+      "kpi_sub": [
+        {
+          "label": "회수금합계",
+          "kpi_key": "claimPaid",
+          "agg_field_primary": "claimSummary.paidAmount",
+          "selector_hint": ".report-kpi-card[data-kpi=\"claim\"] .submetric-label == '회수금합계'"
+        },
+        {
+          "label": "회수예정금합계",
+          "kpi_key": "claimPlanned",
+          "agg_field_primary": "claimSummary.overdueAmount",
+          "selector_hint": ".report-kpi-card[data-kpi=\"claim\"] .submetric-label == '회수예정금합계'"
+        }
+      ]
+    },
+    {
+      "card": "ops",
+      "card_title": "운영현황",
+      "kpi_sub": [
+        {
+          "label": "신규대출금액",
+          "kpi_key": "operationNewLoansMonth",
+          "agg_field_primary": "App.state.loans[] filtered by createdAt between agg.monthStart..agg.today",
+          "selector_hint": ".report-kpi-card[data-kpi=\"ops\"] .submetric-label == '신규대출금액'"
+        },
+        {
+          "label": "신규채권금액",
+          "kpi_key": "operationNewClaimsMonth",
+          "agg_field_primary": "App.state.claims[] filtered by createdAt between agg.monthStart..agg.today",
+          "selector_hint": ".report-kpi-card[data-kpi=\"ops\"] .submetric-label == '신규채권금액'"
+        }
+      ]
+    }
+  ],
+  "dom_mismatch": [],
+  "notes": [
+    "Top 3 KPI cards share the same DOM structure between v302 and v306.",
+    "v306 introduced a new computeReportAggregates implementation; updateOverviewKPI continued to rely on App.data.computePortfolioSummary for main loan/claim values.",
+    "The critical regression between v302 -> v303 was the removal/breakage of computeReportAggregates, which caused updateReportView to abort early and skip updateOverviewKPI entirely."
+  ]
+}

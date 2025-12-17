@@ -1,0 +1,168 @@
+/* modal.css - auto-reorganized structural CSS (v101) */
+
+/* ========== Modal Backdrop & Root (v104 manual) ========== */
+
+#modal-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+#modal-root }.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}/* ========== Modal Container (v104 manual) ========== */
+
+/* ========== Modal Container (v109 structured) ========== */
+#modal-root .modal {
+  width: 100%;
+  max-width: 540px;
+  
+  border-radius: var(--font-md);
+  border: 1px solid var(--state-active);
+  
+  padding: var(--space-4) var(--font-md) var(--space-4);
+#modal-root }.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+#modal-root }.modal-title {
+  font-size: var(--font-md);
+  font-weight: 600;
+}/* ========== Modal Layout (v104 manual) ========== */
+
+/* ========== Modal Layout (v109 structured) ========== */
+#modal-root .modal-body {
+  font-size: var(--space-4);
+#modal-root }.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--radius-sm);
+  margin-top: var(--space-3);
+#modal-root }.modal-backdrop {
+  
+#modal-root }.modal {
+  
+  border-radius: var(--space-5);
+  border: 1px solid rgba(209, 213, 219, 0.95);
+  
+#modal-root }.modal-body {
+  max-height: 440px;
+  overflow-y: auto;
+#modal-root }.modal {
+  
+  
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(209, 213, 219, 0.95);
+  
+#modal-root }.modal-backdrop {
+  
+  backdrop-filter: blur(var(--space-5));
+#modal-root }.modal {
+  max-width: 540px;
+  
+  border-radius: 22px;
+  border: 1px solid #111218;
+  
+  
+#modal-root }.modal-title {
+  
+#modal-root }.modal-subtitle {
+  
+#modal-root }.modal .field-text label {
+  
+}.modal .field-text input,
+.modal .field-text select,
+#modal-root .modal .field-text textarea {
+  
+  
+  
+}.card,
+.panel,
+.section-card,
+.table-card,
+.debtor-panel,
+.sidepanel,
+.sidepanel-section,
+.modal,
+.modal-body,
+#modal-root .modal-surface {
+  background: var(--charcoal-bg-surface);
+  border-radius: var(--space-5);
+  border: 1px solid var(--charcoal-border-subtle);
+  box-shadow: var(--charcoal-shadow-soft);
+}.card,
+.panel,
+.section-card,
+.table-card,
+.debtor-panel,
+.sidepanel,
+.sidepanel-section,
+.modal,
+.modal-body,
+#modal-root .modal-surface {
+  box-shadow: var(--charcoal-shadow-soft);
+#modal-root }.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 25, 0.42);
+  backdrop-filter: blur(var(--space-2));
+#modal-root }.modal {
+  max-width: 560px;
+  margin: 80px auto;
+  border-radius: var(--radius-lg);
+  background: var(--charcoal-bg-surface);
+  box-shadow:
+    0 var(--space-6) 60px rgba(15, 23, 42, 0.35),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
+}.modal-title,
+#modal-root .drawer-title {
+  padding-top: var(--radius-lg);
+  line-height: 1.32;
+  overflow: visible;
+#modal-root }.modal-header {
+  border-bottom: none !important;
+#modal-root }.modal-title {
+  padding-top: var(--font-xl) !important;
+  padding-bottom: var(--space-4) !important;
+  line-height: 1.32;
+#modal-root }.modal {
+    border: none !important;
+}
+
+/* v123 – remove inner card border for modal body only */
+#modal-root .modal-body {
+  border: none;
+  box-shadow: none;
+}
+
+/* v124 – modal size & inner radius fix */
+#modal-root .modal {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.modal-body .form-wrapper,
+.modal-body .field-set,
+#modal-root .modal-body .section-card {
+  border-radius: 14px;
+}
+
+/* v125 – modal inner card vertical padding */
+.modal-body .form-wrapper,
+.modal-body .field-set,
+#modal-root .modal-body .section-card {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* v126 – label indent fix */
+#modal-root .modal .field-text label {
+  padding-left: 4px;
+}

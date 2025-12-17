@@ -1,0 +1,889 @@
+{
+  "version": "v302_overview_legacy_audit_stage2",
+  "base_version": "v301_overview_legacy_audit_stage1",
+  "debtorDetail_files": {
+    "js/modules/debtorDetail.dom.js": {
+      "defined_functions": [
+        {
+          "file": "js/modules/debtorDetail.dom.js",
+          "name": "render",
+          "full_name": "App.debtorDetail.render",
+          "type": "app_method_function",
+          "defined_at": {
+            "line": 7,
+            "column": 0
+          },
+          "usages_in_report_engine": [
+            {
+              "file": "js/features/report.js",
+              "line": 325,
+              "column": 4,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 329,
+              "column": 11,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "function render() {"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 339,
+              "column": 41,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "console.warn('[Report] Failed to render overview metrics:', e);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 366,
+              "column": 30,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "console.error('[Report] render error', e);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 907,
+              "column": 38,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "App.features.report = { init: init, render: render };"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 408,
+              "column": 13,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "function render() {"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 457,
+              "column": 14,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 471,
+              "column": 10,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 484,
+              "column": 10,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 500,
+              "column": 6,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 506,
+              "column": 6,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "renderRecoveryChart: render"
+            }
+          ]
+        },
+        {
+          "file": "js/modules/debtorDetail.dom.js",
+          "name": "show",
+          "full_name": "App.debtorDetail.show",
+          "type": "app_method_function",
+          "defined_at": {
+            "line": 50,
+            "column": 0
+          },
+          "usages_in_report_engine": []
+        }
+      ],
+      "app_usages_in_file": [
+        "App.debtorDetail",
+        "App.debtorDetail.render",
+        "App.debtorDetail.show",
+        "App.debtorPanel",
+        "App.debtorPanel.showDetail",
+        "App.debtors",
+        "App.debtors.openDetail",
+        "App.modules",
+        "App.modules.DebtorDetail",
+        "App.modules.DebtorDetail.render"
+      ],
+      "app_tokens_used_in_report_engine": {}
+    },
+    "js/modules/debtorDetail.info.js": {
+      "defined_functions": [],
+      "app_usages_in_file": [],
+      "app_tokens_used_in_report_engine": {}
+    },
+    "js/modules/debtorDetail.kpi.js": {
+      "defined_functions": [],
+      "app_usages_in_file": [],
+      "app_tokens_used_in_report_engine": {}
+    },
+    "js/modules/debtordetail.js": {
+      "defined_functions": [
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "extractNum",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 8,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "el",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 17,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "appendChildren",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 24,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "formatCurrency",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 31,
+            "column": 11
+          },
+          "usages_in_report_engine": [
+            {
+              "file": "js/features/report.compute.trends_risk.js",
+              "line": 265,
+              "column": 21,
+              "matched_token": "formatCurrency",
+              "is_call_like": false,
+              "line_snippet": "if (!util || !util.formatCurrency) return String(n);"
+            },
+            {
+              "file": "js/features/report.compute.trends_risk.js",
+              "line": 266,
+              "column": 14,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "return util.formatCurrency(n);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 299,
+              "column": 24,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "return App.util.formatCurrency(safeAmount(v));"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 346,
+              "column": 38,
+              "matched_token": "formatCurrency",
+              "is_call_like": false,
+              "line_snippet": "if (App.util && typeof App.util.formatCurrency === 'function') {"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 347,
+              "column": 25,
+              "matched_token": "formatCurrency",
+              "is_call_like": false,
+              "line_snippet": "// Fallback: use formatCurrency when formatShortCurrency is not defined"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 349,
+              "column": 26,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "return App.util.formatCurrency(v || 0);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 508,
+              "column": 21,
+              "matched_token": "formatCurrency",
+              "is_call_like": false,
+              "line_snippet": "if (!util || !util.formatCurrency) return String(n);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 509,
+              "column": 14,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "return util.formatCurrency(n);"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 303,
+              "column": 27,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "if (util.formatCurrency) return util.formatCurrency(v);"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 320,
+              "column": 27,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "if (util.formatCurrency) return util.formatCurrency(val);"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 356,
+              "column": 17,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "if (util.formatCurrency) return util.formatCurrency(v || 0);"
+            },
+            {
+              "file": "js/features/report.render.trends_risk.js",
+              "line": 9,
+              "column": 21,
+              "matched_token": "formatCurrency",
+              "is_call_like": false,
+              "line_snippet": "if (!util || !util.formatCurrency) return String(n);"
+            },
+            {
+              "file": "js/features/report.render.trends_risk.js",
+              "line": 10,
+              "column": 14,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "return util.formatCurrency(n);"
+            },
+            {
+              "file": "js/features/report.render.trends_risk.js",
+              "line": 163,
+              "column": 49,
+              "matched_token": "formatCurrency",
+              "is_call_like": true,
+              "line_snippet": "return label + ': ' + App.util.formatCurrency(v || 0);"
+            }
+          ]
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "formatISODate",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 39,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "getSchedulesForLoan",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 48,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "getSchedulesForClaim",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 68,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "computeClaimSummary",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 88,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "computeDebtorSummary",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 108,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "buildContext",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 221,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createTopbar",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 264,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createMainRow",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 278,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createStatusSelect",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 313,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createAmountRow",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 335,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createLoanCard",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 345,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createClaimCard",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 433,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createLoanSection",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 526,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "createClaimSection",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 580,
+            "column": 11
+          },
+          "usages_in_report_engine": []
+        },
+        {
+          "file": "js/modules/debtordetail.js",
+          "name": "render",
+          "full_name": null,
+          "type": "function_declaration",
+          "defined_at": {
+            "line": 637,
+            "column": 11
+          },
+          "usages_in_report_engine": [
+            {
+              "file": "js/features/report.js",
+              "line": 325,
+              "column": 4,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 329,
+              "column": 11,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "function render() {"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 339,
+              "column": 41,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "console.warn('[Report] Failed to render overview metrics:', e);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 366,
+              "column": 30,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "console.error('[Report] render error', e);"
+            },
+            {
+              "file": "js/features/report.js",
+              "line": 907,
+              "column": 38,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "App.features.report = { init: init, render: render };"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 408,
+              "column": 13,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "function render() {"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 457,
+              "column": 14,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 471,
+              "column": 10,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 484,
+              "column": 10,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 500,
+              "column": 6,
+              "matched_token": "render",
+              "is_call_like": true,
+              "line_snippet": "render();"
+            },
+            {
+              "file": "js/features/report.render.recovery.js",
+              "line": 506,
+              "column": 6,
+              "matched_token": "render",
+              "is_call_like": false,
+              "line_snippet": "renderRecoveryChart: render"
+            }
+          ]
+        }
+      ],
+      "app_usages_in_file": [
+        "App.features",
+        "App.features.debtors",
+        "App.features.debtors.openClaimModal",
+        "App.features.debtors.openLoanModal",
+        "App.modules",
+        "App.modules.DebtorDetail",
+        "App.state",
+        "App.state.claimsCollapsed",
+        "App.state.loansCollapsed",
+        "App.state.schedules",
+        "App.util",
+        "App.util.formatDate"
+      ],
+      "app_tokens_used_in_report_engine": {
+        "App.features": [
+          {
+            "file": "js/features/report.js",
+            "line": 4,
+            "column": 2,
+            "matched_token": "App.features",
+            "is_call_like": false,
+            "line_snippet": "App.features = App.features || {};"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 907,
+            "column": 2,
+            "matched_token": "App.features",
+            "is_call_like": false,
+            "line_snippet": "App.features.report = { init: init, render: render };"
+          }
+        ],
+        "App.state": [
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 7,
+            "column": 14,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var state = App.state || {};"
+          },
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 334,
+            "column": 21,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var loans = (App.state && App.state.loans) || [];"
+          },
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 352,
+            "column": 22,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var claims = (App.state && App.state.claims) || [];"
+          },
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 593,
+            "column": 14,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var state = App.state || {};"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 245,
+            "column": 18,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "if (!root || !App.state || !App.data || !App.util) return;"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 648,
+            "column": 21,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var loans = (App.state && App.state.loans) || [];"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 668,
+            "column": 22,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var claims = (App.state && App.state.claims) || [];"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 891,
+            "column": 16,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "if (!root || !App.state) return;"
+          },
+          {
+            "file": "js/features/report.render.recovery.js",
+            "line": 59,
+            "column": 23,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var schedules = (App.state && App.state.schedules) || [];"
+          },
+          {
+            "file": "js/features/report.render.trends_risk.js",
+            "line": 213,
+            "column": 19,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "if (!section || !App.state) return;"
+          },
+          {
+            "file": "js/features/report.render.trends_risk.js",
+            "line": 215,
+            "column": 14,
+            "matched_token": "App.state",
+            "is_call_like": false,
+            "line_snippet": "var state = App.state;"
+          }
+        ],
+        "App.state.schedules": [
+          {
+            "file": "js/features/report.render.recovery.js",
+            "line": 59,
+            "column": 36,
+            "matched_token": "App.state.schedules",
+            "is_call_like": false,
+            "line_snippet": "var schedules = (App.state && App.state.schedules) || [];"
+          }
+        ],
+        "App.util": [
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 12,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 276,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 375,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.compute.trends_risk.js",
+            "line": 395,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 7,
+            "column": 30,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "if (!host || !summary || !App.util) return;"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 135,
+            "column": 30,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "if (!host || !summary || !App.util) return;"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 245,
+            "column": 45,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "if (!root || !App.state || !App.data || !App.util) return;"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 299,
+            "column": 15,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "return App.util.formatCurrency(safeAmount(v));"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 345,
+            "column": 9,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "if (!App.util || typeof App.util.formatShortCurrency !== 'function') {"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 346,
+            "column": 10,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "if (App.util && typeof App.util.formatCurrency === 'function') {"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 348,
+            "column": 8,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "App.util.formatShortCurrency = function (v) {"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 349,
+            "column": 17,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "return App.util.formatCurrency(v || 0);"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 352,
+            "column": 8,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "App.util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 353,
+            "column": 8,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "App.util.formatShortCurrency = function (v) {"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 519,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 694,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.js",
+            "line": 714,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.render.recovery.js",
+            "line": 263,
+            "column": 17,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.render.recovery.js",
+            "line": 335,
+            "column": 17,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.render.trends_risk.js",
+            "line": 24,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          },
+          {
+            "file": "js/features/report.render.trends_risk.js",
+            "line": 163,
+            "column": 40,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "return label + ': ' + App.util.formatCurrency(v || 0);"
+          },
+          {
+            "file": "js/features/report.render.trends_risk.js",
+            "line": 174,
+            "column": 23,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "return App.util.formatShortCurrency(v || 0);"
+          },
+          {
+            "file": "js/features/report.render.trends_risk.js",
+            "line": 218,
+            "column": 13,
+            "matched_token": "App.util",
+            "is_call_like": false,
+            "line_snippet": "var util = App.util || {};"
+          }
+        ]
+      }
+    }
+  },
+  "report_engine_files": [
+    "js/features/report.compute.trends_risk.js",
+    "js/features/report.js",
+    "js/features/report.render.recovery.js",
+    "js/features/report.render.trends_risk.js",
+    "js/features/report.state.js"
+  ],
+  "notes": {
+    "analysis_mode": "regex_token_based static scan; call-like detection via 'symbol(' pattern; no runtime execution; aliases not resolved."
+  }
+}

@@ -1,0 +1,348 @@
+/* card.css — v017_claimcard_unify_rebuild
+ * Loan / Claim cards unified layout
+ * - Applies to both .loan-card and .claim-card
+ * - Keeps visual tone similar to v028_fix1 black cards
+ */
+
+/* Base card surface */
+.loan-card,
+.claim-card {
+  background: linear-gradient(135deg,#cbd5e1 0%,#f1f5f9 50%,#cbd5e1 100%); color:#111827; /* almost-black slate */
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.95);
+  padding: 8px 10px;
+  font-size: 11px;
+  color:#111827;
+}
+
+/* Layout: info row + actions row */
+.loan-card .loan-info-row,
+.claim-card .loan-info-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+}
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.loan-card .loan-info-wrapper,
+.claim-card .loan-info-wrapper{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+/* Left block: principal + status */
+.loan-card .loan-header-line,
+.claim-card .loan-header-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.loan-card .loan-principal-row,
+.claim-card .loan-principal-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+}
+
+
+.loan-card .amount-label,
+.claim-card .amount-label {
+  font-weight: 500;
+  color:#111827;
+}
+
+.loan-card .amount-value,
+.claim-card .amount-value {
+  font-weight: 600;
+  color:#111827;
+  text-align: right;
+}
+
+/* Amount list (vertical) */
+.loan-card .loan-amounts-vertical,
+.claim-card .loan-amounts-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.loan-card .amount-row,
+.claim-card .amount-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+/* Right reserved block (currently empty, keeps height) */
+.loan-card .loan-info-empty,
+.claim-card .loan-info-empty{
+  flex:1 1 auto;
+  min-width:140px;
+}
+
+/* Status pill */
+.card-status-inline-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.card-status-select-inline {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: linear-gradient(135deg,#cbd5e1 0%,#f1f5f9 50%,#cbd5e1 100%); color:#111827;
+  border-radius: 999px;
+  border: 1px solid #1f2937;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color:#111827;
+  line-height: 1.2;
+}
+
+.card-status-select-inline::-ms-expand {
+  display: none;
+}
+
+.card-status-select-inline option {
+  background-color:#111827;
+  color:#111827;
+}
+
+/* Status state: 진행 / 완료 / 꺾기 */
+.loan-card.card-status-진행,
+.claim-card.card-status-진행 {
+  opacity: 1;
+}
+
+.loan-card.card-status-완료,
+.claim-card.card-status-완료 {
+  opacity: 0.55;
+}
+
+.loan-card.card-status-꺾기,
+.claim-card.card-status-꺾기 {
+  opacity: 0.8;
+  border-style: dashed;
+}
+
+/* Actions row */
+.loan-card .card-actions,
+.claim-card .card-actions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.loan-card .card-actions-left,
+.loan-card .card-actions-right,
+.claim-card .card-actions-left,
+.claim-card .card-actions-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons inside cards */
+.loan-card .btn-plain,
+.claim-card .btn-plain {
+  font-size: 11px;
+}
+
+/* Ensure text buttons sizing matches v028 */
+.loan-card .btn-text,
+.claim-card .btn-text {
+  font-size: 11px;
+}
+
+/* v120 behavior – edit/delete white & bold for visibility */
+.card-actions-inline .btn-plain {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+
+.loan-card .card-status-inline-wrapper,
+.claim-card .card-status-inline-wrapper{
+  position:absolute;
+  top:6px;
+  right:6px;
+}
+
+.loan-card, .claim-card{
+  position:relative;
+}
+
+
+.loan-card .amount-value,
+.claim-card .amount-value{
+  text-align:right !important;
+  display:inline-block;
+  min-width:80px;
+}
+
+
+/* Right side meta info block */
+.card-meta-block{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.card-meta-block .meta-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+}
+
+.meta-row span:first-child{
+  color:#111827;
+  font-weight:500;
+}
+.meta-row span:last-child{
+  color:#111827;
+  font-weight:600;
+  text-align:right;
+  min-width:80px;
+}
+
+/* v024 grid patch */
+.card-row {
+  display: grid;
+  grid-template-columns: 50px 80px 50px 80px;
+  column-gap: 6px;
+  align-items: center;
+}
+.l-label, .r-label {
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: left;
+}
+.l-value, .r-value {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* v030: fix card row height */
+.card-row {
+  height: 15px;
+}
+
+
+
+/* DebtorDetail 4×4 grid card layout (v079) */
+.dd-card-body.dd-grid-4x4 {
+  display: grid;
+  grid-template-columns: 50px 1fr 50px 1fr;
+  column-gap: 6px;
+  row-gap: 2px;
+  align-items: center;
+}
+
+/* 각 셀 공통 스타일 */
+.dd-cell {
+  font-size: 11px;
+}
+
+.dd-label-left,
+.dd-label-right {
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.dd-value-left,
+.dd-value-right {
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* 카드 footer (수정 / 삭제 · 진행 · 스케쥴) */
+.dd-card-footer {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(15,23,42,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dd-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dd-footer-right {
+  margin-left: auto;
+}
+
+.dd-footer-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 진행 상태 뱃지 */
+.dd-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  background: linear-gradient(135deg,#e5e7eb 0%,#f9fafb 60%,#e5e7eb 100%);
+  border: 1px solid rgba(107,114,128,0.7);
+  color: #111827;
+}
+
+/* v101 4x4 grid sync */
+.loan-card .grid-4x4,
+.claim-card .grid-4x4 {
+  display:grid;
+  grid-template-columns:50px 80px 50px 80px;
+  column-gap:6px;
+  row-gap:4px;
+  align-items:center;
+}
+.l-label,.r-label{
+  font-weight:600;
+  font-size:11px;
+  text-align:left;
+}
+.l-value,.r-value{
+  font-weight:500;
+  font-size:11px;
+  text-align:right;
+}
+
+/* v107 enforce 4x4 grid columns */
+.grid-4x4 {
+  display: grid !important;
+  grid-template-columns: 50px 80px 50px 80px !important;
+  column-gap: 6px;
+  row-gap: 4px;
+  align-items: center;
+}
+.l-label, .r-label, .l-value, .r-value {
+  display: block;
+}

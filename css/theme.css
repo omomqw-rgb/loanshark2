@@ -1,0 +1,66 @@
+/* theme.css - Design tokens (colors, spacing, typography, shadows, z-index) */
+
+/* =========================================================
+   Design tokens (v030 consolidated)
+   - Side layout width
+   - Charcoal theme palette
+   - Accent color
+   - Text colors
+   ---------------------------------------------------------
+   NOTE:
+   This block merges earlier scattered :root definitions from
+   v026 / v027 skins into a single source of truth.
+   ========================================================= */
+
+:root {
+  --side-width: 340px;
+  --charcoal-bg-body: #F7F8FA;
+  --charcoal-bg-surface: #FFFFFF;
+  --charcoal-bg-elevated: #F1F2F4;
+  --charcoal-border-subtle: #E1E4EA;
+  --charcoal-border-strong: #CBD0D9;
+  --charcoal-text-primary: #1A1C1F;
+  --charcoal-text-secondary: #4B5057;
+  --charcoal-text-muted: #8A9099;
+  --charcoal-accent: #1F2F48;
+  --charcoal-accent-soft: #DEE4F0;
+  --charcoal-shadow-soft: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --charcoal-shadow-medium: 0 4px 14px rgba(18, 22, 33, 0.08);
+  --charcoal-shadow-strong: 0 12px 32px rgba(10, 12, 15, 0.16);
+  --accent: #2563EB;
+  --accent-soft: rgba(37, 99, 235, 0.08);
+  --text-primary: #1A1C1F;
+  --text-secondary: #373D44;
+  --text-muted: #9DA3AA;
+
+/* spacing scale */
+--space-1: 2px;
+--space-2: 4px;
+--space-3: 8px;
+--space-4: 12px;
+--space-5: 16px;
+--space-6: 24px;
+
+/* font scale */
+--font-xs: 11px;
+--font-sm: 12px;
+--font-md: 14px;
+--font-lg: 16px;
+--font-xl: 20px;
+
+/* radius scale */
+--radius-sm: 6px;
+--radius-md: 10px;
+--radius-lg: 18px;
+
+/* generic shadows */
+--shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+--shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+--shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.14);
+
+/* state colors for financial amounts */
+--state-planned: #52657A;
+--state-overdue: #ef4444;
+--state-completed: #6b7280;
+--state-active: #111827;
+}

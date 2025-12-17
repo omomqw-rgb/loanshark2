@@ -1,0 +1,42 @@
+{
+  "version": "v307_overview_top3kpi_trace_and_fix",
+  "base": "v306_overview_topkpi_trace_and_fix.zip",
+  "compare_to": "v302_overview_legacy_audit_stage2.zip",
+  "files": {
+    "js/features/report.compute.trends_risk.js": {
+      "changed": true,
+      "len_a": 25247,
+      "len_b": 24685,
+      "notes": [
+        "v302: computeReportAggregates fully implemented (loans/claims/schedules/debtors loops).",
+        "v302: totals = { loanPrincipal, loanTotalRepay, claimAmount, debtTotal, claimCollectedTotal, allCollectedTotal, allOutstandingTotal, loanOutstanding, claimOutstanding }.",
+        "v302: period = { weekExpected, weekCollected, monthExpected, monthCollected, monthClaimCollected } and statusBuckets/statusDays/ageBuckets present.",
+        "v302: returns { today, monthStart, weekStart, weekEnd, totals, statusBuckets, statusDays, ageBuckets, period, counts, debtorStats, overallRecoveryRate }.",
+        "v306: computeReportAggregates reimplemented with simplified totals and no weekStart/weekEnd/statusDays/ageBuckets/monthClaimCollected.",
+        "v303~v305: file header was broken (formatCurrencySafe body at top-level, computeReportAggregates missing), so App.reportCompute.computeAggregates was undefined at runtime.",
+        "v306: computeReportAggregates restored but schema partially diverged from v302."
+      ]
+    },
+    "js/features/report.js": {
+      "changed": false,
+      "notes": [
+        "No diff: file content identical between v302 and v306."
+      ]
+    },
+    "js/core/data.js": {
+      "changed": false,
+      "notes": [
+        "No diff: file content identical between v302 and v306."
+      ]
+    },
+    "index.html": {
+      "changed": true,
+      "len_a": 23380,
+      "len_b": 23513,
+      "notes": [
+        "Difference between v302 and v306 is outside the Overview top KPI row.",
+        "Top KPI DOM structure (.report-kpi-card[data-kpi=\"loan|claim|ops|avail\"]) is identical."
+      ]
+    }
+  }
+}

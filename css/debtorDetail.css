@@ -1,0 +1,550 @@
+
+/* DebtorDetail — Level 7 Premium Layout */
+
+/* Root container spacing (for detail mode) */
+#debtor-detail-root {
+  padding: 10px 12px;
+}
+
+/* Global card layout */
+.dd-card {
+  position: relative;
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.96), rgba(245,247,250,0.98));
+  border-radius: 18px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(229,231,235,0.9);
+  box-shadow:
+    0 18px 45px rgba(15,23,42,0.10),
+    0 1px 0 rgba(255,255,255,0.9) inset;
+}
+
+/* subtle card separator on top */
+.dd-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.7), transparent 55%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Header Card */
+.dd-header-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px 16px;
+}
+
+/* Back button */
+.dd-back-btn {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(209,213,219,0.9);
+  background: linear-gradient(to bottom, #ffffff, #f3f4f6);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: #4b5563;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dd-back-btn:hover {
+  background: linear-gradient(to bottom, #f9fafb, #e5e7eb);
+}
+
+/* Header main row */
+.dd-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+/* Debtor name */
+.dd-header-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Action buttons */
+.dd-action-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.8);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+  color: #111827;
+  cursor: pointer;
+  margin-left: 6px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+
+.dd-action-btn:hover {
+  background: linear-gradient(135deg, #ffffff, #e5e7eb);
+  box-shadow:
+    0 0 0 1px rgba(148,163,184,0.35),
+    0 6px 16px rgba(15,23,42,0.15);
+}
+
+/* Info card */
+.dd-info-card {
+  padding-top: 16px;
+  padding-bottom: 14px;
+}
+
+/* 4-column info grid */
+.dd-info-grid-4col {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px 1fr;
+  column-gap: 28px;
+  row-gap: 8px;
+}
+
+.dd-info-grid-4col .label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dd-info-grid-4col .value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Risk tier accent */
+.dd-risktier-value {
+  color: #e11d48;
+  font-weight: 600;
+}
+
+/* SUMMARY card */
+.dd-summary-card {
+  padding-top: 18px;
+  padding-bottom: 16px;
+}
+
+/* Summary grid: label / value pairs */
+.dd-summary-grid {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  row-gap: 10px;
+}
+
+/* Summary labels */
+.dd-summary-grid .label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Summary values */
+.dd-summary-grid .value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  text-align: right;
+}
+
+/* Thin divider row between totals and counts can be drawn via margin in markup;
+   here we just give a utility class if needed in future */
+.dd-summary-divider {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(209,213,219,0.9), transparent);
+}
+
+/* Sections */
+.dd-section {
+  padding: 12px 18px 10px;
+  border-radius: 16px;
+  margin-top: 10px;
+  border: 1px solid rgba(229,231,235,0.95);
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.98), rgba(243,244,246,0.98));
+  box-shadow: 0 10px 28px rgba(15,23,42,0.10);
+}
+
+/* Section header (대출 카드 / 채권 카드) */
+.dd-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 4px 2px 6px;
+}
+
+.dd-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* drop-down icon */
+.dd-section-toggle {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  transform-origin: center;
+  transition: transform 0.18s ease-out, opacity 0.18s ease-out;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+/* collapsed state hook (future) */
+.dd-section.is-collapsed .dd-section-toggle {
+  transform: rotate(-90deg);
+  opacity: 0.7;
+}
+
+/* Loan / Claim cards inside section */
+.dd-loans .loan-card,
+.dd-claims .claim-card {
+  margin-top: 10px;
+}
+
+/* Responsive tweak for narrow widths */
+@media (max-width: 960px) {
+  #debtor-detail-root {
+    padding: 18px 14px;
+  }
+
+  .dd-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .dd-info-grid-4col {
+    grid-template-columns: 100px 1fr;
+    row-gap: 6px;
+  }
+}
+
+
+/* Section body wrapper for collapse animation */
+.dd-section-body {
+  margin-top: 6px;
+  transition: opacity 0.16s ease-out, transform 0.16s ease-out;
+}
+
+.dd-section.is-collapsed .dd-section-body {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.debtor-detail-mainrow { position: relative; z-index: 20; }
+
+.form-section-header { display:flex; justify-content:space-between; align-items:center; }
+
+.form-section-actions { display:flex; align-items:center; gap:6px; }
+
+
+.debtor-header-edit,
+.debtor-header-delete {
+  position: relative;
+  z-index: 999;
+}
+
+
+
+.dd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #ffffff;
+  border-radius: 8px;
+  position: relative;
+  z-index: 999;
+  margin-bottom: 10px;
+}
+.dd-header-left {
+  display: flex;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.dd-header-right {
+  display: flex;
+  gap: 8px;
+}
+.dd-header-btn {
+  padding: 4px 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+
+
+
+.ddh-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  position: relative;
+  z-index: 999;
+  margin-bottom: 12px;
+}
+.ddh-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ddh-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+}
+.ddh-phone {
+  font-size: 14px;
+  color: #333;
+}
+.ddh-right {
+  display: flex;
+  gap: 6px;
+}
+.ddh-btn {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+}
+
+
+
+/* v124 Info & Summary Premium Line Style */
+.dd-info-card {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+.dd-info-section { padding:10px 0 14px; border-top:1px solid #e5e5e5; border-bottom:1px solid #e5e5e5; margin-bottom:24px; }
+.dd-info-grid { display:grid; grid-template-columns:50px 1.4fr 50px 1fr; row-gap:18px; column-gap:6px; padding:8px 0; }
+.dd-info-label { font-size:13px; font-weight:500; color:#666; }
+.dd-info-value { font-size:14px; font-weight:500; color:#222; }
+
+.dd-summary-card { background:none; border:none; padding:0; margin:0; }
+.dd-summary-section { margin:20px 0 28px; border-top:1px solid #e5e5e5; padding-top:12px; }
+.dd-summary-row { display:flex; justify-content:space-between; padding:10px 2px 12px; align-items:center; }
+.dd-summary-row + .dd-summary-row { border-top:1px solid #f0f0f0; }
+.dd-summary-label { font-size:13px; font-weight:600; color:#444; }
+.dd-summary-value { font-size:14px; font-weight:500; color:#222; }
+
+
+
+/* v125 overrides: Info/Summary premium tuning & header buttons & section headers */
+
+.dd-info-card {
+  all: unset;
+  display: block;
+  padding: 10px 0 14px;
+  margin: 0 0 24px 0;
+  border-top: 1px solid #c4c4c4;
+  border-bottom: 1px solid #c4c4c4;
+}
+
+.dd-info-grid { display:grid; grid-template-columns:50px 1.4fr 50px 1fr; row-gap:18px; column-gap:6px; padding:8px 0; }
+
+.dd-info-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.dd-info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+}
+
+/* Summary line style & typography */
+.dd-summary-section {
+  margin: 20px 0 28px;
+  border-top: 1px solid #c4c4c4;
+  padding-top: 12px;
+}
+
+.dd-summary-row + .dd-summary-row {
+  border-top: 1px solid #e0e0e0;
+}
+
+.dd-summary-label,
+.dd-summary-value {
+  font-size: 11px;
+}
+
+.dd-summary-label {
+  font-weight: 600;
+  color: #444;
+}
+
+.dd-summary-value {
+  font-weight: 500;
+  color: #222;
+  text-align: right;
+}
+
+.dd-summary-row:hover {
+  background: none;
+}
+
+/* Header buttons text-only */
+.ddh-header .ddh-btn {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 6px;
+}
+
+/* Loan / Claim header add buttons alignment */
+.form-section-header .btn-inline {
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+/* Stronger separators between sections */
+.form-section.loan-section,
+.form-section.claim-section {
+  border-top: 1px solid #e0e0e0;
+}
+
+
+
+/* v126 Debtor detail tuning */
+
+/* Topbar back button slightly larger & tighter line spacing */
+.debtor-topbar .btn-text {
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+/* Header main row spacing */
+.ddh-header {
+  padding-top: 8px;
+  padding-bottom: 10px;
+  line-height: 1.15;
+}
+
+/* Debtor name as silver card */
+.ddh-name {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f9f9f9, #eaeaea);
+  border: 1px solid #d5d5d5;
+  font-weight: 600;
+  color: #000;
+}
+
+/* Info section typography & grid */
+.dd-info-card {
+  padding: 8px 0 10px;
+  margin-bottom: 20px;
+}
+
+.dd-info-grid { display:grid; grid-template-columns:50px 1.4fr 50px 1fr; row-gap:18px; column-gap:6px; padding:8px 0; }
+
+.dd-info-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #222;
+}
+
+.dd-info-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+}
+
+/* Summary compact layout */
+.dd-summary-section {
+  margin: 14px 0 18px;
+  border-top: 1px solid #c4c4c4;
+  padding-top: 8px;
+}
+
+.dd-summary-row {
+  padding: 6px 2px 8px;
+  line-height: 1.25;
+}
+
+.dd-summary-row + .dd-summary-row {
+  border-top: 1px solid #e0e0e0;
+}
+
+.dd-summary-label,
+.dd-summary-value {
+  font-size: 11px;
+}
+
+.dd-summary-label {
+  font-weight: 600;
+  color: #444;
+}
+
+.dd-summary-value {
+  font-weight: 500;
+  color: #222;
+  text-align: right;
+}
+
+/* Header buttons text-only remain compact */
+.ddh-header .ddh-btn {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 6px;
+}
+
+/* Loan / Claim header layout: title left, actions (add + toggle) right */
+.form-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Slightly tighter spacing before sections */
+.form-section.loan-section,
+.form-section.claim-section {
+  margin-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+
+#debtor-panel-root{display:none;}
+
+
+.dd-loan-card,.dd-claim-card{border:1px solid rgba(0,0,0,0.1);padding:8px;border-radius:8px;margin-bottom:8px;background:#fff;}
+.dd-loan-title,.dd-claim-title{font-weight:600;margin-bottom:4px;}
+.dd-loan-row,.dd-claim-row{display:flex;justify-content:space-between;padding:2px 0;}
+
+.ddh-header{display:flex;justify-content:space-between;align-items:center;}
+.ddh-left button.btn-text{color:#000;}
+.ddh-center{text-align:center;flex:1;}
+.ddh-name{background:none;border:none;padding:0;}
+
+.ddh-header{display:flex;align-items:center;}
+.ddh-left{min-width:60px;}
+.ddh-center{flex:1;text-align:center;}
+.ddh-right{text-align:right;min-width:80px;}

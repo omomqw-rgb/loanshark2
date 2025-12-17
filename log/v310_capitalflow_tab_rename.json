@@ -1,0 +1,72 @@
+{
+  "version": "v310_capitalflow_tab_rename",
+  "base": "v309_recovery_trends_month_year_upgrade.zip",
+  "renamed_tab": {
+    "from": "trends",
+    "to": "capitalflow",
+    "label_from": "Trends",
+    "label_to": "Capital Flow"
+  },
+  "updated_files": [
+    "index.html",
+    "css/report.css",
+    "js/features/report.js",
+    "js/features/report.render.trends_risk.js",
+    "js/features/report.render.recovery.js",
+    "js/features/capitalflow.engine.js"
+  ],
+  "removed_files": [
+    "js/features/recovery.trends.engine.js"
+  ],
+  "namespaces": {
+    "features": {
+      "from": "App.features.recoveryTrends",
+      "to": "App.features.capitalFlow"
+    },
+    "render": {
+      "from": "App.reportRender.trends",
+      "to": "App.reportRender.capitalflow"
+    }
+  },
+  "dom_changes": {
+    "report_subtab_button": {
+      "data-report-section": {
+        "from": "trends",
+        "to": "capitalflow"
+      },
+      "label": {
+        "from": "Trends",
+        "to": "Capital Flow"
+      }
+    },
+    "report_section": {
+      "class": {
+        "from": "report-section-trends",
+        "to": "report-section-capitalflow"
+      },
+      "data-report-section": {
+        "from": "trends",
+        "to": "capitalflow"
+      },
+      "title": {
+        "from": "Trends",
+        "to": "Capital Flow Timeline"
+      }
+    },
+    "capitalflow_chart": {
+      "id": {
+        "from": "trend-main-chart",
+        "to": "capitalflow-main-chart"
+      },
+      "legend_data_attr": {
+        "from": "data-trend-legend",
+        "to": "data-capitalflow-legend"
+      },
+      "summary_classes_prefix": {
+        "from": "trend-",
+        "to": "capitalflow-"
+      }
+    }
+  },
+  "timestamp_utc": "2025-12-07T14:28:36.616399Z"
+}

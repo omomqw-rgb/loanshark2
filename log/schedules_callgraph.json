@@ -1,0 +1,692 @@
+{
+  "create": [
+    {
+      "fn": "buildLoanSchedule",
+      "file": "js/core/db.js",
+      "calledFrom": [
+        "js/core/db.js:filterFn"
+      ],
+      "actions": [
+        "create"
+      ]
+    },
+    {
+      "fn": "buildClaimSchedule",
+      "file": "js/core/db.js",
+      "calledFrom": [
+        "js/core/db.js:filterFn"
+      ],
+      "actions": [
+        "create"
+      ]
+    },
+    {
+      "fn": "rebuildSchedulesForLoan",
+      "file": "js/core/db.js",
+      "calledFrom": [
+        "js/core/db.js:seedDummyData",
+        "js/features/debtors.handlers.js:handleLoanCreate",
+        "js/features/debtors.handlers.js:handleLoanEdit"
+      ],
+      "actions": [
+        "create"
+      ]
+    },
+    {
+      "fn": "filterFn",
+      "file": "js/core/db.js",
+      "calledFrom": [],
+      "actions": [
+        "create",
+        "delete"
+      ]
+    },
+    {
+      "fn": "rebuildSchedulesForClaim",
+      "file": "js/core/db.js",
+      "calledFrom": [
+        "js/core/db.js:seedDummyData",
+        "js/features/debtors.handlers.js:handleClaimCreate",
+        "js/features/debtors.handlers.js:handleClaimEdit"
+      ],
+      "actions": [
+        "create"
+      ]
+    },
+    {
+      "fn": "seedDummyData",
+      "file": "js/core/db.js",
+      "calledFrom": [],
+      "actions": [
+        "create"
+      ]
+    },
+    {
+      "fn": "groupByDebtor",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:render"
+      ],
+      "actions": [
+        "create"
+      ]
+    }
+  ],
+  "update": [
+    {
+      "fn": "normalizeScheduleStatus",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/core/data.js:normalizeAllSchedules"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "normalizeAllSchedules",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/core/data.js:computePortfolioSummary"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "buildDayDetail",
+      "file": "js/features/calendar.js",
+      "calledFrom": [
+        "js/features/calendar.js:render"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "handleClaimEdit",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/ui/modalManager.debtors.js:attachModalEvents"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "handleLoanScheduleSave",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/ui/modalManager.debtors.js:attachModalEvents"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "handleClaimScheduleSave",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/ui/modalManager.debtors.js:attachModalEvents"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "computeClaimSummary",
+      "file": "js/modules/debtordetail.js",
+      "calledFrom": [
+        "js/modules/debtordetail.js:createClaimCard"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "openLoanScheduleModal",
+      "file": "js/ui/modalManager.debtors.js",
+      "calledFrom": [
+        "js/features/calendar.js:handleDayItemClick",
+        "js/features/debtors.js:attachPanelEvents"
+      ],
+      "actions": [
+        "update"
+      ]
+    },
+    {
+      "fn": "openClaimScheduleModal",
+      "file": "js/ui/modalManager.debtors.js",
+      "calledFrom": [
+        "js/features/calendar.js:handleDayItemClick",
+        "js/features/debtors.js:attachPanelEvents"
+      ],
+      "actions": [
+        "update"
+      ]
+    }
+  ],
+  "delete": [
+    {
+      "fn": "filterFn",
+      "file": "js/core/db.js",
+      "calledFrom": [],
+      "actions": [
+        "create",
+        "delete"
+      ]
+    },
+    {
+      "fn": "handleDebtorDelete",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/features/debtors.js:attachPanelEvents"
+      ],
+      "actions": [
+        "delete"
+      ]
+    },
+    {
+      "fn": "handleLoanDelete",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/features/debtors.js:attachPanelEvents"
+      ],
+      "actions": [
+        "delete"
+      ]
+    },
+    {
+      "fn": "handleClaimDelete",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/features/debtors.js:attachPanelEvents"
+      ],
+      "actions": [
+        "delete"
+      ]
+    }
+  ],
+  "read": [
+    {
+      "fn": "clearAppDataState",
+      "file": "js/core/auth.js",
+      "calledFrom": [
+        "js/core/auth.js:handleAuthResult"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "normalizeScheduleIdsInPlace",
+      "file": "js/core/cloudState.js",
+      "calledFrom": [
+        "js/core/cloudState.js:normalizeAppDataIds"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "normalizeAppDataIds",
+      "file": "js/core/cloudState.js",
+      "calledFrom": [
+        "js/core/cloudState.js:runShadowQA"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "runShadowQA",
+      "file": "js/core/cloudState.js",
+      "calledFrom": [
+        "js/core/cloudState.js:runShadowQA"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "recomputeDerivedLoanFields",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/core/data.js:loadAllFromSupabase"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildDebtorsDetailed",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/core/data.js:loadAllFromSupabase",
+        "js/features/debtors.handlers.js:handleClaimCreate",
+        "js/features/debtors.handlers.js:handleClaimDelete",
+        "js/features/debtors.handlers.js:handleClaimEdit",
+        "js/features/debtors.handlers.js:handleLoanCreate",
+        "js/features/debtors.handlers.js:handleLoanDelete",
+        "js/features/debtors.handlers.js:handleLoanEdit"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "loadAllFromSupabase",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/app.js:init",
+        "js/core/auth.js:handleAuthResult"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computePortfolioSummary",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/features/report.js:getClaim",
+        "js/features/report.js:renderOverviewMetrics",
+        "js/features/report.js:updateOverviewKPI"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computeRecoveryFlowSummary",
+      "file": "js/core/data.js",
+      "calledFrom": [],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "toKey",
+      "file": "js/core/data.js",
+      "calledFrom": [
+        "js/core/data.js:toKey"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computeRecoveryFlowSeries",
+      "file": "js/core/data.js",
+      "calledFrom": [],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildCalendarData",
+      "file": "js/features/calendar.js",
+      "calledFrom": [
+        "js/features/calendar.js:render"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "handleDayItemClick",
+      "file": "js/features/calendar.js",
+      "calledFrom": [
+        "js/features/calendar.js:bindEvents"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "getSchedules",
+      "file": "js/features/capitalflow.engine.js",
+      "calledFrom": [
+        "js/features/capitalflow.engine.js:buildRecoveryCache",
+        "js/features/monitoring.js:getSchedules",
+        "js/features/monitoring.js:getSchedulesByDebtor",
+        "js/features/monitoring.js:render"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildRecoveryCache",
+      "file": "js/features/capitalflow.engine.js",
+      "calledFrom": [
+        "js/features/capitalflow.engine.js:init",
+        "js/features/capitalflow.engine.js:update"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "handleLoanCreate",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/ui/modalManager.debtors.js:attachModalEvents"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "handleLoanEdit",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/ui/modalManager.debtors.js:attachModalEvents"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "handleClaimCreate",
+      "file": "js/features/debtors.handlers.js",
+      "calledFrom": [
+        "js/ui/modalManager.debtors.js:attachModalEvents"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "getSchedules",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/capitalflow.engine.js:buildRecoveryCache",
+        "js/features/capitalflow.engine.js:getSchedules",
+        "js/features/monitoring.js:getSchedulesByDebtor",
+        "js/features/monitoring.js:render"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "getSchedulesByDebtor",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:buildDebtorOverview",
+        "js/features/monitoring.js:buildEnforcementAlerts",
+        "js/features/monitoring.js:detectConsecutiveMiss",
+        "js/features/monitoring.js:detectPartialPattern",
+        "js/features/monitoring.js:detectPaymentStop"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "summarizeSchedules",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:buildDebtorOverview",
+        "js/features/monitoring.js:buildEnforcementAlerts",
+        "js/features/monitoring.js:buildRiskAlerts",
+        "js/features/monitoring.js:createHeader"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "detectConsecutiveMiss",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:buildEnforcementAlerts",
+        "js/features/monitoring.js:buildRiskAlerts"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "detectPaymentStop",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:buildRiskAlerts"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "detectPartialPattern",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:buildRiskAlerts"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildRiskAlerts",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:render"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildEnforcementAlerts",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:render"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildDebtorOverview",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:buildWatchlist"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "createHeader",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:createDebtorCard"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "createScheduleList",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/features/monitoring.js:createDebtorCard"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "render",
+      "file": "js/features/monitoring.js",
+      "calledFrom": [
+        "js/core/auth.js:clearAppDataState",
+        "js/core/data.js:renderAll",
+        "js/features/calendar.js:handleDaySortToggle",
+        "js/features/calendar.js:handleNav",
+        "js/features/calendar.js:handleSelectDate",
+        "js/features/calendar.js:handleViewToggle",
+        "js/features/calendar.js:init",
+        "js/features/calendar.js:render",
+        "js/features/capitalflow.engine.js:applyActiveMode",
+        "js/features/capitalflow.engine.js:init",
+        "js/features/capitalflow.engine.js:render",
+        "js/features/capitalflow.engine.js:update",
+        "js/features/debtors.handlers.js:getValue",
+        "js/features/debtors.handlers.js:handleClaimCreate",
+        "js/features/debtors.handlers.js:handleClaimDelete",
+        "js/features/debtors.handlers.js:handleClaimEdit",
+        "js/features/debtors.handlers.js:handleClaimScheduleSave",
+        "js/features/debtors.handlers.js:handleDebtorCreate",
+        "js/features/debtors.handlers.js:handleDebtorDelete",
+        "js/features/debtors.handlers.js:handleLoanCreate",
+        "js/features/debtors.handlers.js:handleLoanDelete",
+        "js/features/debtors.handlers.js:handleLoanEdit",
+        "js/features/debtors.handlers.js:handleLoanScheduleSave",
+        "js/features/debtors.js:attachPanelEvents",
+        "js/features/debtors.js:init",
+        "js/features/debtors.js:refreshOtherViews",
+        "js/features/debtors.js:render",
+        "js/features/debtors_domlist.js:<top-level>",
+        "js/features/monitoring.js:init",
+        "js/features/report.js:init",
+        "js/features/report.js:render",
+        "js/features/report.js:updateReportView",
+        "js/features/statistics.engine.js:render",
+        "js/modules/debtorDetail.dom.js:<top-level>",
+        "js/modules/debtordetail.js:render",
+        "js/ui/debtorBack.dom.js:<top-level>",
+        "js/vendor/chart.umd.min.js:_t"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computeReportAggregates",
+      "file": "js/features/report.compute.capitalflow.js",
+      "calledFrom": [],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "toDate",
+      "file": "js/features/report.compute.capitalflow.js",
+      "calledFrom": [
+        "js/features/report.compute.capitalflow.js:getBucketKey",
+        "js/features/report.compute.capitalflow.js:toDate"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computeTrendSeries",
+      "file": "js/features/report.compute.capitalflow.js",
+      "calledFrom": [
+        "js/features/report.render.capitalflow.js:updateCapitalFlowSection"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "getBucketKey",
+      "file": "js/features/report.compute.capitalflow.js",
+      "calledFrom": [
+        "js/features/report.compute.capitalflow.js:getBucketKey",
+        "js/features/report.compute.capitalflow.js:toDate"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "updateRiskSection",
+      "file": "js/features/report.render.capitalflow.js",
+      "calledFrom": [
+        "js/features/report.js:updateReportView"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "buildContext",
+      "file": "js/features/statistics.engine.js",
+      "calledFrom": [
+        "js/features/report.js:updateReportView",
+        "js/modules/debtordetail.js:buildContext",
+        "js/modules/debtordetail.js:render"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computeOverdueMetrics",
+      "file": "js/features/statistics.engine.js",
+      "calledFrom": [
+        "js/features/statistics.engine.js:buildContext"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "getSchedulesForLoan",
+      "file": "js/modules/debtordetail.js",
+      "calledFrom": [
+        "js/modules/debtordetail.js:computeDebtorSummary",
+        "js/modules/debtordetail.js:createLoanCard"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "getSchedulesForClaim",
+      "file": "js/modules/debtordetail.js",
+      "calledFrom": [
+        "js/modules/debtordetail.js:computeDebtorSummary",
+        "js/modules/debtordetail.js:createClaimCard"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "computeDebtorSummary",
+      "file": "js/modules/debtordetail.js",
+      "calledFrom": [
+        "js/modules/debtordetail.js:buildContext"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "createLoanCard",
+      "file": "js/modules/debtordetail.js",
+      "calledFrom": [
+        "js/modules/debtordetail.js:createLoanSection"
+      ],
+      "actions": [
+        "read"
+      ]
+    },
+    {
+      "fn": "createClaimCard",
+      "file": "js/modules/debtordetail.js",
+      "calledFrom": [
+        "js/modules/debtordetail.js:createClaimSection"
+      ],
+      "actions": [
+        "read"
+      ]
+    }
+  ]
+}

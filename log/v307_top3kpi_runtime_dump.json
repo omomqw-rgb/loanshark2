@@ -1,0 +1,100 @@
+{
+  "version": "v307_overview_top3kpi_trace_and_fix",
+  "base": "v306_overview_topkpi_trace_and_fix.zip",
+  "updateReportView": {
+    "called": true,
+    "agg_non_null_after_fix": true,
+    "pipeline": [
+      "agg = App.reportCompute.computeAggregates()",
+      "updateOverviewKPI(root, agg)",
+      "updateRecoveryTiles(root, agg)",
+      "updateStatisticsKPI(root, agg)",
+      "App.reportRender.trends.updateTrendsSection(root, agg)"
+    ]
+  },
+  "cards": [
+    {
+      "card": "loan",
+      "data_kpi": "loan",
+      "dom": {
+        "title": "대출규모",
+        "main_label": "대출원리금합계",
+        "sub_labels": [
+          "상환금합계",
+          "상환예정금합계",
+          "미납금합계"
+        ]
+      },
+      "fields_before_fix": {
+        "loanTotal": "0 or --원",
+        "loanPaid": "0 or --원",
+        "loanPlanned": "0 or --원",
+        "loanOverdue": "0 or --원"
+      },
+      "fields_after_fix_expected": {
+        "loanTotal": "> 0 when App.state.loans has data",
+        "loanPaid": "sum of paidAmount from loan schedules",
+        "loanPlanned": "future planned amounts for loans",
+        "loanOverdue": "overdue loan principal/interest"
+      }
+    },
+    {
+      "card": "claim",
+      "data_kpi": "claim",
+      "dom": {
+        "title": "채권규모",
+        "main_label": "채권금합계",
+        "sub_labels": [
+          "회수금합계",
+          "회수예정금합계"
+        ]
+      },
+      "fields_before_fix": {
+        "claimTotal": "0 or --원",
+        "claimPaid": "0 or --원",
+        "claimPlanned": "0 or --원"
+      },
+      "fields_after_fix_expected": {
+        "claimTotal": "> 0 when App.state.claims has data",
+        "claimPaid": "sum of paidAmount for claim schedules",
+        "claimPlanned": "outstanding claim balances"
+      }
+    },
+    {
+      "card": "ops",
+      "data_kpi": "ops",
+      "dom": {
+        "title": "운영현황",
+        "sub_labels": [
+          "신규대출금액",
+          "신규채권금액"
+        ]
+      },
+      "fields_before_fix": {
+        "operationNewLoansMonth": "0 or --원 / --건",
+        "operationNewClaimsMonth": "0 or --원 / --건"
+      },
+      "fields_after_fix_expected": {
+        "operationNewLoansMonth": "> 0 / count > 0 when new loans exist between monthStart..today",
+        "operationNewClaimsMonth": "> 0 / count > 0 when new claims exist between monthStart..today"
+      }
+    }
+  ],
+  "root_cause_before_fix": [
+    {
+      "card": "loan",
+      "cause": "call_missing",
+      "detail": "In v303~v305, computeReportAggregates was broken, so updateReportView returned early and never called updateOverviewKPI; loan card stayed at 0/--."
+    },
+    {
+      "card": "claim",
+      "cause": "call_missing",
+      "detail": "Same as loan: overview KPI render was skipped when agg was null/undefined."
+    },
+    {
+      "card": "ops",
+      "cause": "call_missing",
+      "detail": "Operations card is also updated from updateOverviewKPI; when this wasn't called, values stayed at placeholders."
+    }
+  ]
+}

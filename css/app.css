@@ -1,0 +1,123 @@
+/* app.css - Aggregator that imports the structured CSS layers in order.
+   NOTE:
+   This file intentionally contains no rules; all styles live in the
+   split CSS files to keep concerns separated.
+*/
+
+@import "./theme.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./utilities.css";
+@import "./components.css";
+@import "./card.css";
+@import "./modal.css";
+@import "./calendar.css";
+@import "./monitoring.css";
+@import "./debtors.css";
+@import "./report.css";
+
+
+/* Debtor sidepanel layout */
+.debtor-sidepanel {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 650px;
+  background: #ffffff;
+  border-right: 1px solid rgba(0,0,0,0.06);
+  transition: width 0.25s ease, min-width 0.25s ease;
+}
+
+.debtor-sidepanel.is-expanded {
+  width: 330px;
+  min-width: 330px;
+}
+
+.debtor-sidepanel.is-collapsed {
+  width: 56px;
+  min-width: 56px;
+}
+
+.debtor-sidepanel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.debtor-sidepanel-title {
+  flex: 1;
+}
+
+.debtor-sidepanel-toggle-icon {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* collapsed state: hide inner content, show only icon */
+.debtor-sidepanel.is-collapsed .debtor-sidepanel-title,
+.debtor-sidepanel.is-collapsed .debtor-sidepanel-body {
+  display: none;
+}
+
+.debtor-sidepanel.is-collapsed .debtor-sidepanel-header {
+  justify-content: center;
+}
+
+.debtor-sidepanel.is-collapsed .debtor-sidepanel-toggle-icon {
+  font-size: 20px;
+}
+
+/* tabs */
+.debtor-sidepanel-body {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.debtor-sidepanel-tabs {
+  display: flex;
+  padding: 6px 6px;
+  gap: 4px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.debtor-tab-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.debtor-tab-btn.is-active {
+  background: rgba(53,126,246,0.08);
+  color: #1f5fd1;
+}
+
+.debtor-sidepanel-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+
+/* Panel collapse layout tweaks */
+.body-row { display:flex; }
+.side { width:260px; transition:width .25s ease; }
+.side.is-collapsed { width:56px; }
+.main { flex:1; transition:all .25s ease; }
+
+#debtor-panel-root { display:none; }
+
+
+/* === v242: debtor-sidepanel rounded === */
+.debtor-sidepanel {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}

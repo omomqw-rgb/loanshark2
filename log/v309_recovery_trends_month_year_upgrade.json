@@ -1,0 +1,18 @@
+{
+  "version": "v309_recovery_trends_month_year_upgrade",
+  "base": "v308_recovery_trends_tooltip_fix.zip",
+  "updated_files": [
+    "index.html",
+    "css/report.css",
+    "js/features/recovery.trends.engine.js",
+    "js/features/report.render.recovery.js"
+  ],
+  "changes": {
+    "ui_switch": "added daily/monthly/yearly switch buttons to recovery flow chart box",
+    "monthly_engine": "rebuilt monthly series as 3-month rolling averages over raw monthly sums derived from cache",
+    "yearly_engine": "rebuilt yearly series as 3-year rolling averages over raw yearly sums derived from monthly buckets",
+    "summary_update": "summaryController.updateFromSeries is now invoked only in daily mode",
+    "tooltip": "extended tooltip to read raw monthly/yearly values from rawMonthlyMap/rawYearMap while preserving raw+graph display per mode"
+  },
+  "timestamp_utc": "2025-12-07T12:41:55.168872Z"
+}
