@@ -527,6 +527,10 @@
 
             var nameSpan = document.createElement('span');
             nameSpan.className = 'week-item-debtor';
+            // 이름 텍스트에도 상태별 amount-* 클래스를 적용해 색상을 금액과 동일 톤으로 맞춘다.
+            // (색상 값은 기존 CSS 토큰/규칙을 그대로 사용)
+            var nameCls = getAmountClassByStatus(it.status);
+            if (nameCls) nameSpan.classList.add(nameCls);
             nameSpan.textContent = it.debtorName || '';
 
             main.appendChild(pill);
@@ -703,14 +707,20 @@ summary.appendChild(chipOverdue);
         typeBadge.className = 'day-type-text-badge';
         if (it.kind === 'loan') {
           typeBadge.classList.add('badge-loan');
-          typeBadge.textContent = '대출';
+          typeBadge.textContent = 'L';
+          typeBadge.title = '대출';
         } else {
           typeBadge.classList.add('badge-claim');
-          typeBadge.textContent = '채권';
+          typeBadge.textContent = 'C';
+          typeBadge.title = '채권';
         }
         // 채무자명
         var nameEl = document.createElement('span');
         nameEl.className = 'day-item-name';
+        // 이름 텍스트에도 상태별 amount-* 클래스를 적용해 색상을 금액과 동일 톤으로 맞춘다.
+        // (색상 값은 기존 CSS 토큰/규칙을 그대로 사용)
+        var nameCls = getAmountClassByStatus(it.status);
+        if (nameCls) nameEl.classList.add(nameCls);
         nameEl.textContent = it.debtorName || '';
         // 금액
         var amtEl = null;

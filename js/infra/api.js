@@ -232,11 +232,32 @@
     };
   }
 
+  
+  // UI safety: remove orphan modal scrim that can leave the shell visually/interactively locked.
+  // This does NOT close valid modals (it only clears when a .modal-backdrop exists without any .modal).
+  function cleanupOrphanModalBackdrop(reason) {
+    try {
+      var modalRoot = document.getElementById('modal-root');
+      if (!modalRoot) return false;
+      var hasBackdrop = !!modalRoot.querySelector('.modal-backdrop');
+      if (!hasBackdrop) return false;
+      var hasModal = !!modalRoot.querySelector('.modal');
+      if (hasBackdrop && !hasModal) {
+        modalRoot.innerHTML = '';
+        try { console.warn('[UI] Cleared orphan modal backdrop:', reason || ''); } catch (e2) {}
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
   // Stage 3: Navigation boundary APIs (List <-> Detail)
   if (typeof App.api.view.openDebtorDetail !== 'function') {
     App.api.view.openDebtorDetail = function (debtorId) {
       var id = (debtorId != null) ? String(debtorId) : null;
       if (!id) return;
+
+      cleanupOrphanModalBackdrop('view.openDebtorDetail');
 
       if (App.state && App.state.ui && App.state.ui.debtorPanel) {
         App.state.ui.debtorPanel.mode = 'detail';
@@ -255,6 +276,7 @@
 
   if (typeof App.api.view.openDebtorList !== 'function') {
     App.api.view.openDebtorList = function () {
+      cleanupOrphanModalBackdrop('view.openDebtorList');
       if (App.state && App.state.ui && App.state.ui.debtorPanel) {
         App.state.ui.debtorPanel.mode = 'list';
         App.state.ui.debtorPanel.selectedDebtorId = null;

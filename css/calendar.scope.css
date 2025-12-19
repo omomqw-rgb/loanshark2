@@ -1,0 +1,29 @@
+#calendar-root .week-detail-item.is-paid .week-item-debtor,
+#calendar-root .week-detail-item.is-paid .week-item-amount,
+#calendar-root .day-detail-item.is-paid .day-item-name,
+#calendar-root .day-detail-item.is-paid .day-item-amount {
+  color: #22c55e;
+}
+
+#calendar-root .week-detail-item.is-overdue .week-item-debtor,
+#calendar-root .week-detail-item.is-overdue .week-item-amount,
+#calendar-root .day-detail-item.is-overdue .day-item-name,
+#calendar-root .day-detail-item.is-overdue .day-item-amount {
+  color: var(--state-overdue);
+}
+
+
+#calendar-root .week-detail-item.is-overdue .week-item-amount,
+#calendar-root .day-detail-item.is-overdue .day-item-amount {
+  color: #ef4444 !important;
+}
+
+#calendar-root .week-detail-item.is-partial .week-item-amount,
+#calendar-root .day-detail-item.is-partial .day-item-amount {
+  color: #facc15 !important;
+}
+
+#calendar-root .week-detail-item.is-paid .week-item-amount,
+#calendar-root .day-detail-item.is-paid .day-item-amount {
+  color: #22c55e !important;
+}

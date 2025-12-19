@@ -35,6 +35,13 @@
     { value: 'OVERDUE', label: '미납' }
   ];
 
+  // 모달 UI 전용: "사실상 완납" 판정 (status/저장/도메인 로직 변경 없음)
+  function isFullyPaidUI(s) {
+    const total = Number(s.amount || 0);
+    const paid  = Number(s.partialPaidAmount || 0);
+    return total > 0 && paid >= total;
+  }
+
   var modalInitialized = false;
 
   function ensureModalEvents() {
@@ -111,6 +118,36 @@
       if (!form) return;
 
       var kind = form.getAttribute('data-modal-kind');
+
+      // schedule-loan 전용: partial 금액 입력 시 "사실상 완납" UI 상태를 즉시 반영한다.
+      if (kind === 'schedule-loan' && el.matches('input[data-partial-id]')) {
+        var tr = el.closest('tr');
+        if (tr) {
+          tr.classList.remove('is-paid', 'is-overdue', 'is-partial', 'is-planned');
+
+          var sid = el.getAttribute('data-partial-id');
+          var select = sid ? form.querySelector('select[data-schedule-id="' + sid + '"]') : null;
+          var st = select ? String(select.value || '').toUpperCase() : 'PLANNED';
+
+          var sObj = sid ? findScheduleById(sid) : null;
+          var sUI = {
+            amount: (sObj && sObj.amount) || 0,
+            partialPaidAmount: el.value
+          };
+
+          if (st === 'PAID' || isFullyPaidUI(sUI)) {
+            tr.classList.add('is-paid');
+          } else if (st === 'PARTIAL') {
+            tr.classList.add('is-partial');
+          } else if (st === 'OVERDUE') {
+            tr.classList.add('is-overdue');
+          } else {
+            tr.classList.add('is-planned');
+          }
+        }
+        return;
+      }
+
       var api = App.features && App.features.debtorsHandlers;
       if (!api) return;
 
@@ -125,6 +162,87 @@
       if (!form) return;
 
       var kind = form.getAttribute('data-modal-kind');
+
+      // schedule-loan / schedule-claim: UI 전용 row 상태 클래스 즉시 동기화
+      if (kind === 'schedule-loan' || kind === 'schedule-claim') {
+        if (el.matches('select[data-schedule-id]')) {
+          // 상태 변경 시 row(tr)에 즉시 반영: 기존 is-* 제거 후 UI 기준으로 is-* 부착
+          var tr = el.closest('tr');
+          if (tr) {
+            tr.classList.remove('is-paid', 'is-overdue', 'is-partial', 'is-planned');
+
+            var sid = el.getAttribute('data-schedule-id');
+            var st = String(el.value || '').toUpperCase();
+
+            var sObj = sid ? findScheduleById(sid) : null;
+            // 기본은 저장된 schedule 값을 기준으로 판단 (데이터/도메인 로직 변경 없음)
+            var sForUI = sObj || { amount: 0, partialPaidAmount: 0 };
+
+            // schedule-loan + PARTIAL 선택 시에는 현재 입력값을 우선 반영 (저장과 무관하게 UI만 즉시)
+            if (kind === 'schedule-loan' && st === 'PARTIAL' && sid) {
+              var pInput = form.querySelector('input[data-partial-id="' + sid + '"]');
+              if (pInput) {
+                sForUI = {
+                  amount: (sObj && sObj.amount) || 0,
+                  partialPaidAmount: pInput.value === '' ? ((sObj && sObj.partialPaidAmount) || 0) : pInput.value
+                };
+              }
+            }
+
+            if (st === 'PAID' || isFullyPaidUI(sForUI)) {
+              tr.classList.add('is-paid');
+            } else if (st === 'PARTIAL') {
+              tr.classList.add('is-partial');
+            } else if (st === 'OVERDUE') {
+              tr.classList.add('is-overdue');
+            } else {
+              tr.classList.add('is-planned');
+            }
+          }
+
+          // schedule-loan 전용: PARTIAL 입력 필드 표시/숨김
+          if (kind === 'schedule-loan') {
+            var sid2 = el.getAttribute('data-schedule-id');
+            var input = form.querySelector('input[data-partial-id="' + sid2 + '"]');
+            if (input) {
+              if (el.value === 'PARTIAL') {
+                input.style.display = 'block';
+              } else {
+                input.style.display = 'none';
+                input.value = '';
+              }
+            }
+          }
+        } else if (kind === 'schedule-loan' && el.matches('input[data-partial-id]')) {
+          // 일부 브라우저에서 input[type=number]는 change 이벤트로만 잡히는 케이스가 있어 보완한다.
+          var tr2 = el.closest('tr');
+          if (tr2) {
+            tr2.classList.remove('is-paid', 'is-overdue', 'is-partial', 'is-planned');
+
+            var sid3 = el.getAttribute('data-partial-id');
+            var select2 = sid3 ? form.querySelector('select[data-schedule-id="' + sid3 + '"]') : null;
+            var st2 = select2 ? String(select2.value || '').toUpperCase() : 'PLANNED';
+
+            var sObj2 = sid3 ? findScheduleById(sid3) : null;
+            var sUI2 = {
+              amount: (sObj2 && sObj2.amount) || 0,
+              partialPaidAmount: el.value
+            };
+
+            if (st2 === 'PAID' || isFullyPaidUI(sUI2)) {
+              tr2.classList.add('is-paid');
+            } else if (st2 === 'PARTIAL') {
+              tr2.classList.add('is-partial');
+            } else if (st2 === 'OVERDUE') {
+              tr2.classList.add('is-overdue');
+            } else {
+              tr2.classList.add('is-planned');
+            }
+          }
+        }
+        return;
+      }
+
       var api = App.features && App.features.debtorsHandlers;
       if (!api) return;
 
@@ -137,19 +255,6 @@
       } else if (kind === 'claim-create' || kind === 'claim-edit') {
         if (el.name === 'claim-cycle-type' && api.updateClaimCycleVisibility) {
           api.updateClaimCycleVisibility(form);
-        }
-      } else if (kind === 'schedule-loan') {
-        if (el.matches('select[data-schedule-id]')) {
-          var sid = el.getAttribute('data-schedule-id');
-          var input = form.querySelector('input[data-partial-id="' + sid + '"]');
-          if (input) {
-            if (el.value === 'PARTIAL') {
-              input.style.display = 'block';
-            } else {
-              input.style.display = 'none';
-              input.value = '';
-            }
-          }
         }
       }
     });
@@ -800,6 +905,14 @@ function openLoanModal(mode, context) {
     return null;
   }
 
+  function findScheduleById(id) {
+    var schedules = (App.state && App.state.schedules) || [];
+    for (var i = 0; i < schedules.length; i++) {
+      if (String(schedules[i].id) === String(id)) return schedules[i];
+    }
+    return null;
+  }
+
   function openLoanScheduleModal(loanId, highlightScheduleId) {
     ensureModalEvents();
 
@@ -893,7 +1006,7 @@ function openLoanModal(mode, context) {
         if (highlightScheduleId && s.id === highlightScheduleId) {
           rowClasses.push('highlight-row');
         }
-        if (s.status === 'PAID') {
+        if (s.status === 'PAID' || isFullyPaidUI(s)) {
           rowClasses.push('is-paid');
         } else if (s.status === 'PARTIAL') {
           rowClasses.push('is-partial');
@@ -908,6 +1021,7 @@ function openLoanModal(mode, context) {
         if (rowClasses.length) {
           tr.className = rowClasses.join(' ');
         }
+        if (s.status === 'PAID') tr.classList.add('is-paid');
 
         var tdNo = document.createElement('td');
         tdNo.textContent = String(s.installmentNo || '');
@@ -918,7 +1032,61 @@ function openLoanModal(mode, context) {
         tr.appendChild(tdDate);
 
         var tdAmount = document.createElement('td');
-        tdAmount.textContent = amountLabel || '';
+        // PARTIAL 상태에서는 "입금" vs "잔여"를 DOM 기반으로 분해 표시한다.
+        // (색상/토큰 값은 변경하지 않고, 표현만 추가)
+        if (String(s.status || '').toUpperCase() === 'PARTIAL') {
+          var totalAmount = Number(s.amount || 0);
+          var paidAmount = Number(s.partialPaidAmount || 0);
+          if (!isFinite(totalAmount)) totalAmount = 0;
+          if (!isFinite(paidAmount)) paidAmount = 0;
+          if (paidAmount < 0) paidAmount = 0;
+
+          var remainingAmount = totalAmount - paidAmount;
+          if (!isFinite(remainingAmount) || remainingAmount < 0) remainingAmount = 0;
+
+          var breakdown = document.createElement('div');
+          breakdown.className = 'schedule-amount-breakdown';
+
+          var totalLine = document.createElement('div');
+          totalLine.className = 'schedule-amount-line schedule-amount-line-total';
+          var totalLabel = document.createElement('span');
+          totalLabel.className = 'schedule-amount-label';
+          totalLabel.textContent = '총액';
+          var totalVal = document.createElement('span');
+          totalVal.className = 'schedule-amount-value';
+          totalVal.textContent = util.formatCurrency(totalAmount);
+          totalLine.appendChild(totalLabel);
+          totalLine.appendChild(totalVal);
+          breakdown.appendChild(totalLine);
+
+          var paidLine = document.createElement('div');
+          paidLine.className = 'schedule-amount-line schedule-amount-line-paid';
+          var paidLabel = document.createElement('span');
+          paidLabel.className = 'schedule-amount-label';
+          paidLabel.textContent = '입금';
+          var paidVal = document.createElement('span');
+          paidVal.className = 'schedule-amount-value';
+          paidVal.textContent = util.formatCurrency(paidAmount);
+          paidLine.appendChild(paidLabel);
+          paidLine.appendChild(paidVal);
+          breakdown.appendChild(paidLine);
+
+          var remainLine = document.createElement('div');
+          remainLine.className = 'schedule-amount-line schedule-amount-line-remaining';
+          var remainLabel = document.createElement('span');
+          remainLabel.className = 'schedule-amount-label';
+          remainLabel.textContent = '잔여';
+          var remainVal = document.createElement('span');
+          remainVal.className = 'schedule-amount-value';
+          remainVal.textContent = util.formatCurrency(remainingAmount);
+          remainLine.appendChild(remainLabel);
+          remainLine.appendChild(remainVal);
+          breakdown.appendChild(remainLine);
+
+          tdAmount.appendChild(breakdown);
+        } else {
+          tdAmount.textContent = amountLabel || '';
+        }
         tr.appendChild(tdAmount);
 
         var tdStatus = document.createElement('td');
@@ -1079,7 +1247,7 @@ function openLoanModal(mode, context) {
         if (highlightScheduleId && s.id === highlightScheduleId) {
           rowClasses.push('highlight-row');
         }
-        if (s.status === 'PAID') {
+        if (s.status === 'PAID' || isFullyPaidUI(s)) {
           rowClasses.push('is-paid');
         } else if (s.status === 'PARTIAL') {
           rowClasses.push('is-partial');

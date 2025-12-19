@@ -1,12 +1,8 @@
-/* Report / Overview layout skeleton */
-
 #report-root .report-overview {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-
-/* KPI row */
 
 #report-root .report-kpi-row {
   margin-bottom: 0.5rem;
@@ -93,10 +89,6 @@
   color: #111827;
 }
 
-/* Detail panel */
-
-
-
 #report-root .portfolio-title {
   font-size: 0.85rem;
   font-weight: 600;
@@ -123,8 +115,6 @@
   border-color: #1d4ed8;
   color: #ffffff;
 }
-
-
 
 #report-root .status-card {
   border-radius: 6px;
@@ -179,8 +169,6 @@
   margin-top: 0.15rem;
 }
 
-
-
 #report-root .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -205,25 +193,11 @@
   color: #111827;
 }
 
-
-
-
-
-
-
-/* Recovery */
-
-
-
 #report-root .recovery-title {
   font-size: 0.85rem;
   font-weight: 600;
   color: #0f172a;
 }
-
-
-
-
 
 #report-root .filter-label {
   font-size: 0.7rem;
@@ -246,16 +220,10 @@
   color: #ffffff;
 }
 
-
-
 #report-root .chart-placeholder {
   font-size: 0.75rem;
   color: #9ca3af;
 }
-
-
-
-
 
 #report-root .kpi-label {
   font-size: 0.7rem;
@@ -267,8 +235,6 @@
   font-weight: 600;
   color: #111827;
 }
-
-/* Responsive tweaks */
 
 @media (max-width: 1200px) {
   #report-root .report-kpi-grid {
@@ -286,11 +252,11 @@
   #report-root .report-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
   #report-root .portfolio-body {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-/* Report subtabs & sections */
 
 #report-root .report-subtabs {
   display: inline-flex;
@@ -341,15 +307,12 @@
   color: #6b7280;
 }
 
-  border-radius: 8px;
+border-radius: 8px;
   border: 1px dashed rgba(148, 163, 184, 0.6);
   padding: 0.75rem;
   font-size: 0.75rem;
   color: #9ca3af;
 }
-/* ============================
-   v143 Statistics layout
-   ============================ */
 
 
 
@@ -385,12 +348,10 @@
 
 
 
-/* ============================
-   ============================ */
 
-/* ============================
-   Trend section – capital flow & velocity
-   ============================ */
+
+
+
 
   display: flex;
   flex-direction: column;
@@ -437,7 +398,6 @@
 
 #report-root .capitalflow-chart-wrapper canvas {
   width: 100%;
-  
 }
 
 #report-root .capitalflow-legend {
@@ -515,48 +475,7 @@
   color: #111827;
 }
 
-/* ============================
-   v143 Statistics layout
-   ============================ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ============================
-   ============================ */
-
-  display: flex;
+display: flex;
   flex-direction: column;
   gap: 0.85rem;
 }
@@ -615,8 +534,6 @@
   color: #6b7280;
 }
 
-
-
 #report-root .capitalflow-chart-legend {
   display: flex;
   gap: 0.75rem;
@@ -650,10 +567,7 @@
   color: #111827;
 }
 
-/* ============================
-   ============================ */
-
-  display: flex;
+display: flex;
   flex-direction: column;
   gap: 0.85rem;
 }
@@ -723,7 +637,7 @@
   font-weight: 600;
 }
 
-/* v144_clean_kpi_v2 – KPI row layout */
+
 #report-root .report-kpi-main {
   margin: 0.1rem 0 0.35rem;
   display: flex;
@@ -745,10 +659,6 @@
   align-items: baseline;
   column-gap: 0.25rem;
 }
-
-/* ============================
-   Report – Risk section
-   ============================ */
 
 #report-root .report-section-risk {
   margin-top: 1.25rem;
@@ -806,14 +716,14 @@
   font-size: 0.75rem;
 }
 
-.risk-table th,
+#report-root .risk-table th,
 #report-root .risk-table td {
   padding: 0.28rem 0.4rem;
   border-bottom: 1px solid rgba(229, 231, 235, 0.9);
   text-align: right;
 }
 
-.risk-table th:first-child,
+#report-root .risk-table th:first-child,
 #report-root .risk-table td:first-child {
   text-align: left;
 }
@@ -828,8 +738,6 @@
   border-bottom: none;
 }
 
-
-/* Report – Capital Flow period controls */
 #report-root .report-section-header {
   display: flex;
   align-items: center;
@@ -887,45 +795,87 @@
   border-color: #111827;
 }
 
-/* v210 recovery flow styles */
 #report-root .recovery-kpi-grid {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin-bottom:18px;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 16px;
+  margin-bottom: 18px;
 }
-#report-root .recovery-kpi-item .label {font-size:13px;color:#222;margin-bottom:4px;}
-#report-root .recovery-kpi-item .value {font-size:20px;}
-#report-root .recovery-flow-chart-box {width:100%;height:260px;position:relative;margin-top:12px;}
-#report-root .recovery-flow-chart-box canvas {width:100%;height:100%;}
-#report-root .recovery-flow-nav {position:absolute;top:50%;transform:translateY(-50%);
-  width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.05);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  backdrop-filter:blur(4px);transition:0.15s;}
-#report-root .recovery-flow-nav:hover {background:rgba(0,0,0,0.08);}
-#report-root .recovery-flow-nav.left {left:6px;} .recovery-flow-nav.right {right:6px;}
-#report-root .recovery-flow-insight-box {margin-top:20px;padding:14px 18px;background:#F8FAFC;
-  border-radius:10px;font-size:13px;line-height:1.45;}
 
+#report-root .recovery-kpi-item .label {
+  font-size: 13px;
+  color: #222;
+  margin-bottom: 4px;
+}
 
-/* Loanshark v003: overview portfolio cards layout */
+#report-root .recovery-kpi-item .value {
+  font-size: 20px;
+}
+
+#report-root .recovery-flow-chart-box {
+  width: 100%;
+  height: 260px;
+  position: relative;
+  margin-top: 12px;
+}
+
+#report-root .recovery-flow-chart-box canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#report-root .recovery-flow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: 0.15s;
+}
+
+#report-root .recovery-flow-nav:hover {
+  background: rgba(0,0,0,0.08);
+}
+
+#report-root .recovery-flow-nav.left {
+  left: 6px;
+}
+
+#report-root .recovery-flow-nav.right {
+  right: 6px;
+}
+
+#report-root .recovery-flow-insight-box {
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: #F8FAFC;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 #report-root .overview-portfolio-cards {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
 }
+
 #report-root .overview-portfolio-cards .portfolio-card {
   flex: 1 1 220px;
 }
 
-/* v308: ensure recovery trends chart canvas can receive pointer events for tooltips */
 #report-root .recovery-flow-chart-box canvas,
-#recoveryFlowChart {
+#report-root #recoveryFlowChart {
   pointer-events: auto !important;
 }
 
-
-/* v309: recovery trends interval switch (daily / monthly / yearly) */
 #report-root .recovery-flow-chart-box .recovery-interval-switch {
   position: absolute;
   top: 8px;
@@ -950,30 +900,28 @@
   color: #ffffff;
 }
 
-/* Statistics tab layout */
-
 #report-root .report-section-statistics .statistics-layout {
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
-.statistics-header {
+#report-root .statistics-header {
   margin-bottom: 8px;
 }
 
-.statistics-title {
+#report-root .statistics-title {
   font-size: 1.1rem;
   font-weight: 600;
 }
 
-.statistics-kpi-grid {
+#report-root .statistics-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
-.statistics-kpi-card {
+#report-root .statistics-kpi-card {
   background: var(--surface-100);
   padding: 16px;
   border-radius: 10px;
@@ -982,35 +930,32 @@
   gap: 6px;
 }
 
-.statistics-kpi-label {
+#report-root .statistics-kpi-label {
   font-size: 0.85rem;
   opacity: 0.7;
 }
 
-.statistics-kpi-value {
+#report-root .statistics-kpi-value {
   font-size: 1.25rem;
   font-weight: 600;
 }
 
-.statistics-table {
+#report-root .statistics-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.statistics-table th {
+#report-root .statistics-table th {
   background: var(--surface-100);
   text-align: left;
   padding: 8px;
   font-weight: 600;
 }
 
-.statistics-table td {
+#report-root .statistics-table td {
   padding: 8px;
   border-top: 1px solid var(--border-200);
 }
-
-
-/* Statistics v317 – refined layout & planned */
 
 #report-root .report-section-statistics .statistics-layout {
   display: grid;
@@ -1018,7 +963,6 @@
   gap: 24px;
 }
 
-/* Standard card sections */
 #report-root .report-section-statistics .statistics-section {
   background: var(--surface-100);
   border: 1px solid var(--border-200);
@@ -1027,7 +971,6 @@
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
 }
 
-/* Row section that stacks Loan / Claim cards */
 #report-root .report-section-statistics .statistics-section-row {
   grid-column: 1 / -1;
   display: grid;
@@ -1039,7 +982,6 @@
   box-shadow: none;
 }
 
-/* Child cards inside row keep card style */
 #report-root .report-section-statistics .statistics-section-row .statistics-section {
   background: var(--surface-100);
   border: 1px solid var(--border-200);
@@ -1048,12 +990,10 @@
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
 }
 
-/* Span helper */
 #report-root .report-section-statistics .statistics-span-half {
   grid-column: span 1;
 }
 
-/* Section header */
 #report-root .report-section-statistics .statistics-header {
   margin-bottom: 10px;
   padding-bottom: 8px;
@@ -1065,7 +1005,6 @@
   font-weight: 600;
 }
 
-/* Summary KPI row – 1 row, 4 columns */
 #report-root .report-section-statistics .statistics-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1079,7 +1018,6 @@
   padding: 14px 16px;
 }
 
-/* Summary typography */
 #report-root .report-section-statistics .statistics-kpi-label {
   font-size: 0.8rem;
   opacity: 0.7;
@@ -1096,7 +1034,6 @@
   opacity: 0.7;
 }
 
-/* Schedule tables side by side */
 #report-root .report-section-statistics .statistics-section-schedule {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1107,7 +1044,6 @@
   grid-column: 1 / -1;
 }
 
-/* Stripe-style tables */
 #report-root .report-section-statistics .statistics-table {
   width: 100%;
   border-collapse: collapse;
@@ -1123,12 +1059,10 @@
   font-size: 0.82rem;
 }
 
-/* Debtor table alignment */
 #report-root .report-section-statistics .statistics-section-debtors .statistics-table td:last-child {
   text-align: right;
 }
 
-/* Responsive – narrow screens stack columns */
 @media (max-width: 960px) {
   #report-root .report-section-statistics .statistics-layout {
     grid-template-columns: minmax(0, 1fr);

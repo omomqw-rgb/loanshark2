@@ -12,6 +12,7 @@
 @import "./card.css";
 @import "./modal.css";
 @import "./calendar.css";
+@import "./calendar.scope.css";
 @import "./monitoring.css";
 @import "./debtors.css";
 @import "./report.css";

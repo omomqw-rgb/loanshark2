@@ -1,168 +1,260 @@
-/* modal.css - auto-reorganized structural CSS (v101) */
-
-/* ========== Modal Backdrop & Root (v104 manual) ========== */
-
 #modal-root {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 50;
-#modal-root }.modal-backdrop {
+}
+
+#modal-root .modal-backdrop {
   position: fixed;
   inset: 0;
-  
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
-}/* ========== Modal Container (v104 manual) ========== */
+}
 
-/* ========== Modal Container (v109 structured) ========== */
 #modal-root .modal {
   width: 100%;
   max-width: 540px;
-  
   border-radius: var(--font-md);
   border: 1px solid var(--state-active);
-  
   padding: var(--space-4) var(--font-md) var(--space-4);
-#modal-root }.modal-header {
+}
+
+#modal-root .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
-#modal-root }.modal-title {
+}
+
+#modal-root .modal-title {
   font-size: var(--font-md);
   font-weight: 600;
-}/* ========== Modal Layout (v104 manual) ========== */
+}
 
-/* ========== Modal Layout (v109 structured) ========== */
 #modal-root .modal-body {
   font-size: var(--space-4);
-#modal-root }.modal-actions {
+}
+
+#modal-root .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--radius-sm);
   margin-top: var(--space-3);
-#modal-root }.modal-backdrop {
-  
-#modal-root }.modal {
-  
+}
+
+#modal-root .modal-backdrop {
+}
+
+#modal-root .modal {
   border-radius: var(--space-5);
   border: 1px solid rgba(209, 213, 219, 0.95);
-  
-#modal-root }.modal-body {
+}
+
+#modal-root .modal-body {
   max-height: 440px;
   overflow-y: auto;
-#modal-root }.modal {
-  
-  
+}
+
+#modal-root .modal {
   border-radius: var(--radius-lg);
   border: 1px solid rgba(209, 213, 219, 0.95);
-  
-#modal-root }.modal-backdrop {
-  
+}
+
+#modal-root .modal-backdrop {
   backdrop-filter: blur(var(--space-5));
-#modal-root }.modal {
+}
+
+#modal-root .modal {
   max-width: 540px;
-  
   border-radius: 22px;
   border: 1px solid #111218;
-  
-  
-#modal-root }.modal-title {
-  
-#modal-root }.modal-subtitle {
-  
-#modal-root }.modal .field-text label {
-  
-}.modal .field-text input,
-.modal .field-text select,
+}
+
+#modal-root .modal-title {
+}
+
+#modal-root .modal-subtitle {
+}
+
+#modal-root .modal .field-text label {
+}
+
+#modal-root .modal .field-text input,
+#modal-root .modal .field-text select,
 #modal-root .modal .field-text textarea {
-  
-  
-  
-}.card,
-.panel,
-.section-card,
-.table-card,
-.debtor-panel,
-.sidepanel,
-.sidepanel-section,
-.modal,
-.modal-body,
-#modal-root .modal-surface {
-  background: var(--charcoal-bg-surface);
-  border-radius: var(--space-5);
-  border: 1px solid var(--charcoal-border-subtle);
-  box-shadow: var(--charcoal-shadow-soft);
-}.card,
-.panel,
-.section-card,
-.table-card,
-.debtor-panel,
-.sidepanel,
-.sidepanel-section,
-.modal,
-.modal-body,
-#modal-root .modal-surface {
-  box-shadow: var(--charcoal-shadow-soft);
-#modal-root }.modal-backdrop {
+}
+
+#modal-root .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(20, 20, 25, 0.42);
   backdrop-filter: blur(var(--space-2));
-#modal-root }.modal {
+}
+
+#modal-root .modal {
   max-width: 560px;
   margin: 80px auto;
   border-radius: var(--radius-lg);
   background: var(--charcoal-bg-surface);
-  box-shadow:
-    0 var(--space-6) 60px rgba(15, 23, 42, 0.35),
+  box-shadow: 0 var(--space-6) 60px rgba(15, 23, 42, 0.35),
     0 0 0 1px rgba(15, 23, 42, 0.04);
-}.modal-title,
+}
+
+#modal-root .modal-title,
 #modal-root .drawer-title {
   padding-top: var(--radius-lg);
   line-height: 1.32;
   overflow: visible;
-#modal-root }.modal-header {
+}
+
+#modal-root .modal-header {
   border-bottom: none !important;
-#modal-root }.modal-title {
+}
+
+#modal-root .modal-title {
   padding-top: var(--font-xl) !important;
   padding-bottom: var(--space-4) !important;
   line-height: 1.32;
-#modal-root }.modal {
-    border: none !important;
 }
 
-/* v123 – remove inner card border for modal body only */
+#modal-root .modal {
+  border: none !important;
+}
+
 #modal-root .modal-body {
   border: none;
   box-shadow: none;
 }
 
-/* v124 – modal size & inner radius fix */
 #modal-root .modal {
   padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.modal-body .form-wrapper,
-.modal-body .field-set,
+#modal-root .modal-body .form-wrapper,
+#modal-root .modal-body .field-set,
 #modal-root .modal-body .section-card {
   border-radius: 14px;
 }
 
-/* v125 – modal inner card vertical padding */
-.modal-body .form-wrapper,
-.modal-body .field-set,
+#modal-root .modal-body .form-wrapper,
+#modal-root .modal-body .field-set,
 #modal-root .modal-body .section-card {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-/* v126 – label indent fix */
 #modal-root .modal .field-text label {
   padding-left: 4px;
+}
+
+/* =========================================================
+   Schedule modal status color & PARTIAL amount breakdown
+   - 색상 값/토큰은 기존 정의를 그대로 사용
+   ========================================================= */
+
+/* 상태별 row 색상 (즉시 시각 피드백) */
+#modal-root tr.is-paid {
+  color: var(--state-completed);
+}
+
+/* schedule 모달(대출/채권)에서 PAID는 기존 UI의 paid green(#22c55e)을 그대로 사용 */
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid {
+  color: #22c55e;
+}
+
+#modal-root tr.is-overdue {
+  color: var(--state-overdue);
+}
+
+/* NOTE: --state-partial 토큰이 없을 수 있어 fallback을 둔다(기존 UI에서 쓰는 amber 계열 값 재사용). */
+#modal-root tr.is-partial {
+  color: var(--state-partial, #ca8a04);
+}
+
+#modal-root tr.is-planned {
+  color: var(--state-planned);
+}
+
+/* schedule 모달에서만 상태색이 select/input에 보이도록 (전역 form control color 규칙 상속 복구) */
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid    select,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-overdue select,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-partial select,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-planned select,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid    input,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-overdue input,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-partial input,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-planned input {
+  color: inherit;
+}
+
+
+/* PAID 상태 시각 보강 — 색상 값 변경 없음 */
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid select,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid input {
+  font-weight: 600;
+  text-shadow: 0 0 0.01px currentColor;
+}
+
+/*
+  PAID 색상 상속/표시 보정 (v007)
+  - 색상 값/토큰 변경 없음
+  - 전역 form control color 규칙(components.css) 및 native form control
+    텍스트 렌더링 차이로 인해, row(tr)의 상태색이 select/input에
+    완전히 전달되지 않는 환경을 보강한다.
+  - 핵심은 "색을 바꾸는" 것이 아니라, "상속 기준점"을 확실히 하고
+    WebKit/Blink 계열에서 내부 텍스트 페인트가 currentColor를 따르도록
+    힌트를 추가하는 것.
+*/
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid td {
+  /* td에 별도의 color가 걸려 상속이 끊기는 케이스를 방지 */
+  color: inherit;
+}
+
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid select,
+#modal-root form[data-modal-kind^="schedule-"] tr.is-paid input {
+  /* color 값은 기존 row 색을 그대로 상속 */
+  color: inherit;
+
+  /*
+    일부 Chromium/WebKit 환경에서 form control 텍스트가 color 상속을
+    완전히 반영하지 않는 케이스 보강.
+    - currentColor를 그대로 사용하므로 "색상 값 변경"이 아니다.
+  */
+  -webkit-text-fill-color: currentColor;
+}
+
+/* PARTIAL 금액 분해 표시(loan schedule) */
+#modal-root .schedule-amount-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#modal-root .schedule-amount-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+#modal-root .schedule-amount-line-total {
+  font-weight: 600;
+}
+
+#modal-root .schedule-amount-line-paid,
+#modal-root .schedule-amount-line-remaining {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+#modal-root .schedule-amount-label,
+#modal-root .schedule-amount-value {
+  white-space: nowrap;
 }
