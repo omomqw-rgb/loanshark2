@@ -3,6 +3,23 @@
   if (!window.App) window.App = {};
   var App = window.App;
 
+  // Single source of truth: Calendar default view.
+  // - Used by init/mount, load (legacy), and invalidate/rerender paths.
+  // - Keep the default in ONE place to prevent regressions.
+  App.getDefaultCalendarView = function () {
+    return 'week';
+  };
+
+  function pad2(v) {
+    v = Number(v) || 0;
+    return v < 10 ? '0' + v : String(v);
+  }
+
+  function getTodayISODateLocal() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
   App.state = {
     debtors: [],
     loans: [],
@@ -18,6 +35,11 @@
      */
     ui: {
       activeTab: 'calendar',
+      calendar: {
+        view: App.getDefaultCalendarView(),
+        sortMode: 'type',
+        currentDate: getTodayISODateLocal()
+      },
       debtorPanel: {
         mode: 'list',           // 'list' | 'detail'
         selectedDebtorId: null,
@@ -33,7 +55,7 @@
     loansCollapsed: false,
     claimsCollapsed: false
   };
-App.config = {
+  App.config = {
     locale: 'ko-KR',
     currency: 'KRW'
   };

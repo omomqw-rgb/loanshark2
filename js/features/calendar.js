@@ -58,13 +58,22 @@
     return new Date(date.getFullYear(), date.getMonth() + months, 1);
   }
 
+  function getDefaultCalendarView() {
+    // Default must be centralized (core/state.js). This helper only reads it.
+    if (App && typeof App.getDefaultCalendarView === 'function') {
+      return App.getDefaultCalendarView();
+    }
+    // Safety fallback (should not be hit in this build)
+    return 'week';
+  }
+
   function ensureCalendarState() {
     var state = App.state || (App.state = {});
     state.ui = state.ui || {};
     if (!state.ui.calendar) {
       var today = new Date();
       state.ui.calendar = {
-        view: 'month', // 'month' | 'week'
+        view: getDefaultCalendarView(), // 'month' | 'week'
         currentDate: toISODate(today),
         // 주 상세 패널의 정렬 모드. 'type' = 대출/채권 타입 기준, 'status' = 상태 기준
         sortMode: 'type'
@@ -74,7 +83,7 @@
         state.ui.calendar.currentDate = toISODate(new Date());
       }
       if (state.ui.calendar.view !== 'month' && state.ui.calendar.view !== 'week') {
-        state.ui.calendar.view = 'month';
+        state.ui.calendar.view = getDefaultCalendarView();
       }
       // sortMode 기본값 지정
       if (!state.ui.calendar.sortMode) {

@@ -305,7 +305,7 @@
 
       ui: {
         calendar: {
-          view: calendar.view || 'month',
+          view: calendar.view || (App.getDefaultCalendarView ? App.getDefaultCalendarView() : 'week'),
           sortMode: calendar.sortMode || 'type',
           currentDate: calendar.currentDate || getTodayISODate()
         },

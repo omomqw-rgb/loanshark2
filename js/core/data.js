@@ -482,7 +482,15 @@ function renderAll() {
             ? App.util.todayISODate()
             : new Date().toISOString().slice(0, 10);
 
-          App.state.ui.calendar.view = legacyCal.view || App.state.ui.calendar.view || 'week';
+          // IMPORTANT: Calendar view must only change by explicit user action.
+          // Legacy cloud payload may contain view, but applying it would override
+          // the in-memory default (WEEK) or the user's current selection.
+          // Therefore: keep current view if valid; otherwise fall back to the
+          // single-source default.
+          var currentView = App.state.ui.calendar.view;
+          if (currentView !== 'month' && currentView !== 'week') {
+            App.state.ui.calendar.view = (App.getDefaultCalendarView ? App.getDefaultCalendarView() : 'week');
+          }
           App.state.ui.calendar.sortMode = legacyCal.sortMode || App.state.ui.calendar.sortMode || 'type';
           App.state.ui.calendar.currentDate = legacyCal.currentDate || App.state.ui.calendar.currentDate || todayISO;
         }
