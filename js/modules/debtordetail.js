@@ -407,6 +407,11 @@
 
     article.appendChild(grid);
 
+    // displayId (ops/log identifier) – show only when present.
+    if (loan && loan.displayId) {
+      article.appendChild(el('div', 'card-display-id', 'ID: ' + String(loan.displayId)));
+    }
+
     var actions = el('div', 'card-actions');
     var left = el('div', 'card-actions-left');
 
@@ -500,6 +505,11 @@
     grid.appendChild(el('div', 'card-grid-value', endDate));
 
     article.appendChild(grid);
+
+    // displayId (ops/log identifier) – show only when present.
+    if (claim && claim.displayId) {
+      article.appendChild(el('div', 'card-display-id', 'ID: ' + String(claim.displayId)));
+    }
 
     var actions = el('div', 'card-actions');
     var left = el('div', 'card-actions-left');

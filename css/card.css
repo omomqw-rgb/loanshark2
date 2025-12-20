@@ -147,6 +147,16 @@
   gap: 8px;
 }
 
+/* displayId (Loan/Claim) – debtor detail panel only */
+#debtor-detail-root .loan-card .card-display-id,
+#debtor-detail-root .claim-card .card-display-id {
+  margin-top: 6px;
+  margin-bottom: 4px;
+  font-size: 10px;
+  line-height: 1.2;
+  color: #6b7280;
+}
+
 .loan-card .card-actions-left,
 .loan-card .card-actions-right,
 .claim-card .card-actions-left,

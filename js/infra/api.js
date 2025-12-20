@@ -719,8 +719,16 @@
         cycleType: cycleType,
         dayInterval: dayInterval,
         weekDay: weekDay,
-        startDate: startDate
+        startDate: startDate,
+        // Keep legacy semantics: createdAt defaults to the chosen startDate.
+        // (Used as the primary date source for displayId generation.)
+        createdAt: startDate
       };
+
+      // displayId: generate only when missing (new entity)
+      if (App.util && typeof App.util.ensureDisplayId === 'function') {
+        App.util.ensureDisplayId('loan', loan);
+      }
 
       App.state.loans.push(loan);
 
@@ -798,6 +806,11 @@
       loan.dayInterval = dayInterval;
       loan.weekDay = weekDay;
       loan.startDate = startDate;
+
+      // displayId: generate only when missing (legacy entity save-time)
+      if (App.util && typeof App.util.ensureDisplayId === 'function') {
+        App.util.ensureDisplayId('loan', loan);
+      }
 
       // schedules regeneration (legacy logic)
       if (App.db && typeof App.db.rebuildSchedulesForLoan === 'function') {
@@ -962,6 +975,11 @@
         cardStatus: '진행'
       };
 
+      // displayId: generate only when missing (new entity)
+      if (App.util && typeof App.util.ensureDisplayId === 'function') {
+        App.util.ensureDisplayId('claim', claim);
+      }
+
       App.state.claims.push(claim);
 
       // schedules regeneration (legacy logic)
@@ -1036,6 +1054,11 @@
       claim.dayInterval = dayInterval;
       claim.weekDay = weekDay;
       claim.memo = memo;
+
+      // displayId: generate only when missing (legacy entity save-time)
+      if (App.util && typeof App.util.ensureDisplayId === 'function') {
+        App.util.ensureDisplayId('claim', claim);
+      }
 
       // schedules regeneration (legacy logic)
       if (App.db && typeof App.db.rebuildSchedulesForClaim === 'function') {

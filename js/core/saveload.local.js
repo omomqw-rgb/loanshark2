@@ -9,6 +9,19 @@
       if (App.stateIO && typeof App.stateIO.ensureMeta === 'function') {
         App.stateIO.ensureMeta();
       }
+
+      
+// displayId repair (Loan/Claim): fix invalid ids before persisting/exporting.
+// - Only repairs when displayId exists (no bulk generation).
+if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
+  App.util.repairLoanClaimDisplayIds();
+}
+
+// displayId (Loan/Claim): generate only at save-time when missing.
+      // NOTE: This MUST NOT run on app load.
+      if (App.util && typeof App.util.ensureLoanClaimDisplayIds === 'function') {
+        App.util.ensureLoanClaimDisplayIds();
+      }
       const data = JSON.stringify(App.state || {}, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

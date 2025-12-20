@@ -515,38 +515,74 @@
     }
 
     function createHeader(group, mode) {
+      // Card header (collapsed view) must be single-row:
+      // [Name] [Status summary text] [Amount]
+      // NOTE: Right-side count UI is intentionally removed to avoid duplication.
       var header = createEl('div', 'monitoring-debtor-header');
 
-      var main = createEl('div', 'monitoring-debtor-main');
       var nameText = (group.debtor && group.debtor.name) ? group.debtor.name : ('채무자 #' + (group.debtor && group.debtor.id != null ? group.debtor.id : ''));
       var nameEl = createEl('div', 'monitoring-debtor-name', nameText);
 
-      var subtitleText = '';
       var count = group.schedules && group.schedules.length ? group.schedules.length : 0;
+      var overdueDays = group.overdueDays || group.maxOverdueDays || 0;
+
+      // Single status summary text (contains the only visible "n건" count if needed)
+      var summaryText = '';
 
       if (mode === 'dday') {
-        subtitleText = '오늘 만기 ' + count + '건';
+        summaryText = '오늘만기 ' + count + '건';
       } else if (mode === 'd1') {
-        subtitleText = '내일 만기 ' + count + '건';
+        summaryText = '내일만기 ' + count + '건';
       } else if (mode === 'overdue') {
-        if (group.maxOverdueDays) {
-          subtitleText = '미납 ' + count + '건 · 최대 ' + group.maxOverdueDays + '일 경과';
+        if (overdueDays) {
+          summaryText = '미납 ' + count + '건 · 최대 ' + overdueDays + '일 경과';
         } else {
-          subtitleText = '미납 ' + count + '건';
+          summaryText = '미납 ' + count + '건';
         }
       } else if (mode === 'risk') {
-        subtitleText = group.reason || '위험 신호 자동 탐지';
+        if (overdueDays) {
+          summaryText = '미납 ' + count + '건 · 최대 ' + overdueDays + '일 경과';
+        } else {
+          summaryText = '미납 ' + count + '건';
+        }
+        if (group.reason) {
+          summaryText += ' · ' + group.reason;
+        }
       } else if (mode === 'enforce') {
-        subtitleText = group.tag || '강제집행 검토';
+        if (overdueDays) {
+          summaryText = '미납 ' + count + '건 · 최대 ' + overdueDays + '일 경과';
+        } else {
+          summaryText = '미납 ' + count + '건';
+        }
+        if (group.tag) {
+          summaryText += ' · ' + group.tag;
+        }
       } else if (mode === 'watch') {
-        subtitleText = '관심 채무자 모니터링';
+        if (count > 0) {
+          if (overdueDays) {
+            summaryText = '미납 ' + count + '건 · 최대 ' + overdueDays + '일 경과';
+          } else {
+            summaryText = '미납 ' + count + '건';
+          }
+        } else {
+          summaryText = '관심 채무자';
+        }
+      } else {
+        summaryText = group.reason || group.tag || '';
       }
 
-      var subtitleEl = createEl('div', 'monitoring-debtor-subtitle', subtitleText);
+      if (!summaryText) summaryText = '-';
 
-      main.appendChild(nameEl);
-      main.appendChild(subtitleEl);
-      header.appendChild(main);
+      var subtitleEl = createEl('div', 'monitoring-debtor-subtitle', summaryText);
+
+      // Info block wrapper: centered within the card, left-aligned text.
+      var infoWrap = createEl('div', 'monitoring-debtor-info');
+      var infoInner = createEl('div', 'monitoring-debtor-info-inner');
+      infoInner.appendChild(subtitleEl);
+      infoWrap.appendChild(infoInner);
+
+      header.appendChild(nameEl);
+      header.appendChild(infoWrap);
 
       var meta = createEl('div', 'monitoring-debtor-meta');
 
@@ -569,17 +605,6 @@
 
       var amountEl = createEl('div', 'monitoring-debtor-amount', amountText);
       meta.appendChild(amountEl);
-
-      var countEl = createEl('div', 'monitoring-debtor-count', (count || 0) + '건');
-      meta.appendChild(countEl);
-
-      var overdueDays = group.overdueDays || group.maxOverdueDays || 0;
-      if (mode === 'overdue' || mode === 'enforce') {
-        if (overdueDays > 0) {
-          var odEl = createEl('div', 'monitoring-debtor-odays', '최대 ' + overdueDays + '일 지연');
-          meta.appendChild(odEl);
-        }
-      }
 
       header.appendChild(meta);
       return header;
@@ -655,6 +680,31 @@
       item.appendChild(left);
       item.appendChild(right);
 
+      // v021: schedule item click opens schedule detail modal without collapsing the debtor card
+      item.addEventListener('click', function (event) {
+        if (event && typeof event.stopPropagation === 'function') {
+          event.stopPropagation();
+        }
+
+        var scheduleId = sc && sc.id != null ? String(sc.id) : null;
+        if (!scheduleId) return;
+
+        if (sc.kind === 'loan') {
+          var loanId = sc.loanId != null ? String(sc.loanId) : null;
+          if (loanId && App.features && App.features.debtors && typeof App.features.debtors.openLoanScheduleModal === 'function') {
+            App.features.debtors.openLoanScheduleModal(loanId, scheduleId);
+          }
+          return;
+        }
+
+        if (sc.kind === 'claim') {
+          var claimId = sc.claimId != null ? String(sc.claimId) : null;
+          if (claimId && App.features && App.features.debtors && typeof App.features.debtors.openClaimScheduleModal === 'function') {
+            App.features.debtors.openClaimScheduleModal(claimId, scheduleId);
+          }
+        }
+      });
+
       return item;
     }
 
@@ -716,6 +766,16 @@
 
       var existing = root.querySelector('.monitoring-container');
       if (existing) {
+        // v016: remove Enforcement Alerts + Watchlist sections if they exist.
+        // This is a defensive cleanup to guarantee the sections are not present in DOM.
+        var enforceOld = existing.querySelector('.monitoring-section[data-section="enforce"]');
+        if (enforceOld && enforceOld.parentNode) {
+          enforceOld.parentNode.removeChild(enforceOld);
+        }
+        var watchOld = existing.querySelector('.monitoring-section[data-section="watch"]');
+        if (watchOld && watchOld.parentNode) {
+          watchOld.parentNode.removeChild(watchOld);
+        }
         return existing;
       }
 
@@ -729,9 +789,7 @@
         { key: 'dday', title: 'Today (D-Day)' },
         { key: 'd1', title: 'Tomorrow (D-1)' },
         { key: 'overdue', title: 'Overdue' },
-        { key: 'risk', title: 'Risk Alerts' },
-        { key: 'enforce', title: 'Enforcement Alerts' },
-        { key: 'watch', title: 'Watchlist' }
+        { key: 'risk', title: 'Risk Alerts' }
       ];
 
       for (var i = 0; i < sections.length; i++) {
@@ -794,15 +852,11 @@
       var overdueGroups = groupByDebtor(schedules.filter(filterOverdue));
 
       var riskAlerts = buildRiskAlerts();
-      var enforcementAlerts = buildEnforcementAlerts();
-      var watchGroups = buildWatchlist();
 
       renderSection('dday', ddayGroups, 'dday');
       renderSection('d1', d1Groups, 'd1');
       renderSection('overdue', overdueGroups, 'overdue');
       renderSection('risk', riskAlerts, 'risk');
-      renderSection('enforce', enforcementAlerts, 'enforce');
-      renderSection('watch', watchGroups, 'watch');
     }
 
     function init() {

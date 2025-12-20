@@ -978,6 +978,19 @@ App.data.saveToSupabase = async function () {
     return;
   }
 
+  
+// displayId repair (Loan/Claim): fix invalid ids before persisting to Cloud.
+// - Only repairs when displayId exists (no bulk generation).
+if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
+  App.util.repairLoanClaimDisplayIds();
+}
+
+// displayId (Loan/Claim): generate only at save-time when missing.
+  // Must not run during app load/applySnapshot.
+  if (App.util && typeof App.util.ensureLoanClaimDisplayIds === 'function') {
+    App.util.ensureLoanClaimDisplayIds();
+  }
+
   var snapshot;
   try {
     snapshot = App.cloudState.build();

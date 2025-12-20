@@ -302,6 +302,14 @@
 
     
 
+
+// displayId repair (Loan/Claim): fix invalid ids already present in loaded snapshots.
+// - Does NOT generate ids when missing (no bulk generation on load).
+if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
+  App.util.repairLoanClaimDisplayIds();
+}
+
+
     // Stage 6.1: Apply meta counters (monotonic IDs) from snapshot when present.
     applyMetaFromSnapshot(snapshot, dataRoot);
 
