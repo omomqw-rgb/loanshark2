@@ -284,6 +284,39 @@ function mapLoanRow(row) {
     var overdueByDebtor = Object.create(null);
     var hasOutstandingByDebtor = Object.create(null);
 
+    // v022_1: debtor status icon criteria (alive/overdue schedule)
+    // - Do NOT use loan/claim counts, outstanding/remaining amount, or card states.
+    // - Only schedule status and dueDate are used.
+    var hasAliveScheduleByDebtor = Object.create(null);
+    var hasOverdueScheduleByDebtor = Object.create(null);
+
+    function normalizeScheduleDueDate(sc) {
+      if (!sc) return '';
+      var due = sc.dueDate || sc.due_date || sc.date || null;
+      if (!due) return '';
+      // Prefer ISO-like strings if already present.
+      if (typeof due === 'string') {
+        // Keep YYYY-MM-DD portion.
+        if (due.length >= 10) return due.slice(0, 10);
+        return due;
+      }
+      if (App.date && typeof App.date.toISODate === 'function') {
+        return App.date.toISODate(due) || '';
+      }
+      try {
+        var d = new Date(due);
+        if (isNaN(d.getTime())) return '';
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var dd = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + dd;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    var todayStr = (App.date && typeof App.date.getToday === 'function') ? App.date.getToday() : '';
+
     for (var k = 0; k < schedules.length; k++) {
       var sc = schedules[k];
       if (!sc || sc.debtorId == null) continue;
@@ -292,6 +325,24 @@ function mapLoanRow(row) {
       var amount = Number(sc.amount) || 0;
       var paid = Number(sc.paidAmount) || 0;
       var status = (sc.status || '').toUpperCase();
+
+      // Alive schedule: any loan/claim schedule with status !== PAID.
+      // Overdue schedule: any schedule with status !== PAID AND dueDate < today.
+      // (No amount/balance/card-state conditions.)
+      var kind = String(sc.kind || '').toLowerCase();
+      if (!kind) {
+        if (sc.loanId != null) kind = 'loan';
+        else if (sc.claimId != null) kind = 'claim';
+      }
+      var isLoanOrClaim = (kind === 'loan' || kind === 'claim');
+      if (isLoanOrClaim && status !== 'PAID') {
+        hasAliveScheduleByDebtor[key3] = true;
+
+        var dueStr = normalizeScheduleDueDate(sc);
+        if (todayStr && dueStr && dueStr < todayStr) {
+          hasOverdueScheduleByDebtor[key3] = true;
+        }
+      }
 
       if (amount > paid) {
         hasOutstandingByDebtor[key3] = true;
@@ -333,6 +384,10 @@ function mapLoanRow(row) {
       var hasExposure = (loanTotal > 0) || (claimTotal > 0);
       var hasOutstanding = !!hasOutstandingByDebtor[id];
 
+      // v022_1: derived flags for debtor list status icon.
+      var hasAliveSchedule = !!hasAliveScheduleByDebtor[id];
+      var hasOverdueSchedule = !!hasOverdueScheduleByDebtor[id];
+
       var detailStatus;
       if (hasOutstanding) {
         detailStatus = '진행';
@@ -362,6 +417,8 @@ function mapLoanRow(row) {
         loanTotal: loanTotal,
         claimTotal: claimTotal,
         overdueAmount: overdueAmount,
+        hasAliveSchedule: hasAliveSchedule,
+        hasOverdueSchedule: hasOverdueSchedule,
         loans: dLoans.slice(),
         claims: dClaims.slice()
       };

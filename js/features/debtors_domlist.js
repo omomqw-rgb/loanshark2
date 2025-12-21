@@ -82,17 +82,17 @@ App.debtors.renderItem = function (d) {
   var statusDot = document.createElement("span");
   statusDot.className = "dlist-status-dot";
 
-  var status = d && d.status ? String(d.status) : "";
-  var overdueAmount = (d && d.overdueAmount != null) ? d.overdueAmount : 0;
-  var isActive = (status === "진행");
-  var hasOverdue = overdueAmount > 0;
+  // v022_1: status icon is derived strictly from schedule existence.
+  // UI must only consume derived flags (no schedule traversal, no amounts, no card states).
+  var hasAliveSchedule = !!(d && d.hasAliveSchedule);
+  var hasOverdueSchedule = !!(d && d.hasOverdueSchedule);
 
-  if (isActive && !hasOverdue) {
-    statusDot.className += " dlist-status--active-ok";        // 진행 & 미납 없음 (초록)
-  } else if (isActive && hasOverdue) {
-    statusDot.className += " dlist-status--active-overdue";   // 진행 & 미납 있음 (주황)
+  if (!hasAliveSchedule) {
+    statusDot.className += " dlist-status--inactive";         // 회색
+  } else if (hasOverdueSchedule) {
+    statusDot.className += " dlist-status--active-overdue";   // 주황
   } else {
-    statusDot.className += " dlist-status--inactive";         // 진행 아님 (완료/보류 등, 회색)
+    statusDot.className += " dlist-status--active-ok";        // 초록
   }
 
   colRight.appendChild(statusDot);
