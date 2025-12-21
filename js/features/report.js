@@ -377,6 +377,17 @@ function init() {
     if (!root) return;
 
 
+    // v023: Overview KPI '운영현황' 클릭 -> 운영현황 모달 (Log first)
+    var opsCard = root.querySelector('.report-kpi-card[data-kpi="ops"]');
+    if (opsCard && !opsCard._operationModalBound) {
+      opsCard.addEventListener('click', function () {
+        if (App.ui && App.ui.operationModal && typeof App.ui.operationModal.open === 'function') {
+          App.ui.operationModal.open();
+        }
+      });
+      opsCard._operationModalBound = true;
+    }
+
     // Overview 포트폴리오 타입 토글 (대출 / 채권)
     var portfolioToggleRoot = root.querySelector('.overview-portfolio-types');
     if (portfolioToggleRoot) {

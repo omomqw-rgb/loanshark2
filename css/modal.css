@@ -258,3 +258,388 @@
 #modal-root .schedule-amount-value {
   white-space: nowrap;
 }
+
+
+/* =========================================================
+   v023: Operation Modal (Report > Overview > 운영현황)
+   - Log / Monitor tabs (Log first)
+   - Scoped rules only (no global token/theme changes)
+   ========================================================= */
+
+/*
+  v023.2: Operation Modal size adjustment
+  - 약 +25% 가시성 개선을 위해 vw/vh 기준으로 확장
+  - JS/DOM 변경 없이 컨테이너 크기만 조정
+  - 중앙 정렬 유지 (backdrop flex 기준)
+
+  v023.3: Operation Modal width refinement
+  - v023.2 대비 가로 폭 약 15% 축소 (vw 기준)
+  - height 값은 v023.2 그대로 유지
+*/
+
+#modal-root #operation-modal-root {
+  width: 78vw;
+  height: 75vh;
+  max-width: 78vw;
+  max-height: 75vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 72rem) {
+  #modal-root #operation-modal-root {
+    width: 68vw;
+    max-width: 68vw;
+  }
+}
+
+#modal-root #operation-modal-root .modal-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+
+#operation-modal-root .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6) var(--space-3);
+  border-bottom: 1px solid var(--charcoal-border-subtle);
+}
+
+#operation-modal-root .modal-title {
+  padding: 0 !important;
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--charcoal-text-primary);
+}
+
+#operation-modal-root .modal-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--charcoal-text-muted);
+}
+
+#operation-modal-root .modal-close:hover {
+  background: var(--charcoal-bg-elevated);
+  color: var(--charcoal-text-primary);
+}
+
+#operation-modal-root .modal-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--charcoal-border-subtle);
+}
+
+#operation-modal-root .modal-tabs button {
+  border: 1px solid var(--charcoal-border-strong);
+  background: transparent;
+  color: var(--charcoal-text-secondary);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+#operation-modal-root .modal-tabs button.is-active {
+  background: var(--charcoal-accent-soft);
+  color: var(--charcoal-text-primary);
+  border-color: var(--charcoal-border-strong);
+}
+
+#operation-modal-root .modal-body {
+  padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+#operation-modal-root .log-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+#operation-modal-root .log-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 160px;
+}
+
+#operation-modal-root .log-filter-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--charcoal-text-secondary);
+}
+
+#operation-modal-root .log-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+#operation-modal-root .log-filter-input,
+#operation-modal-root .log-filter-select {
+  border: 1px solid var(--charcoal-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--charcoal-bg-surface);
+  color: var(--charcoal-text-primary);
+  padding: 6px 8px;
+  font-size: var(--font-sm);
+}
+
+#operation-modal-root .log-filter-sep {
+  font-size: var(--font-sm);
+  color: var(--charcoal-text-muted);
+}
+
+#operation-modal-root .log-sort-toggle {
+  border: 1px solid var(--charcoal-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--charcoal-bg-surface);
+  color: var(--charcoal-text-primary);
+  padding: 6px 10px;
+  font-size: var(--font-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#operation-modal-root .log-sort-toggle:hover {
+  background: var(--charcoal-bg-elevated);
+}
+
+#operation-modal-root .log-list-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: var(--space-2);
+}
+
+#operation-modal-root .operation-log-item {
+  border: 1px solid var(--charcoal-border-subtle);
+  background: var(--charcoal-bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+#operation-modal-root .operation-log-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+#operation-modal-root .operation-log-row-top .operation-log-amount {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--charcoal-text-primary);
+}
+
+#operation-modal-root .operation-log-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--charcoal-border-subtle);
+  background: var(--charcoal-bg-elevated);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--charcoal-text-secondary);
+  flex: 0 0 auto;
+}
+
+#operation-modal-root .operation-log-type.is-claim {
+  background: var(--charcoal-accent-soft);
+  color: var(--charcoal-text-primary);
+}
+
+#operation-modal-root .operation-log-debtor {
+  font-weight: 600;
+  color: var(--charcoal-text-primary);
+}
+
+#operation-modal-root .operation-log-row-bottom {
+  font-size: var(--font-xs);
+  color: var(--charcoal-text-muted);
+  gap: var(--space-2);
+}
+
+#operation-modal-root .operation-log-meta-label {
+  font-weight: 600;
+  color: var(--charcoal-text-secondary);
+}
+
+#operation-modal-root .operation-log-meta-sep {
+  opacity: 0.8;
+}
+
+#operation-modal-root .operation-log-empty {
+  border: 1px dashed var(--charcoal-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--charcoal-bg-elevated);
+  color: var(--charcoal-text-muted);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+#operation-modal-root .monitor-placeholder {
+  border: 1px dashed var(--charcoal-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--charcoal-bg-elevated);
+  color: var(--charcoal-text-muted);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+/* v023.1: Operation Modal - Monitor tab (관제) */
+
+#operation-modal-root .monitor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+#operation-modal-root .monitor-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 160px;
+}
+
+#operation-modal-root .monitor-filter-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--charcoal-text-secondary);
+}
+
+#operation-modal-root .monitor-filter-select {
+  border: 1px solid var(--charcoal-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--charcoal-bg-surface);
+  color: var(--charcoal-text-primary);
+  padding: 6px 8px;
+  font-size: var(--font-sm);
+}
+
+#operation-modal-root .monitor-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: var(--space-2);
+}
+
+#operation-modal-root .monitor-section .section-header {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--charcoal-text-primary);
+  margin-bottom: var(--space-3);
+}
+
+#operation-modal-root .monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+#operation-modal-root .monitor-empty {
+  border: 1px dashed var(--charcoal-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--charcoal-bg-elevated);
+  color: var(--charcoal-text-muted);
+  padding: var(--space-5);
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+#operation-modal-root .monitor-card {
+  border: 1px solid var(--charcoal-border-subtle);
+  background: var(--charcoal-bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--charcoal-shadow-soft);
+}
+
+#operation-modal-root .monitor-card:hover {
+  background: var(--charcoal-bg-elevated);
+}
+
+#operation-modal-root .monitor-card:focus {
+  outline: 2px solid var(--charcoal-accent-soft);
+  outline-offset: 2px;
+}
+
+#operation-modal-root .monitor-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+#operation-modal-root .monitor-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--charcoal-border-subtle);
+  background: var(--charcoal-bg-elevated);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--charcoal-text-secondary);
+  flex: 0 0 auto;
+}
+
+#operation-modal-root .monitor-type.is-claim {
+  background: var(--charcoal-accent-soft);
+  color: var(--charcoal-text-primary);
+}
+
+#operation-modal-root .monitor-status {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--charcoal-border-subtle);
+  background: transparent;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--charcoal-text-secondary);
+  flex: 0 0 auto;
+}
+
+#operation-modal-root .monitor-status.is-overdue {
+  border-color: var(--state-overdue);
+  color: var(--state-overdue);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+#operation-modal-root .monitor-debtor-name {
+  font-weight: 600;
+  color: var(--charcoal-text-primary);
+}
