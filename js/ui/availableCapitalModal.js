@@ -1035,10 +1035,29 @@
     }
 
     controller = createController(modalRefs);
-    // Default filter = 전체
-    if (modalRefs.filterFrom) modalRefs.filterFrom.value = '';
-    if (modalRefs.filterTo) modalRefs.filterTo.value = '';
-    if (controller) controller.render();
+
+    // Default filter = 최근 7일 (오늘 포함 7일)
+    // - 시작일: 오늘 - 6일
+    // - 종료일: 오늘
+    // - 정렬은 기존 ASC 유지 (과거 → 현재)
+    if (controller && typeof controller.applyPreset === 'function') {
+      controller.applyPreset('7d');
+    } else {
+      var today = todayISODate();
+      if (modalRefs.filterFrom) modalRefs.filterFrom.value = addDays(today, -6);
+      if (modalRefs.filterTo) modalRefs.filterTo.value = today;
+      if (controller) controller.render();
+    }
+
+    // Initial scroll position: show latest logs (bottom)
+    var wrap = modal && modal.querySelector ? modal.querySelector('.ledger-table-wrap') : null;
+    if (wrap && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(function () {
+        wrap.scrollTop = wrap.scrollHeight;
+      });
+    } else if (wrap) {
+      wrap.scrollTop = wrap.scrollHeight;
+    }
 
     attachEsc();
   }

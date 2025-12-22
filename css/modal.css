@@ -635,7 +635,7 @@
 }
 
 #available-capital-modal-root .ledger-cell-amount.is-plus {
-  color: var(--state-completed);
+  color: var(--success-green, #16a34a);
 }
 
 #available-capital-modal-root .ledger-cell-amount.is-minus {
