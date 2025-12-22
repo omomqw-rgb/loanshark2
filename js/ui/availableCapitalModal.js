@@ -74,6 +74,99 @@
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
+  function toKey(v) {
+    return v != null ? String(v) : '';
+  }
+
+  function buildIdMap(list) {
+    var map = Object.create(null);
+    if (!Array.isArray(list)) return map;
+    for (var i = 0; i < list.length; i++) {
+      var it = list[i];
+      if (!it) continue;
+      if (it.id == null) continue;
+      var key = String(it.id);
+      if (!key) continue;
+      map[key] = it;
+    }
+    return map;
+  }
+
+  function getAllSchedulesForLookup() {
+    if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
+      return App.schedulesEngine.getAll() || [];
+    }
+    var st = App.state || {};
+    return Array.isArray(st.schedules) ? st.schedules : [];
+  }
+
+  function defaultTitleByType(type, title) {
+    if (title) return title;
+    if (type === 'INIT') return '초기자본';
+    if (type === 'AUTO_OUT') return '대출 실행';
+    if (type === 'AUTO_IN') return '대출상환';
+    if (type === 'AUTO_ADJUST') return '상환 정정';
+    if (type === 'MANUAL_IN') return '수동 유입';
+    if (type === 'MANUAL_OUT') return '수동 유출';
+    return '';
+  }
+
+  function resolveDebtorName(row, maps) {
+    maps = maps || {};
+    var debtorMap = maps.debtorMap || Object.create(null);
+    var loanMap = maps.loanMap || Object.create(null);
+    var claimMap = maps.claimMap || Object.create(null);
+    var scheduleMap = maps.scheduleMap || Object.create(null);
+
+    var debtorId = toKey(row && row.debtorId);
+
+    // Fallback by referenced entity when debtorId is missing.
+    if (!debtorId) {
+      var rt = (row && (row.refType || row.refKind)) ? String(row.refType || row.refKind) : '';
+      var rid = toKey(row && row.refId);
+
+      if (rt === 'loan' && rid && loanMap[rid] && loanMap[rid].debtorId != null) {
+        debtorId = String(loanMap[rid].debtorId);
+      } else if (rt === 'claim' && rid && claimMap[rid] && claimMap[rid].debtorId != null) {
+        debtorId = String(claimMap[rid].debtorId);
+      } else if (rt === 'schedule' && rid && scheduleMap[rid]) {
+        var sc = scheduleMap[rid];
+        if (sc.debtorId != null) {
+          debtorId = String(sc.debtorId);
+        } else if (sc.loanId != null && loanMap[String(sc.loanId)] && loanMap[String(sc.loanId)].debtorId != null) {
+          debtorId = String(loanMap[String(sc.loanId)].debtorId);
+        } else if (sc.claimId != null && claimMap[String(sc.claimId)] && claimMap[String(sc.claimId)].debtorId != null) {
+          debtorId = String(claimMap[String(sc.claimId)].debtorId);
+        }
+      }
+    }
+
+    if (!debtorId) return '';
+    var debtor = debtorMap[debtorId];
+    if (!debtor) return '';
+    if (debtor.name != null && String(debtor.name).trim()) {
+      return String(debtor.name).trim();
+    }
+    return '';
+  }
+
+  function buildLedgerDisplayTitle(row, maps) {
+    if (!row) return '';
+    var baseTitle = defaultTitleByType(row.type, row.title);
+
+    // AUTO logs: append debtor name for operational readability (UI only).
+    if (row.type === 'AUTO_IN' || row.type === 'AUTO_OUT' || row.type === 'AUTO_ADJUST') {
+      var debtorName = resolveDebtorName(row, maps);
+      if (debtorName) {
+        if (baseTitle.indexOf(debtorName) === -1) {
+          return baseTitle + ' · ' + debtorName;
+        }
+      }
+    }
+
+    return baseTitle;
+  }
+
   function getCashLogs() {
     if (App.cashLedger && typeof App.cashLedger.getLogs === 'function') {
       return App.cashLedger.getLogs() || [];
@@ -139,6 +232,10 @@
         type: it.type != null ? String(it.type) : '',
         date: it.date || '',
         title: it.title || '',
+        refType: it.refType != null ? String(it.refType) : (it.refKind != null ? String(it.refKind) : ''),
+        refKind: it.refKind != null ? String(it.refKind) : (it.refType != null ? String(it.refType) : ''),
+        refId: it.refId != null ? String(it.refId) : '',
+        debtorId: it.debtorId != null ? String(it.debtorId) : '',
         amount: safeNumber(it.amount),
         balance: running,
         createdAt: it.createdAt || ''
@@ -382,8 +479,10 @@
     var thItem = document.createElement('th');
     thItem.textContent = '항목';
     var thAmount = document.createElement('th');
+    thAmount.className = 'amount';
     thAmount.textContent = '금액';
     var thBalance = document.createElement('th');
+    thBalance.className = 'balance';
     thBalance.textContent = '가용자산';
     headTr.appendChild(thItem);
     headTr.appendChild(thAmount);
@@ -633,6 +732,15 @@
       var logs = getCashLogs();
       var result = buildFilteredRows(logs, state.from, state.to);
 
+      // Lookup maps (UI-only) for AUTO log title readability.
+      var st = App.state || {};
+      var maps = {
+        debtorMap: buildIdMap(st.debtors),
+        loanMap: buildIdMap(st.loans),
+        claimMap: buildIdMap(st.claims),
+        scheduleMap: buildIdMap(getAllSchedulesForLookup())
+      };
+
       // Summary uses the full ledger total (NOT filtered)
       var total = 0;
       if (App.cashLedger && typeof App.cashLedger.getCurrentBalance === 'function') {
@@ -676,7 +784,11 @@
 
         var title = document.createElement('div');
         title.className = 'ledger-item-title';
-        title.textContent = row.title || (row.type === 'INIT' ? '초기자본' : '');
+        var titleText = row.title || (row.type === 'INIT' ? '초기자본' : '');
+        if (isAutoType(row.type)) {
+          titleText = buildLedgerDisplayTitle(row, maps);
+        }
+        title.textContent = titleText;
 
         var badge = document.createElement('span');
         badge.className = 'ledger-item-badge';
@@ -739,14 +851,14 @@
 
         // Amount cell
         var tdAmt = document.createElement('td');
-        tdAmt.className = 'ledger-cell ledger-cell-amount';
+        tdAmt.className = 'ledger-cell ledger-cell-amount amount';
         if (row.amount > 0) tdAmt.classList.add('is-plus');
         if (row.amount < 0) tdAmt.classList.add('is-minus');
         tdAmt.textContent = formatSignedCurrency(row.amount);
 
         // Balance cell
         var tdBal = document.createElement('td');
-        tdBal.className = 'ledger-cell ledger-cell-balance';
+        tdBal.className = 'ledger-cell ledger-cell-balance balance';
         tdBal.textContent = formatCurrency(row.balance);
 
         tr.appendChild(tdItem);

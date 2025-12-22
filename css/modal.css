@@ -622,6 +622,18 @@
   font-weight: 700;
 }
 
+/* v024.3: Ledger column alignment & fixed width for numeric readability */
+#available-capital-modal-root .ledger-table th.amount,
+#available-capital-modal-root .ledger-table td.amount,
+#available-capital-modal-root .ledger-table th.balance,
+#available-capital-modal-root .ledger-table td.balance {
+  text-align: right;
+  width: 140px;
+  padding-right: 16px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
 #available-capital-modal-root .ledger-cell-amount.is-plus {
   color: var(--state-completed);
 }
