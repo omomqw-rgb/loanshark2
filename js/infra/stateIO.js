@@ -122,6 +122,19 @@
       var row = cashLogs[i];
       if (!isObject(row)) continue;
       if (row.id != null) row.id = toStr(row.id);
+
+      // v024.1: cashLogs ref 연결 구조 보완
+      // - Prefer refType; keep refKind for backward compatibility.
+      if (typeof row.refType === 'undefined' && typeof row.refKind !== 'undefined') {
+        row.refType = row.refKind;
+      }
+      if (typeof row.refKind === 'undefined' && typeof row.refType !== 'undefined') {
+        row.refKind = row.refType;
+      }
+
+      if (row.refType != null) row.refType = toStr(row.refType);
+      if (row.refKind != null) row.refKind = toStr(row.refKind);
+      if (row.refId != null) row.refId = toStr(row.refId);
     }
   }
 

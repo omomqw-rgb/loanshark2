@@ -732,6 +732,21 @@
 
       App.state.loans.push(loan);
 
+      // v024: Available Capital Ledger AUTO_OUT (대출 실행)
+      // - source of truth: App.state.cashLogs
+      // - amount must be negative (-principal)
+      if (App.cashLedger && typeof App.cashLedger.addAutoOut === 'function') {
+        App.cashLedger.addAutoOut({
+          date: startDate,
+          amount: principal,
+          title: '대출 실행',
+          refType: 'loan',
+          refKind: 'loan',
+          refId: newId,
+          debtorId: debtorId
+        });
+      }
+
       // schedules regeneration (legacy logic)
       if (App.db && typeof App.db.rebuildSchedulesForLoan === 'function') {
         App.db.rebuildSchedulesForLoan(newId);
@@ -869,6 +884,23 @@
         App.schedulesEngine.removeByLoanId(id);
       }
 
+      // v024.1: Available Capital Ledger integrity
+      // - Loan deletion cancels the event itself.
+      // - Remove all AUTO_OUT logs linked to this loan (do NOT adjust by overwriting).
+      if (App.state && Array.isArray(App.state.cashLogs)) {
+        for (var j = App.state.cashLogs.length - 1; j >= 0; j--) {
+          var row = App.state.cashLogs[j];
+          if (!row) continue;
+          if (row.type !== 'AUTO_OUT') continue;
+          var rt = (row.refType != null) ? String(row.refType)
+            : (row.refKind != null ? String(row.refKind) : '');
+          var rid = (row.refId != null) ? String(row.refId) : '';
+          if (rt === 'loan' && rid === id) {
+            App.state.cashLogs.splice(j, 1);
+          }
+        }
+      }
+
       // Stage 6: Narrow invalidate scope
       if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
         App.api.commit({
@@ -897,6 +929,28 @@
       // Align selected debtor state to match legacy UX (engine used to call debtorDetail.render(debtorId)).
       var loanId = form.getAttribute('data-loan-id');
       var loan = findLoanById(loanId);
+
+      // v024: snapshot paidAmount(before) for AUTO_IN delta computation
+      var paidBefore = 0;
+      (function () {
+        var id = loanId != null ? String(loanId) : '';
+        if (!id) return;
+        var list = null;
+        if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
+          list = App.schedulesEngine.getByLoanId(id);
+        } else if (App.state && Array.isArray(App.state.schedules)) {
+          list = App.state.schedules.filter(function (s) {
+            return s && s.loanId != null && String(s.loanId) === id;
+          });
+        }
+        if (!Array.isArray(list)) return;
+        for (var i = 0; i < list.length; i++) {
+          var sc = list[i];
+          if (!sc) continue;
+          var v = (sc.paidAmount != null) ? Number(sc.paidAmount) : Number(sc.partialPaidAmount);
+          if (isFinite(v)) paidBefore += v;
+        }
+      })();
       if (loan && loan.debtorId != null) {
         setDebtorPanelDetailState(loan.debtorId);
       }
@@ -904,6 +958,62 @@
       if (App.schedulesEngine && typeof App.schedulesEngine.bulkUpdateFromLoanForm === 'function') {
         App.schedulesEngine.bulkUpdateFromLoanForm(form);
       }
+
+      // v024: snapshot paidAmount(after) then create AUTO_IN only for positive delta
+      (function () {
+        if (!App.cashLedger || typeof App.cashLedger.addAutoIn !== 'function') return;
+        var id = loanId != null ? String(loanId) : '';
+        if (!id) return;
+
+        var paidAfter = 0;
+        var list = null;
+        if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
+          list = App.schedulesEngine.getByLoanId(id);
+        } else if (App.state && Array.isArray(App.state.schedules)) {
+          list = App.state.schedules.filter(function (s) {
+            return s && s.loanId != null && String(s.loanId) === id;
+          });
+        }
+        if (!Array.isArray(list)) return;
+        for (var i = 0; i < list.length; i++) {
+          var sc = list[i];
+          if (!sc) continue;
+          var v = (sc.paidAmount != null) ? Number(sc.paidAmount) : Number(sc.partialPaidAmount);
+          if (isFinite(v)) paidAfter += v;
+        }
+
+        var delta = paidAfter - paidBefore;
+        if (!isFinite(delta) || delta === 0) return;
+
+        var today = (App.util && typeof App.util.todayISODate === 'function')
+          ? App.util.todayISODate()
+          : new Date().toISOString().slice(0, 10);
+
+        if (delta > 0 && typeof App.cashLedger.addAutoIn === 'function') {
+          App.cashLedger.addAutoIn({
+            date: today,
+            amount: delta,
+            title: '대출상환',
+            refType: 'loan',
+            refKind: 'loan',
+            refId: id,
+            debtorId: loan && loan.debtorId != null ? loan.debtorId : undefined
+          });
+        } else if (delta < 0) {
+          var fn = (typeof App.cashLedger.addAutoAdjust === 'function') ? App.cashLedger.addAutoAdjust : App.cashLedger.addLog;
+          if (typeof fn !== 'function') return;
+          fn({
+            type: 'AUTO_ADJUST',
+            date: today,
+            amount: delta,
+            title: '상환 정정',
+            refType: 'loan',
+            refKind: 'loan',
+            refId: id,
+            debtorId: loan && loan.debtorId != null ? loan.debtorId : undefined
+          });
+        }
+      })();
 
       // Close modal (legacy UX)
       if (App.modalManager && typeof App.modalManager.close === 'function') {
@@ -1152,6 +1262,28 @@
       // Align selected debtor state to match legacy UX (engine used to call debtorDetail.render(debtorId)).
       var claimId = form.getAttribute('data-claim-id');
       var claim = findClaimById(claimId);
+
+      // v024: snapshot paidAmount(before) for AUTO_IN delta computation
+      var paidBefore = 0;
+      (function () {
+        var id = claimId != null ? String(claimId) : '';
+        if (!id) return;
+        var list = null;
+        if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
+          list = App.schedulesEngine.getByClaimId(id);
+        } else if (App.state && Array.isArray(App.state.schedules)) {
+          list = App.state.schedules.filter(function (s) {
+            return s && s.claimId != null && String(s.claimId) === id;
+          });
+        }
+        if (!Array.isArray(list)) return;
+        for (var i = 0; i < list.length; i++) {
+          var sc = list[i];
+          if (!sc) continue;
+          var v = (sc.paidAmount != null) ? Number(sc.paidAmount) : Number(sc.partialPaidAmount);
+          if (isFinite(v)) paidBefore += v;
+        }
+      })();
       if (claim && claim.debtorId != null) {
         setDebtorPanelDetailState(claim.debtorId);
       }
@@ -1159,6 +1291,62 @@
       if (App.schedulesEngine && typeof App.schedulesEngine.bulkUpdateFromClaimForm === 'function') {
         App.schedulesEngine.bulkUpdateFromClaimForm(form);
       }
+
+      // v024: snapshot paidAmount(after) then create AUTO_IN only for positive delta
+      (function () {
+        if (!App.cashLedger || typeof App.cashLedger.addAutoIn !== 'function') return;
+        var id = claimId != null ? String(claimId) : '';
+        if (!id) return;
+
+        var paidAfter = 0;
+        var list = null;
+        if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
+          list = App.schedulesEngine.getByClaimId(id);
+        } else if (App.state && Array.isArray(App.state.schedules)) {
+          list = App.state.schedules.filter(function (s) {
+            return s && s.claimId != null && String(s.claimId) === id;
+          });
+        }
+        if (!Array.isArray(list)) return;
+        for (var i = 0; i < list.length; i++) {
+          var sc = list[i];
+          if (!sc) continue;
+          var v = (sc.paidAmount != null) ? Number(sc.paidAmount) : Number(sc.partialPaidAmount);
+          if (isFinite(v)) paidAfter += v;
+        }
+
+        var delta = paidAfter - paidBefore;
+        if (!isFinite(delta) || delta === 0) return;
+
+        var today = (App.util && typeof App.util.todayISODate === 'function')
+          ? App.util.todayISODate()
+          : new Date().toISOString().slice(0, 10);
+
+        if (delta > 0 && typeof App.cashLedger.addAutoIn === 'function') {
+          App.cashLedger.addAutoIn({
+            date: today,
+            amount: delta,
+            title: '채권회수',
+            refType: 'claim',
+            refKind: 'claim',
+            refId: id,
+            debtorId: claim && claim.debtorId != null ? claim.debtorId : undefined
+          });
+        } else if (delta < 0) {
+          var fn = (typeof App.cashLedger.addAutoAdjust === 'function') ? App.cashLedger.addAutoAdjust : App.cashLedger.addLog;
+          if (typeof fn !== 'function') return;
+          fn({
+            type: 'AUTO_ADJUST',
+            date: today,
+            amount: delta,
+            title: '상환 정정',
+            refType: 'claim',
+            refKind: 'claim',
+            refId: id,
+            debtorId: claim && claim.debtorId != null ? claim.debtorId : undefined
+          });
+        }
+      })();
 
       // Close modal (legacy UX)
       if (App.modalManager && typeof App.modalManager.close === 'function') {

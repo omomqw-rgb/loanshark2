@@ -388,6 +388,17 @@ function init() {
       opsCard._operationModalBound = true;
     }
 
+    // v024: Overview KPI '가용자산' 클릭 -> 가용자산 Ledger 모달
+    var availCard = root.querySelector('.report-kpi-card[data-kpi="avail"]');
+    if (availCard && !availCard._availableCapitalModalBound) {
+      availCard.addEventListener('click', function () {
+        if (App.ui && App.ui.availableCapitalModal && typeof App.ui.availableCapitalModal.open === 'function') {
+          App.ui.availableCapitalModal.open();
+        }
+      });
+      availCard._availableCapitalModalBound = true;
+    }
+
     // Overview 포트폴리오 타입 토글 (대출 / 채권)
     var portfolioToggleRoot = root.querySelector('.overview-portfolio-types');
     if (portfolioToggleRoot) {
@@ -699,7 +710,25 @@ function updateOverviewKPI(root, agg) {
     });
   }
 
-  // ④ 가용자산(data-kpi="avail")은 아직 공식 확정 전이라, 여기서는 수정하지 않는다.
+  // ④ 가용자산(data-kpi="avail") — Cash Ledger(sum of cashLogs.amount)
+  var availCard = root.querySelector('.report-kpi-card[data-kpi="avail"]');
+  if (availCard) {
+    var availValueEl = availCard.querySelector('.report-kpi-main .report-kpi-value');
+    if (availValueEl) {
+      var totalAvail = 0;
+      if (App.cashLedger && typeof App.cashLedger.getCurrentBalance === 'function') {
+        totalAvail = Number(App.cashLedger.getCurrentBalance()) || 0;
+      } else {
+        var logs = (App.state && Array.isArray(App.state.cashLogs)) ? App.state.cashLogs : [];
+        for (var i = 0; i < logs.length; i++) {
+          var it = logs[i];
+          if (!it) continue;
+          totalAvail += Number(it.amount) || 0;
+        }
+      }
+      availValueEl.textContent = formatCurrencySafe(util, totalAvail);
+    }
+  }
 }
 
 

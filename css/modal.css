@@ -275,12 +275,17 @@
   v023.3: Operation Modal width refinement
   - v023.2 대비 가로 폭 약 15% 축소 (vw 기준)
   - height 값은 v023.2 그대로 유지
+
+  v023.4: Operation Modal width fine tuning
+  - v023.3 대비 가로 폭을 추가로 축소하여 가독성 개선
+  - width: 55vw (vw 기반)
+  - height 값은 v023.3 그대로 유지
 */
 
 #modal-root #operation-modal-root {
-  width: 78vw;
+  width: 55vw;
   height: 75vh;
-  max-width: 78vw;
+  max-width: 55vw;
   max-height: 75vh;
   margin: 0;
   padding: 0;
@@ -291,8 +296,8 @@
 
 @media (min-width: 72rem) {
   #modal-root #operation-modal-root {
-    width: 68vw;
-    max-width: 68vw;
+    width: 55vw;
+    max-width: 55vw;
   }
 }
 
@@ -333,6 +338,369 @@
 #operation-modal-root .modal-close:hover {
   background: var(--charcoal-bg-elevated);
   color: var(--charcoal-text-primary);
+}
+
+
+/* =========================================================
+   v024: Available Capital Ledger Modal (Report > Overview > 가용자산)
+   - Source of truth: App.state.cashLogs
+   - Scoped rules only (no global token/theme changes)
+   ========================================================= */
+
+#modal-root #available-capital-modal-root {
+  width: 55vw;
+  height: 75vh;
+  max-width: 55vw;
+  max-height: 75vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 72rem) {
+  #modal-root #available-capital-modal-root {
+    width: 55vw;
+    max-width: 55vw;
+  }
+}
+
+#available-capital-modal-root .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6) var(--space-3);
+  border-bottom: 1px solid var(--charcoal-border-subtle);
+}
+
+#available-capital-modal-root .modal-title {
+  padding: 0 !important;
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .modal-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .modal-close:hover {
+  background: var(--charcoal-bg-elevated);
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .modal-body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  gap: var(--space-4);
+}
+
+#available-capital-modal-root .avail-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+#available-capital-modal-root .avail-summary-label {
+  font-size: var(--font-sm);
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .avail-summary-value {
+  font-size: var(--font-xl);
+  font-weight: 800;
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .avail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+#available-capital-modal-root .avail-action-btn {
+  border: 1px solid var(--charcoal-border-subtle);
+  background: var(--charcoal-bg-elevated);
+  color: var(--charcoal-text-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-sm);
+}
+
+#available-capital-modal-root .avail-action-btn:hover {
+  background: var(--charcoal-bg-surface);
+}
+
+#available-capital-modal-root .ledger-editor {
+  border: 1px solid var(--charcoal-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--charcoal-bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+#available-capital-modal-root .ledger-editor-title {
+  font-weight: 700;
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .ledger-editor-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 48rem) {
+  #available-capital-modal-root .ledger-editor-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+#available-capital-modal-root .ledger-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+#available-capital-modal-root .ledger-field-label {
+  font-size: var(--font-xs);
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .ledger-input {
+  border: 1px solid var(--charcoal-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--charcoal-bg-surface);
+  color: var(--charcoal-text-primary);
+  padding: var(--space-2) var(--space-2);
+}
+
+#available-capital-modal-root .ledger-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+#available-capital-modal-root .ledger-editor-btn {
+  border: 1px solid var(--charcoal-border-subtle);
+  background: var(--charcoal-bg-surface);
+  color: var(--charcoal-text-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-sm);
+}
+
+#available-capital-modal-root .ledger-editor-btn.is-save {
+  background: var(--charcoal-bg-surface);
+  font-weight: 700;
+}
+
+#available-capital-modal-root .ledger-editor-btn:hover {
+  background: var(--charcoal-bg-elevated);
+}
+
+#available-capital-modal-root .ledger-filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+#available-capital-modal-root .ledger-filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+#available-capital-modal-root .ledger-filter-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+#available-capital-modal-root .ledger-filter-label {
+  font-size: var(--font-xs);
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .ledger-filter-input {
+  border: 1px solid var(--charcoal-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--charcoal-bg-surface);
+  color: var(--charcoal-text-primary);
+  padding: var(--space-2);
+}
+
+#available-capital-modal-root .ledger-filter-sep {
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .ledger-preset-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+#available-capital-modal-root .ledger-preset-btn {
+  border: 1px solid var(--charcoal-border-subtle);
+  background: transparent;
+  color: var(--charcoal-text-primary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: var(--font-xs);
+}
+
+#available-capital-modal-root .ledger-preset-btn.is-active {
+  background: var(--charcoal-bg-elevated);
+}
+
+#available-capital-modal-root .ledger-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--charcoal-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--charcoal-bg-surface);
+}
+
+#available-capital-modal-root .ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-sm);
+}
+
+#available-capital-modal-root .ledger-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--charcoal-bg-surface);
+  z-index: 1;
+  text-align: left;
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--charcoal-border-subtle);
+  color: var(--charcoal-text-muted);
+  font-weight: 700;
+}
+
+#available-capital-modal-root .ledger-table tbody td {
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--charcoal-border-subtle);
+  vertical-align: top;
+}
+
+#available-capital-modal-root .ledger-row.is-auto {
+  opacity: 0.92;
+}
+
+#available-capital-modal-root .ledger-cell-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#available-capital-modal-root .ledger-cell-balance {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+#available-capital-modal-root .ledger-cell-amount.is-plus {
+  color: var(--state-completed);
+}
+
+#available-capital-modal-root .ledger-cell-amount.is-minus {
+  color: var(--state-overdue);
+}
+
+#available-capital-modal-root .ledger-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+#available-capital-modal-root .ledger-item-titlewrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+#available-capital-modal-root .ledger-item-title {
+  font-weight: 700;
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .ledger-item-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--charcoal-border-subtle);
+  font-size: var(--font-xs);
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .ledger-item-badge.is-auto {
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .ledger-item-badge.is-manual {
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .ledger-item-badge.is-init {
+  color: var(--charcoal-text-primary);
+}
+
+#available-capital-modal-root .ledger-item-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+#available-capital-modal-root .ledger-mini-btn {
+  border: 1px solid var(--charcoal-border-subtle);
+  background: transparent;
+  color: var(--charcoal-text-primary);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: var(--font-xs);
+  cursor: pointer;
+}
+
+#available-capital-modal-root .ledger-mini-btn:hover {
+  background: var(--charcoal-bg-elevated);
+}
+
+#available-capital-modal-root .ledger-item-sub {
+  margin-top: 4px;
+  font-size: var(--font-xs);
+  color: var(--charcoal-text-muted);
+}
+
+#available-capital-modal-root .ledger-empty-cell {
+  text-align: center;
+  padding: var(--space-6) var(--space-3);
+  color: var(--charcoal-text-muted);
 }
 
 #operation-modal-root .modal-tabs {
