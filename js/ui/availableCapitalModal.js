@@ -82,8 +82,17 @@
     return Array.isArray(st.cashLogs) ? st.cashLogs : [];
   }
 
-  function computeBalanceMap(logs) {
-    // 1) Sort ascending for cumulative balance
+  function buildFilteredRows(logs, from, to) {
+    var fromMs = from ? toLocalDayMs(from) : NaN;
+    var toMs = to ? toLocalDayMs(to) : NaN;
+
+    // Inclusive range: expand end to end-of-day
+    if (isFinite(toMs)) {
+      toMs = toMs + (24 * 60 * 60 * 1000) - 1;
+    }
+
+    // Ledger display order: date ASC, createdAt ASC
+    // Running balance MUST be calculated in the same (sorted) order.
     var list = (Array.isArray(logs) ? logs.slice() : []);
     list.sort(function (a, b) {
       var da = toLocalDayMs(a && a.date);
@@ -112,35 +121,14 @@
       return 0;
     });
 
-    var sum = 0;
-    var map = {};
+    var rows = [];
+    var running = 0;
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
       if (!it) continue;
-      sum += safeNumber(it.amount);
-      if (it.id != null) {
-        map[String(it.id)] = sum;
-      }
-    }
-    map._final = sum;
-    return map;
-  }
 
-  function buildFilteredRows(logs, from, to) {
-    var balanceMap = computeBalanceMap(logs);
-
-    var fromMs = from ? toLocalDayMs(from) : NaN;
-    var toMs = to ? toLocalDayMs(to) : NaN;
-
-    // Inclusive range: expand end to end-of-day
-    if (isFinite(toMs)) {
-      toMs = toMs + (24 * 60 * 60 * 1000) - 1;
-    }
-
-    var rows = [];
-    for (var i = 0; i < logs.length; i++) {
-      var it = logs[i];
-      if (!it) continue;
+      // Always accumulate in sorted order to keep the ledger balance truthful.
+      running += safeNumber(it.amount);
 
       var dms = toLocalDayMs(it.date);
       if (isFinite(fromMs) && isFinite(dms) && dms < fromMs) continue;
@@ -152,40 +140,15 @@
         date: it.date || '',
         title: it.title || '',
         amount: safeNumber(it.amount),
-        balance: (it.id != null && balanceMap[String(it.id)] != null) ? safeNumber(balanceMap[String(it.id)]) : 0,
+        balance: running,
         createdAt: it.createdAt || ''
       });
     }
 
-    // Sort display: date DESC (latest first)
-    rows.sort(function (a, b) {
-      var da = toLocalDayMs(a.date);
-      var db = toLocalDayMs(b.date);
-
-      if (!isFinite(da)) da = 0;
-      if (!isFinite(db)) db = 0;
-      if (da !== db) return db - da;
-
-      var ta = 0;
-      var tb = 0;
-      if (a.createdAt) {
-        var d1 = new Date(a.createdAt);
-        if (!isNaN(d1.getTime())) ta = d1.getTime();
-      }
-      if (b.createdAt) {
-        var d2 = new Date(b.createdAt);
-        if (!isNaN(d2.getTime())) tb = d2.getTime();
-      }
-      if (ta !== tb) return tb - ta;
-
-      if (a.id < b.id) return 1;
-      if (a.id > b.id) return -1;
-      return 0;
-    });
-
     return {
       rows: rows,
-      total: safeNumber(balanceMap._final)
+      // Summary uses the full ledger total (NOT filtered)
+      total: running
     };
   }
 
