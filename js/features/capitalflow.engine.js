@@ -708,3 +708,40 @@
     };
   })();
 })(window, document);
+
+
+/* ============================================================================
+ * v2.2.1 CapitalFlow Single Source of Truth Patch
+ * PATCH-ID: LoanShark_v2.2.1_capitalflow_single_source_of_truth_alignment
+ *
+ * Goal
+ * - executionDate is the single Source of Truth for loan capital execution.
+ * - Do NOT mutate persisted data (cashLogs / loans).
+ * - Do NOT generate persistent auto logs.
+ *
+ * What we do (runtime only)
+ * - If a loan has executionDate <= today but its LOAN_EXECUTION cashLog is missing,
+ *   provide ONE virtual LOAN_EXECUTION event for calculation ONLY.
+ * - This virtual event:
+ *   - is NOT pushed into App.state.cashLogs
+ *   - is NOT saved to cloud
+ *   - is NOT directly appended to UI log lists
+ * ========================================================================== */
+/* ========================================================================== *
+ * CapitalFlowEngine (v2.3)
+ * - Virtual LOAN_EXECUTION calculation events removed.
+ * - LOAN_EXECUTION is now a persisted cashLogs entry created ONLY on loan create/edit.
+ * - No runtime backfill, no implicit generation.
+ * ========================================================================== */
+(function (window) {
+  'use strict';
+
+  var App = window.App || (window.App = {});
+  App.capitalFlowEngine = App.capitalFlowEngine || {};
+
+  // Legacy hook: kept as a no-op to avoid breaking any stale call sites.
+  App.capitalFlowEngine.syncLoanExecutionLogs = function () {
+    // no-op (v2.3)
+  };
+})(window);
+

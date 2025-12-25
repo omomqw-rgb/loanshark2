@@ -387,11 +387,7 @@ function computeTrendSeries(period) {
   var toDateLimit = trendState.dateTo ? toDate(trendState.dateTo) : null;
 
   var buckets = {};
-  // v016: ensure bucket exists for each loan startDate
-  loans.forEach(function(loan){
-    var d = toDate(loan.startDate || loan.start_date || loan.createdAt || loan.created_at);
-    if(d){ var key=getBucketKey(d); if(key && !buckets[key]) buckets[key]={inflow:0,outflow:0,net:0};}
-  });
+  // v2.3: Buckets are created from recorded events (cashLogs / schedules).
 
   function getBucketKey(date) {
     if (!date) return null;
@@ -401,14 +397,18 @@ function computeTrendSeries(period) {
     return y + '-' + mm; // YYYY-MM
   }
 
-  // 1) 대출 신규 발생 = 자본 유출 (Outflow)
-  loans.forEach(function (loan) {
-    if (!loan) return;
-    var amt = Number(loan.principal || loan.amount || loan.totalRepayAmount) || 0;
-    if (!amt) return;
+  // 1) 대출 실행 = 자본 유출 (Outflow)
+  // v2.3: Source of Truth is cashLogs (LOAN_EXECUTION).
+  var cashLogs = Array.isArray(state.cashLogs) ? state.cashLogs : [];
+  cashLogs.forEach(function (row) {
+    if (!row) return;
+    if (row.type !== 'LOAN_EXECUTION') return;
 
-    var start = loan.startDate || loan.start_date || loan.createdAt || loan.created_at || null;
-    var date = toDate(start);
+    var amt = Number(row.amount) || 0;
+    if (!amt) return;
+    if (amt < 0) amt = -amt;
+
+    var date = toDate(row.date || null);
     if (!date) return;
     if (date > today) return;
     if (fromDate && date < fromDate) return;

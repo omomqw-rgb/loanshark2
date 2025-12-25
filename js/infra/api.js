@@ -673,6 +673,135 @@
   }
 
   // Stage 4C: Loan CRUD domain API
+
+  // v2.3: Promote LOAN_EXECUTION to an official persisted cashLogs entry.
+  // - No virtual/backfill generation at runtime.
+  // - Create ONLY on loan create/edit under strict conditions.
+
+  function toISODate10(v) {
+    if (v == null) return '';
+    var s = String(v);
+    if (s.length >= 10) s = s.slice(0, 10);
+    if (s.length !== 10) return '';
+    // YYYY-MM-DD (no regex)
+    if (s.charAt(4) !== '-' || s.charAt(7) !== '-') return '';
+    for (var i = 0; i < 10; i++) {
+      if (i === 4 || i === 7) continue;
+      var c = s.charAt(i);
+      if (c < '0' || c > '9') return '';
+    }
+    return s;
+  }
+
+  function todayISODate10() {
+    if (App.date && typeof App.date.getToday === 'function') {
+      return toISODate10(App.date.getToday());
+    }
+    if (App.util && typeof App.util.todayISODate === 'function') {
+      return toISODate10(App.util.todayISODate());
+    }
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function ensureCashLogsArray() {
+    if (!App.state) App.state = {};
+    if (!Array.isArray(App.state.cashLogs)) App.state.cashLogs = [];
+    return App.state.cashLogs;
+  }
+
+  function findLoanExecutionLog(loanId) {
+    var lid = loanId != null ? String(loanId) : '';
+    if (!lid) return null;
+    var logs = (App.state && Array.isArray(App.state.cashLogs)) ? App.state.cashLogs : [];
+    for (var i = 0; i < logs.length; i++) {
+      var row = logs[i];
+      if (!row) continue;
+      if (row.type !== 'LOAN_EXECUTION') continue;
+      var rt = (row.refType != null) ? String(row.refType)
+        : (row.refKind != null ? String(row.refKind) : '');
+      var rid = (row.refId != null) ? String(row.refId) : '';
+      if (rt === 'loan' && rid === lid) return row;
+    }
+    return null;
+  }
+
+  function createLoanExecutionLog(loan) {
+    if (!loan || loan.id == null) return null;
+    var exec = toISODate10(loan.executionDate);
+    if (!exec) return null;
+
+    var principal = Number(loan.principal) || 0;
+    if (!principal) return null;
+
+    // Idempotent: only one LOAN_EXECUTION per loanId
+    if (findLoanExecutionLog(loan.id)) return null;
+
+    var payload = {
+      type: 'LOAN_EXECUTION',
+      date: exec,
+      amount: -principal,
+      refType: 'loan',
+      refId: String(loan.id),
+      debtorId: loan.debtorId != null ? String(loan.debtorId) : undefined,
+      auto: true,
+      createdAt: new Date().toISOString()
+    };
+
+    if (App.cashLedger && typeof App.cashLedger.addLog === 'function') {
+      return App.cashLedger.addLog(payload);
+    }
+
+    // Fallback (should not happen): push minimal shape without breaking.
+    var logs = ensureCashLogsArray();
+    var id = 'LOG_' + String(Date.now()) + '_' + String(Math.random()).slice(2);
+    var row = {
+      id: id,
+      type: payload.type,
+      date: payload.date,
+      title: '',
+      amount: payload.amount,
+      createdAt: payload.createdAt,
+      refType: payload.refType,
+      refKind: payload.refType,
+      refId: payload.refId,
+      debtorId: payload.debtorId,
+      auto: true,
+      editable: false,
+      deletable: false
+    };
+    logs.push(row);
+    return row;
+  }
+
+  function maybeCreateLoanExecutionLogOnCreate(loan) {
+    if (!loan) return null;
+    var exec = toISODate10(loan.executionDate);
+    if (!exec) return null;
+
+    var today = todayISODate10();
+    if (today && exec > today) return null;
+
+    return createLoanExecutionLog(loan);
+  }
+
+  function maybeCreateLoanExecutionLogOnEdit(prevExecutionDate, loan) {
+    if (!loan) return null;
+    var nextExec = toISODate10(loan.executionDate);
+    if (!nextExec) return null;
+
+    var today = todayISODate10();
+    if (today && nextExec > today) return null;
+
+    var prevExec = toISODate10(prevExecutionDate);
+    // Trigger only when:
+    // - executionDate newly entered, OR
+    // - it changed from future (>today) to today or past (<=today)
+    if (prevExec) {
+      if (today && prevExec <= today) return null;
+    }
+    return createLoanExecutionLog(loan);
+  }
+
   if (typeof App.api.domain.loan.createFromForm !== 'function') {
     App.api.domain.loan.createFromForm = function (form) {
       if (!form) return;
@@ -689,6 +818,9 @@
       var weekDayStr = form.querySelector('[name="loan-weekday"]').value;
       var weekDay = weekDayStr === '' ? null : Number(weekDayStr);
       var startDate = form.querySelector('[name="loan-start-date"]').value || new Date().toISOString().slice(0, 10);
+      var executionDate = '';
+      var executionEl = form.querySelector('[name="loan-execution-date"]');
+      if (executionEl && executionEl.value) executionDate = String(executionEl.value).slice(0, 10);
 
       // Legacy validation (v001)
       if (!principal) {
@@ -725,6 +857,10 @@
         createdAt: startDate
       };
 
+      if (executionDate) {
+        loan.executionDate = executionDate;
+      }
+
       // displayId: generate only when missing (new entity)
       if (App.util && typeof App.util.ensureDisplayId === 'function') {
         App.util.ensureDisplayId('loan', loan);
@@ -732,20 +868,8 @@
 
       App.state.loans.push(loan);
 
-      // v024: Available Capital Ledger AUTO_OUT (대출 실행)
-      // - source of truth: App.state.cashLogs
-      // - amount must be negative (-principal)
-      if (App.cashLedger && typeof App.cashLedger.addAutoOut === 'function') {
-        App.cashLedger.addAutoOut({
-          date: startDate,
-          amount: principal,
-          title: '대출 실행',
-          refType: 'loan',
-          refKind: 'loan',
-          refId: newId,
-          debtorId: debtorId
-        });
-      }
+      // v2.3: create official LOAN_EXECUTION log (persisted cashLogs)
+      maybeCreateLoanExecutionLogOnCreate(loan);
 
       // schedules regeneration (legacy logic)
       if (App.db && typeof App.db.rebuildSchedulesForLoan === 'function') {
@@ -782,6 +906,7 @@
 
       var loanId = form.getAttribute('data-loan-id');
       var loan = findLoanById(loanId);
+      var prevExecutionDate = loan && loan.executionDate != null ? String(loan.executionDate).slice(0, 10) : '';
       if (!loan) {
         if (App.modalManager && typeof App.modalManager.close === 'function') {
           App.modalManager.close();
@@ -798,6 +923,9 @@
       var weekDayStr = form.querySelector('[name="loan-weekday"]').value;
       var weekDay = weekDayStr === '' ? null : Number(weekDayStr);
       var startDate = form.querySelector('[name="loan-start-date"]').value || new Date().toISOString().slice(0, 10);
+      var executionDate = '';
+      var executionEl = form.querySelector('[name="loan-execution-date"]');
+      if (executionEl && executionEl.value) executionDate = String(executionEl.value).slice(0, 10);
 
       // Legacy validation (v001)
       if (!principal) {
@@ -821,6 +949,14 @@
       loan.dayInterval = dayInterval;
       loan.weekDay = weekDay;
       loan.startDate = startDate;
+      if (executionDate) {
+        loan.executionDate = executionDate;
+      } else if (loan.executionDate != null) {
+        delete loan.executionDate;
+      }
+
+      // v2.3: create official LOAN_EXECUTION log (persisted cashLogs)
+      maybeCreateLoanExecutionLogOnEdit(prevExecutionDate, loan);
 
       // displayId: generate only when missing (legacy entity save-time)
       if (App.util && typeof App.util.ensureDisplayId === 'function') {
@@ -891,7 +1027,7 @@
         for (var j = App.state.cashLogs.length - 1; j >= 0; j--) {
           var row = App.state.cashLogs[j];
           if (!row) continue;
-          if (row.type !== 'AUTO_OUT') continue;
+          if (row.type !== 'AUTO_OUT' && row.type !== 'LOAN_EXECUTION') continue;
           var rt = (row.refType != null) ? String(row.refType)
             : (row.refKind != null ? String(row.refKind) : '');
           var rid = (row.refId != null) ? String(row.refId) : '';

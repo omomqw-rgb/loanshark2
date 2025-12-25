@@ -7,6 +7,8 @@
     INIT: 'INIT',
     AUTO_IN: 'AUTO_IN',
     AUTO_OUT: 'AUTO_OUT',
+    // v2.2: explicit capital execution outflow (idempotent, executionDate-based)
+    LOAN_EXECUTION: 'LOAN_EXECUTION',
     AUTO_ADJUST: 'AUTO_ADJUST',
     MANUAL_IN: 'MANUAL_IN',
     MANUAL_OUT: 'MANUAL_OUT'
@@ -88,7 +90,7 @@
   }
 
   function isAutoType(type) {
-    return type === TYPES.AUTO_IN || type === TYPES.AUTO_OUT || type === TYPES.AUTO_ADJUST;
+    return type === TYPES.AUTO_IN || type === TYPES.AUTO_OUT || type === TYPES.AUTO_ADJUST || type === TYPES.LOAN_EXECUTION;
   }
 
   function isEditableType(type) {
@@ -98,7 +100,7 @@
 
   function normalizeAmountByType(type, amount) {
     var n = safeToNumber(amount);
-    if (type === TYPES.AUTO_OUT || type === TYPES.MANUAL_OUT || type === TYPES.AUTO_ADJUST) {
+    if (type === TYPES.AUTO_OUT || type === TYPES.MANUAL_OUT || type === TYPES.AUTO_ADJUST || type === TYPES.LOAN_EXECUTION) {
       return -abs(n);
     }
     // INIT / *_IN
@@ -109,6 +111,62 @@
     var st = ensureState();
     return st.cashLogs;
   }
+
+  
+
+  function shouldIncludeInEffective(log, ctx) {
+    if (!log) return false;
+    var t = log.type || '';
+
+    // v2.2+ policy:
+    // - executionDate가 도입되기 전(legacy) AUTO_OUT(대출 실행)은 KPI/Ledger에서 제외한다.
+    if (t === TYPES.AUTO_OUT) return false;
+
+    // v2.3 policy:
+    // - LOAN_EXECUTION은 "cashLogs 기록"이 단일 기준(Source of Truth)이다.
+    // - loan.executionDate를 참조하여 포함 여부를 판단하지 않는다.
+    // - Future-dated LOAN_EXECUTION은 아직 유효하지 않으므로 제외한다.
+    if (t === TYPES.LOAN_EXECUTION) {
+      var today = (ctx && ctx.today) ? ctx.today : todayISODate();
+      var d = log.date ? String(log.date).slice(0, 10) : '';
+      if (d && today && d > today) return false;
+
+      // Must be linked to a loan entry (for display/join safety)
+      var rt = (log.refType != null) ? String(log.refType)
+        : (log.refKind != null ? String(log.refKind) : '');
+      if (rt !== 'loan') return false;
+
+      var rid = (log.refId != null) ? String(log.refId) : '';
+      if (!rid) return false;
+    }
+
+    return true;
+  }
+
+  function getEffectiveLogs() {
+    var logs = getLogs();
+    var out = [];
+    var ctx = { today: todayISODate() };
+    if (!Array.isArray(logs) || !logs.length) return out;
+    for (var i = 0; i < logs.length; i++) {
+      var it = logs[i];
+      if (!it) continue;
+      if (!shouldIncludeInEffective(it, ctx)) continue;
+      out.push(it);
+    }
+    return out;
+  }
+
+
+  
+
+  // v2.3: Single Source of Truth alignment
+  // - Balance/KPI is calculated purely from effective cashLogs
+  // - No virtual events, no loan.executionDate reference
+  function getBalanceEvents() {
+    return getEffectiveLogs();
+  }
+
 
   function sumAmounts(logs) {
     if (!Array.isArray(logs)) return 0;
@@ -143,6 +201,7 @@
       title: title,
       amount: amount,
       createdAt: payload.createdAt != null ? String(payload.createdAt) : new Date().toISOString(),
+      auto: payload.auto != null ? !!payload.auto : isAutoType(type),
       // Optional link info (read-only, does not affect ledger math)
       refType: refType,
       refKind: refKind,
@@ -305,9 +364,11 @@
   App.cashLedger.isAutoType = isAutoType;
   App.cashLedger.isEditableType = isEditableType;
   App.cashLedger.getLogs = getLogs;
+  App.cashLedger.getEffectiveLogs = getEffectiveLogs;
+  App.cashLedger.getBalanceEvents = getBalanceEvents;
   App.cashLedger.sumAmounts = sumAmounts;
   App.cashLedger.getCurrentBalance = function () {
-    return sumAmounts(getLogs());
+    return sumAmounts(getBalanceEvents());
   };
   App.cashLedger.addLog = addLog;
   App.cashLedger.upsertInitialCapital = upsertInitialCapital;

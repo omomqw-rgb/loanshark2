@@ -561,6 +561,30 @@ function openLoanModal(mode, context) {
     row2.appendChild(fieldTotal);
     body.appendChild(row2);
 
+    // v2.2: executionDate (자본 집행 시점) — optional, separate from startDate(schedule)
+    var executionDate = '';
+    if (loan && loan.executionDate) {
+      executionDate = String(loan.executionDate).slice(0, 10);
+    } else if (mode === 'create') {
+      if (App.date && typeof App.date.getToday === 'function') {
+        executionDate = App.date.getToday();
+      } else if (App.util && typeof App.util.todayISODate === 'function') {
+        executionDate = App.util.todayISODate();
+      } else {
+        executionDate = new Date().toISOString().slice(0, 10);
+      }
+    }
+
+    var rowExec = createRow();
+    var fieldExecDate = createField('대출실행일');
+    var execDateInput = document.createElement('input');
+    execDateInput.name = 'loan-execution-date';
+    execDateInput.type = 'date';
+    execDateInput.value = executionDate || '';
+    fieldExecDate.appendChild(execDateInput);
+    rowExec.appendChild(fieldExecDate);
+    body.appendChild(rowExec);
+
     var row3 = createRow();
     var fieldCount = createField('총 회차');
     var countInput = document.createElement('input');
@@ -783,6 +807,30 @@ function openLoanModal(mode, context) {
     fieldStartDate.appendChild(startDateInput);
     row2.appendChild(fieldStartDate);
     body.appendChild(row2);
+
+    // v2.2: executionDate (자본 집행 시점) — optional, separate from startDate(schedule)
+    var executionDate = '';
+    if (loan && loan.executionDate) {
+      executionDate = String(loan.executionDate).slice(0, 10);
+    } else if (mode === 'create') {
+      if (App.date && typeof App.date.getToday === 'function') {
+        executionDate = App.date.getToday();
+      } else if (App.util && typeof App.util.todayISODate === 'function') {
+        executionDate = App.util.todayISODate();
+      } else {
+        executionDate = new Date().toISOString().slice(0, 10);
+      }
+    }
+
+    var rowExec = createRow();
+    var fieldExecDate = createField('대출실행일');
+    var execDateInput = document.createElement('input');
+    execDateInput.name = 'loan-execution-date';
+    execDateInput.type = 'date';
+    execDateInput.value = executionDate || '';
+    fieldExecDate.appendChild(execDateInput);
+    rowExec.appendChild(fieldExecDate);
+    body.appendChild(rowExec);
 
     var row3 = createRow();
     var fieldCycle = createField('상환주기');

@@ -104,6 +104,7 @@
     if (title) return title;
     if (type === 'INIT') return '초기자본';
     if (type === 'AUTO_OUT') return '대출 실행';
+    if (type === 'LOAN_EXECUTION') return '대출 실행 (자본 집행)';
     if (type === 'AUTO_IN') return '대출상환';
     if (type === 'AUTO_ADJUST') return '상환 정정';
     if (type === 'MANUAL_IN') return '수동 유입';
@@ -155,7 +156,7 @@
     var baseTitle = defaultTitleByType(row.type, row.title);
 
     // AUTO logs: append debtor name for operational readability (UI only).
-    if (row.type === 'AUTO_IN' || row.type === 'AUTO_OUT' || row.type === 'AUTO_ADJUST') {
+    if (row.type === 'AUTO_IN' || row.type === 'AUTO_OUT' || row.type === 'AUTO_ADJUST' || row.type === 'LOAN_EXECUTION') {
       var debtorName = resolveDebtorName(row, maps);
       if (debtorName) {
         if (baseTitle.indexOf(debtorName) === -1) {
@@ -168,12 +169,35 @@
   }
 
   function getCashLogs() {
-    if (App.cashLedger && typeof App.cashLedger.getLogs === 'function') {
-      return App.cashLedger.getLogs() || [];
+    if (App.cashLedger) {
+      if (typeof App.cashLedger.getEffectiveLogs === 'function') {
+        return App.cashLedger.getEffectiveLogs() || [];
+      }
+      if (typeof App.cashLedger.getLogs === 'function') {
+        return App.cashLedger.getLogs() || [];
+      }
     }
     var st = App.state || {};
     return Array.isArray(st.cashLogs) ? st.cashLogs : [];
   }
+
+  // v2.3: Single Source of Truth
+  // - Running balance and rows are derived from the same effective cashLogs
+  function getBalanceEvents() {
+    if (App.cashLedger) {
+      if (typeof App.cashLedger.getBalanceEvents === 'function') {
+        return App.cashLedger.getBalanceEvents() || [];
+      }
+      if (typeof App.cashLedger.getEffectiveLogs === 'function') {
+        return App.cashLedger.getEffectiveLogs() || [];
+      }
+      if (typeof App.cashLedger.getLogs === 'function') {
+        return App.cashLedger.getLogs() || [];
+      }
+    }
+    return getCashLogs();
+  }
+
 
   function buildFilteredRows(logs, from, to) {
     var fromMs = from ? toLocalDayMs(from) : NaN;
@@ -260,12 +284,12 @@
     if (App.cashLedger && typeof App.cashLedger.isAutoType === 'function') {
       return !!App.cashLedger.isAutoType(type);
     }
-    return type === 'AUTO_IN' || type === 'AUTO_OUT' || type === 'AUTO_ADJUST';
+    return type === 'AUTO_IN' || type === 'AUTO_OUT' || type === 'AUTO_ADJUST' || type === 'LOAN_EXECUTION';
   }
 
   function typeBadgeText(type) {
     if (type === 'INIT') return '초기';
-    if (type === 'AUTO_IN' || type === 'AUTO_OUT' || type === 'AUTO_ADJUST') return '자동';
+    if (type === 'AUTO_IN' || type === 'AUTO_OUT' || type === 'AUTO_ADJUST' || type === 'LOAN_EXECUTION') return '자동';
     if (type === 'MANUAL_IN' || type === 'MANUAL_OUT') return '수동';
     return '';
   }
@@ -729,8 +753,8 @@
     }
 
     function render() {
-      var logs = getCashLogs();
-      var result = buildFilteredRows(logs, state.from, state.to);
+      var balanceEvents = getBalanceEvents();
+      var result = buildFilteredRows(balanceEvents, state.from, state.to);
 
       // Lookup maps (UI-only) for AUTO log title readability.
       var st = App.state || {};
@@ -794,7 +818,7 @@
         badge.className = 'ledger-item-badge';
         var badgeText = typeBadgeText(row.type);
         badge.textContent = badgeText;
-        if (row.type === 'AUTO_IN' || row.type === 'AUTO_OUT' || row.type === 'AUTO_ADJUST') badge.classList.add('is-auto');
+        if (row.type === 'AUTO_IN' || row.type === 'AUTO_OUT' || row.type === 'AUTO_ADJUST' || row.type === 'LOAN_EXECUTION') badge.classList.add('is-auto');
         if (row.type === 'MANUAL_IN' || row.type === 'MANUAL_OUT') badge.classList.add('is-manual');
         if (row.type === 'INIT') badge.classList.add('is-init');
 
