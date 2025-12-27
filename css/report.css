@@ -1,3 +1,11 @@
+#report-root {
+  /* PATCH: LoanShark_v2.3_report_tab_container_padding_only
+     Report 탭 공통 컨테이너에만 padding을 부여하여 탭 버튼/콘텐츠가 화면 경계에 붙어 보이는 문제를 완화.
+     (UI-only) */
+  padding: 18px 26px 24px;
+  box-sizing: border-box;
+}
+
 #report-root .report-overview {
   display: flex;
   flex-direction: column;
@@ -261,7 +269,8 @@
 #report-root .report-subtabs {
   display: inline-flex;
   gap: 0.35rem;
-  margin-bottom: 0.75rem;
+  /* 탭 버튼 영역과 콘텐츠 영역 사이 공통 여백 */
+  margin-bottom: 14px;
 }
 
 #report-root .report-subtab-btn {
