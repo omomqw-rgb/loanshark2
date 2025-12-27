@@ -517,8 +517,8 @@
   align-items: center;
   padding: 6px 8px;
   font-size: 12px;
-  background: #f3f4f6;
-  border-bottom: 1px solid rgba(148,163,184,0.55);
+  background: #ffffff;
+  border-bottom: 1px solid var(--charcoal-border-subtle, #E1E4EA);
   cursor: pointer;
   transition: background-color .15s ease;
 }
