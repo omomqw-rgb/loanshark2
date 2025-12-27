@@ -7,20 +7,51 @@ App.debtors.state = {
   query: "",
   page: 1,
   perPage: 15,
+
+  // v2.4 UI-only: View mode + Active-only toggle for list exploration
+  // - viewMode: 'all' | 'loan' | 'claim' | 'risk'
+  // - activeOnly: boolean (default ON)
+  viewMode: "all",
+  activeOnly: true,
+
   filteredList: []
 };
 
 App.debtors.updateFilteredList = function () {
-  var q = (App.debtors.state.query || "").toLowerCase();
+  var st = App.debtors.state || {};
+  var q = (st.query || "").toLowerCase();
   var full = (App.data && App.data.debtors) ? App.data.debtors : [];
-  if (!q) {
-    App.debtors.state.filteredList = full.slice();
-    return;
-  }
-  App.debtors.state.filteredList = full.filter(function (d) {
-    if (!d || !d.name) return false;
-    return String(d.name).toLowerCase().indexOf(q) !== -1;
+
+  var viewMode = st.viewMode || "all";
+  var activeOnly = (st.activeOnly !== false); // default ON
+
+  var out = full.filter(function (d) {
+    if (!d) return false;
+
+    // 조건 토글: 활성만보기 (derived flag only)
+    if (activeOnly && !d.hasAliveSchedule) return false;
+
+    // View 모드: 포함/제외 범위만 변경 (정렬/계산/판정 로직 변경 없음)
+    if (viewMode === "loan") {
+      var loanCnt = (d.loanCount != null) ? d.loanCount : 0;
+      if (!(loanCnt > 0)) return false;
+    } else if (viewMode === "claim") {
+      var claimCnt = (d.claimCount != null) ? d.claimCount : 0;
+      if (!(claimCnt > 0)) return false;
+    } else if (viewMode === "risk") {
+      // 위험 관점: derived overdue schedule flag only
+      if (!d.hasOverdueSchedule) return false;
+    }
+
+    // 검색: 이름 기준 (기존 방식 유지)
+    if (q) {
+      if (!d.name) return false;
+      return String(d.name).toLowerCase().indexOf(q) !== -1;
+    }
+    return true;
   });
+
+  App.debtors.state.filteredList = out;
 };
 
 App.debtors.renderList = function () {
@@ -116,6 +147,41 @@ App.debtors.renderItem = function (d) {
   return wrap;
 };
 
+
+/* ===== v2.4: List View / Active Toggle UI helpers ===== */
+
+App.debtors._setViewModeUI = function (mode) {
+  var btns = document.querySelectorAll(".dlist-view-btn[data-view]");
+  if (!btns || !btns.length) return;
+  for (var i = 0; i < btns.length; i++) {
+    var b = btns[i];
+    var v = b.getAttribute("data-view") || "all";
+    if (v === mode) {
+      b.classList.add("active");
+      b.classList.add("is-active");
+      b.setAttribute("aria-selected", "true");
+    } else {
+      b.classList.remove("active");
+      b.classList.remove("is-active");
+      b.setAttribute("aria-selected", "false");
+    }
+  }
+};
+
+App.debtors._setActiveOnlyUI = function (isOn) {
+  var btn = document.querySelector('[data-role="dlist-active-toggle"]');
+  if (!btn) return;
+  if (isOn) {
+    btn.classList.add("is-on");
+    btn.classList.remove("is-off");
+    btn.setAttribute("aria-pressed", "true");
+  } else {
+    btn.classList.remove("is-on");
+    btn.classList.add("is-off");
+    btn.setAttribute("aria-pressed", "false");
+  }
+};
+
 App.debtors.initDom = function () {
   // Stage 6: Register a safe coordinator renderer that refreshes the filtered list
   // before rendering. This avoids stale list UI after DERIVED rebuilds.
@@ -137,6 +203,9 @@ App.debtors.initDom = function () {
   var prevBtn = document.querySelector(".dlist-page-prev");
   var nextBtn = document.querySelector(".dlist-page-next");
   var pageLabel = document.querySelector(".dlist-page-label");
+  var viewBtns = document.querySelectorAll(".dlist-view-btn[data-view]");
+  var activeToggleBtn = document.querySelector('[data-role="dlist-active-toggle"]');
+
 
   if (searchInput) {
     searchInput.addEventListener("input", function () {
@@ -155,6 +224,43 @@ App.debtors.initDom = function () {
       }
     });
   }
+
+  // v2.4: View 모드 (전체/대출/채권/위험)
+  if (viewBtns && viewBtns.length) {
+    for (var vb = 0; vb < viewBtns.length; vb++) {
+      (function (btn) {
+        btn.addEventListener("click", function () {
+          var mode = btn.getAttribute("data-view") || "all";
+          App.debtors.state.viewMode = mode;
+
+          if (typeof App.debtors._setViewModeUI === "function") {
+            App.debtors._setViewModeUI(mode);
+          }
+
+          App.debtors.updateFilteredList();
+          App.debtors.state.page = 1;
+          App.debtors.renderList();
+        });
+      })(viewBtns[vb]);
+    }
+  }
+
+  // v2.4: 조건 토글 (활성만보기)
+  if (activeToggleBtn) {
+    activeToggleBtn.addEventListener("click", function () {
+      var st = App.debtors.state || {};
+      st.activeOnly = !st.activeOnly;
+
+      if (typeof App.debtors._setActiveOnlyUI === "function") {
+        App.debtors._setActiveOnlyUI(!!st.activeOnly);
+      }
+
+      App.debtors.updateFilteredList();
+      st.page = 1;
+      App.debtors.renderList();
+    });
+  }
+
 
   var updatePaginationUI = function () {
     if (!pageLabel) return;
@@ -190,6 +296,17 @@ App.debtors.initDom = function () {
         App.debtors.renderList();
       }
     });
+  }
+
+  // v2.4 defaults (UI-only)
+  if (!App.debtors.state.viewMode) App.debtors.state.viewMode = "all";
+  if (typeof App.debtors.state.activeOnly !== "boolean") App.debtors.state.activeOnly = true;
+
+  if (typeof App.debtors._setViewModeUI === "function") {
+    App.debtors._setViewModeUI(App.debtors.state.viewMode);
+  }
+  if (typeof App.debtors._setActiveOnlyUI === "function") {
+    App.debtors._setActiveOnlyUI(!!App.debtors.state.activeOnly);
   }
 
   App.debtors.updateFilteredList();

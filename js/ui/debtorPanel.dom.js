@@ -32,11 +32,13 @@ App.debtorPanel.init = function() {
 
 App.debtorPanel.showList = function() {
   var search = document.querySelector('.dlist-topbar');
+  var filterbar = document.querySelector('.dlist-filterbar');
   var pagination = document.querySelector('.dlist-pagination');
   var list = document.getElementById('debtor-list-root');
   var detail = document.getElementById('debtor-panel-root');
 
   if (search) search.style.display = '';
+  if (filterbar) filterbar.style.display = '';
   if (pagination) pagination.style.display = '';
   if (list) list.style.display = '';
   if (detail) detail.style.display = 'none';
@@ -45,11 +47,13 @@ App.debtorPanel.showList = function() {
 App.debtorPanel.showDetail = function() {
 
   var search = document.querySelector('.dlist-topbar');
+  var filterbar = document.querySelector('.dlist-filterbar');
   var pagination = document.querySelector('.dlist-pagination');
   var list = document.getElementById('debtor-list-root');
   var detail = document.getElementById('debtor-panel-root');
 
   if (search) search.style.display = 'none';
+  if (filterbar) filterbar.style.display = 'none';
   if (pagination) pagination.style.display = 'none';
   if (list) list.style.display = 'none';
   if (detail) detail.style.display = 'block';

@@ -57,13 +57,27 @@
       <button class="text-btn dlist-add-btn" data-action="debtor-add">+ 채무자</button>
     </div>
 
+    <div class="dlist-filterbar">
+      <div class="dlist-view-switch" role="tablist" aria-label="View 모드">
+        <button class="dlist-view-btn active" data-view="all" type="button">전체</button>
+        <button class="dlist-view-btn" data-view="loan" type="button">대출</button>
+        <button class="dlist-view-btn" data-view="claim" type="button">채권</button>
+        <button class="dlist-view-btn" data-view="risk" type="button">위험</button>
+      </div>
+
+      <button class="dlist-active-toggle is-on" type="button" data-role="dlist-active-toggle" aria-pressed="true">
+        <span class="dlist-toggle-label">활성만보기</span>
+      </button>
+    </div>
+
+    <div class="dlist-body" id="debtor-list-root"></div>
+
     <div class="dlist-pagination">
       <button class="dlist-page-prev">◀</button>
       <span class="dlist-page-label">1 / 1</span>
       <button class="dlist-page-next">▶</button>
     </div>
 
-    <div class="dlist-body" id="debtor-list-root"></div>
     <div id="debtor-panel-root"></div>
   </div>
 </div>

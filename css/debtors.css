@@ -451,8 +451,8 @@
   border-radius: var(--radius-sm);
   border: 1px solid rgba(148,163,184,0.7);
   font-size: 12px;
-  background: var(--surface, #0b1120);
-  color: inherit;
+  background: var(--charcoal-bg-surface, #ffffff);
+  color: var(--charcoal-text-primary, #1A1C1F);
 }
 
 #debtor-sidepanel .text-btn.dlist-add-btn {
@@ -509,7 +509,7 @@
   flex-direction: column;
   gap: 0;
   padding-right: 0;
-  margin-top: 4px;
+  margin-top: 0;
 }
 
 #debtor-sidepanel .debtor-list-panel .dlist-item {
@@ -611,4 +611,89 @@
 
 #debtor-sidepanel .debtor-list-panel {
   padding: 8px !important;
+}
+
+
+/* === v2.4 DebtorList View / Active Toggle UI === */
+
+#debtor-sidepanel .dlist-filterbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#debtor-sidepanel .dlist-view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+#debtor-sidepanel .dlist-view-switch .dlist-view-btn {
+  padding: 3px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #111827;
+  line-height: 1.2;
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+#debtor-sidepanel .dlist-view-switch .dlist-view-btn:hover {
+  background: rgba(148,163,184,0.12);
+}
+
+#debtor-sidepanel .dlist-view-switch .dlist-view-btn.active,
+#debtor-sidepanel .dlist-view-switch .dlist-view-btn.is-active {
+  background: #3C82FF;
+  color: #ffffff;
+}
+
+#debtor-sidepanel .dlist-view-switch .dlist-view-btn.active:hover,
+#debtor-sidepanel .dlist-view-switch .dlist-view-btn.is-active:hover {
+  background: #3C82FF;
+  color: #ffffff;
+}
+
+#debtor-sidepanel .dlist-active-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148,163,184,0.55);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.2;
+  color: rgba(15,23,42,0.92);
+  white-space: nowrap;
+  transition: background-color .15s ease, box-shadow .15s ease, border-color .15s ease, color .15s ease;
+}
+
+
+#debtor-sidepanel .dlist-active-toggle.is-on {
+  background: rgba(60,130,255,0.18);
+  border-color: rgba(60,130,255,0.65);
+  box-shadow: 0 0 0 3px rgba(60,130,255,0.18);
+  font-weight: 600;
+}
+
+
+#debtor-sidepanel .dlist-active-toggle.is-off {
+  background: transparent;
+  border-color: rgba(148,163,184,0.45);
+  box-shadow: none;
+}
+
+#debtor-sidepanel .dlist-active-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(15,23,42,0.15);
 }
