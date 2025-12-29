@@ -54,6 +54,28 @@
   justify-content: space-between;
 }
 
+#monitoring-root .monitoring-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+#monitoring-root .monitoring-section-header .monitoring-title {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+}
+
+#monitoring-root .monitoring-total {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: rgba(111, 107, 102, 0.78);
+  white-space: nowrap;
+}
+
+
 #monitoring-root .monitoring-title::after {
   content: "";
   flex: 1 1 auto;

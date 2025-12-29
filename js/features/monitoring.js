@@ -797,8 +797,19 @@
         var section = createEl('section', 'monitoring-section');
         section.setAttribute('data-section', meta.key);
 
+        var headerRow = createEl('div', 'monitoring-section-header');
         var titleEl = createEl('h2', 'monitoring-title', meta.title);
-        section.appendChild(titleEl);
+        headerRow.appendChild(titleEl);
+
+        if (meta.key === 'dday' || meta.key === 'd1' || meta.key === 'overdue') {
+          var totalEl = createEl('div', 'monitoring-total');
+          totalEl.setAttribute('data-total', meta.key);
+          var label = meta.key === 'overdue' ? '연체 합계' : '합계';
+          totalEl.textContent = label + ' ₩0';
+          headerRow.appendChild(totalEl);
+        }
+
+        section.appendChild(headerRow);
 
         var listEl = createEl('div', 'monitoring-list');
         listEl.setAttribute('data-list', meta.key);
@@ -816,6 +827,39 @@
       if (!root) return;
       var listEl = root.querySelector('.monitoring-list[data-list="' + sectionKey + '"]');
       if (!listEl) return;
+
+      // Section header total (sum of actually rendered items in this section)
+      var totalEl = root.querySelector('.monitoring-total[data-total="' + sectionKey + '"]');
+      if (totalEl) {
+        var sum = 0;
+        if (groups && groups.length) {
+          for (var k = 0; k < groups.length; k++) {
+            var g = groups[k];
+            if (!g || !g.debtor) continue;
+
+            var amountValue = 0;
+            if (typeof g.totalAmount === 'number') {
+              amountValue = g.totalAmount;
+            } else if (g.schedules && g.schedules.length) {
+              var summary = summarizeSchedules(g.schedules);
+              amountValue = summary.totalRemaining;
+            }
+
+            var n = Number(amountValue);
+            if (!isFinite(n)) n = 0;
+            sum += n;
+          }
+        }
+
+        var label = sectionKey === 'overdue' ? '연체 합계' : '합계';
+        var sumText = '';
+        if (App.util && typeof App.util.formatCurrency === 'function') {
+          sumText = App.util.formatCurrency(sum);
+        } else {
+          sumText = String(sum);
+        }
+        totalEl.textContent = label + ' ' + sumText;
+      }
 
       while (listEl.firstChild) {
         listEl.removeChild(listEl.firstChild);
