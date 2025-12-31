@@ -292,6 +292,20 @@ html.ls-mobile #report-root .submetric-value {
    - Available Capital Modal: summary + recent ledger list (no editor/actions/range)
    ========================================================= */
 
+/* v3.2.3: Fullscreen-ish KPI modals on mobile (read-only)
+   - Override the desktop 55vw sizing from modal.css for KPI-related modals
+   - Target only Operation/Available-Capital KPI modals
+*/
+html.ls-mobile #modal-root #operation-modal-root,
+html.ls-mobile #modal-root #available-capital-modal-root {
+  width: 94vw;
+  max-width: 94vw;
+  height: 88vh;
+  max-height: 88vh;
+}
+
+
+
 /* 운영현황 모달: 탭/필터 제거 + 리스트 중심 */
 html.ls-mobile #operation-modal-root .modal-tabs {
   display: none !important;

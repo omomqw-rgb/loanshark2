@@ -366,6 +366,31 @@
 
       var t = event.target;
 
+
+      // v3.2.3: Schedule modals MUST be allowed to open on mobile (view-only).
+      // Some click paths rely on bubble-phase delegation; handle explicitly in capture to guarantee open.
+      var schedLoanEl = t && t.closest && t.closest('[data-action="loan-open-schedule"][data-loan-id]');
+      if (schedLoanEl) {
+        var loanId = schedLoanEl.getAttribute('data-loan-id');
+        if (loanId && window.App && App.modalManager && typeof App.modalManager.openLoanScheduleModal === 'function') {
+          event.preventDefault();
+          event.stopPropagation();
+          App.modalManager.openLoanScheduleModal(String(loanId));
+          return;
+        }
+      }
+
+      var schedClaimEl = t && t.closest && t.closest('[data-action="claim-open-schedule"][data-claim-id]');
+      if (schedClaimEl) {
+        var claimId = schedClaimEl.getAttribute('data-claim-id');
+        if (claimId && window.App && App.modalManager && typeof App.modalManager.openClaimScheduleModal === 'function') {
+          event.preventDefault();
+          event.stopPropagation();
+          App.modalManager.openClaimScheduleModal(String(claimId));
+          return;
+        }
+      }
+
       // Block Save buttons explicitly (even if enabled via custom states)
       if (t && (t.closest('#local-save-btn') || t.closest('#cloud-save-btn'))) {
         event.preventDefault();
