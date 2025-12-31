@@ -164,7 +164,13 @@
       '[data-action="claim-open-schedule"]',
 
       // Status change (write)
-      'select[data-action="card-status-change"]'
+      'select[data-action="card-status-change"]',
+
+      // Available Capital modal (read-only view allowed; editing controls disabled)
+      '.available-capital-modal .avail-action-btn',
+      '.available-capital-modal .ledger-mini-btn',
+      '.available-capital-modal .ledger-editor-btn.is-save',
+      '.available-capital-modal .ledger-editor .ledger-input'
     ];
 
     for (var s = 0; s < selectors.length; s++) {
@@ -236,13 +242,8 @@
       wrapFn(App.modalManager, 'openClaimScheduleModal', '모바일(Read-only)에서는 일정 변경이 불가합니다.');
     }
 
-    // Other write-capable modals
-    if (App.ui && App.ui.operationModal) {
-      wrapFn(App.ui.operationModal, 'open', '모바일(Read-only)에서는 작업이 차단됩니다.');
-    }
-    if (App.ui && App.ui.availableCapitalModal) {
-      wrapFn(App.ui.availableCapitalModal, 'open', '모바일(Read-only)에서는 수정할 수 없습니다.');
-    }
+    // KPI detail modals are allowed to open on mobile (view-only).
+    // Editing controls inside those modals are disabled via applyReadOnlyUI + capture guards.
   }
 
   function attachCaptureGuards() {
@@ -257,6 +258,15 @@
         event.preventDefault();
         event.stopPropagation();
         showToast('모바일(Read-only)에서는 저장할 수 없습니다.');
+        return;
+      }
+
+      // Block Available Capital write controls (defensive)
+      if (t && t.closest('.available-capital-modal') &&
+          (t.closest('.avail-action-btn') || t.closest('.ledger-mini-btn') || t.closest('.ledger-editor-btn.is-save'))) {
+        event.preventDefault();
+        event.stopPropagation();
+        showToast('모바일(Read-only)에서는 수정/저장이 차단됩니다.');
         return;
       }
 

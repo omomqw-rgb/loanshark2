@@ -334,9 +334,34 @@ function init() {
     var root = document.getElementById('report-root');
     if (!root) return;
 
+    var isMobile = false;
+    try {
+      isMobile = !!(App.ui && App.ui.mobile && typeof App.ui.mobile.isMobile === 'function' && App.ui.mobile.isMobile());
+    } catch (e) {
+      isMobile = false;
+    }
 
-    // V189 – Overview 포트폴리오 / 회수 흐름 요약 렌더링
-    if (App.data && typeof App.data.computePortfolioSummary === 'function' && root.querySelector('#overview-metrics')) {
+    // v3.2.1 (mobile): Report는 Overview(KPI 4개)만 사용하도록 강제
+    if (isMobile) {
+      var subBtns = root.querySelectorAll('.report-subtab-btn');
+      var secList = root.querySelectorAll('.report-section');
+      if (subBtns && subBtns.forEach) {
+        subBtns.forEach(function (b) {
+          var k = b.getAttribute('data-report-section') || '';
+          b.classList.toggle('is-active', k === 'overview');
+        });
+      }
+      if (secList && secList.forEach) {
+        secList.forEach(function (sec) {
+          var n = sec.getAttribute('data-report-section') || '';
+          sec.classList.toggle('is-active', n === 'overview');
+        });
+      }
+    }
+
+
+    // V189 – Overview 포트폴리오 / 회수 흐름 요약 렌더링 (모바일 v3.2.1에서는 숨김)
+    if (!isMobile && App.data && typeof App.data.computePortfolioSummary === 'function' && root.querySelector('#overview-metrics')) {
       try {
         renderOverviewMetrics(root);
       } catch (e) {
@@ -363,7 +388,7 @@ function init() {
 
     try {
       updateReportView(root);
-      if (App.reportRender && App.reportRender.recovery && typeof App.reportRender.recovery.init === 'function') {
+      if (!isMobile && App.reportRender && App.reportRender.recovery && typeof App.reportRender.recovery.init === 'function') {
         App.reportRender.recovery.init(root);
       }
     } catch (e) {

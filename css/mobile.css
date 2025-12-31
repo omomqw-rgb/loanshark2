@@ -1,4 +1,4 @@
-/* mobile.css - LoanShark v3.2
+/* mobile.css - LoanShark v3.2.1
    Panel-based mobile compatibility layer (READ-ONLY).
    - Reuses PC panels, only reflows/overrides layout + blocks write actions on mobile.
 */
@@ -34,9 +34,26 @@ html.ls-mobile .topbar-main {
 
 html.ls-mobile .topbar-meta {
   width: 100%;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+html.ls-mobile .account-area {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 8px;
+}
+
+html.ls-mobile .account-area .auth-status {
+  max-width: 44vw;
+}
+
+html.ls-mobile .auth-btn {
+  padding: 0.25rem 0.65rem;
+  font-size: 12px;
 }
 
 html.ls-mobile .top-tabs {
@@ -62,16 +79,28 @@ html.ls-mobile .tab-btn--debtors { display: inline-flex; }
 
 /* Save/Load controls: wrap & enlarge tap targets */
 html.ls-mobile .save-load-controls {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
   gap: 8px;
+  margin-left: 0;
 }
 
 html.ls-mobile .save-load-controls .nav-btn {
-  flex: 1 1 auto;
-  min-width: 120px;
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
 }
+
+html.ls-mobile #local-save-btn,
+html.ls-mobile #local-load-trigger,
+html.ls-mobile #local-load-file {
+  display: none !important;
+}
+
 
 /* Main shell becomes single-column (side panel is moved into the Debtor tab) */
 html.ls-mobile .body-row {
@@ -221,4 +250,38 @@ html.ls-mobile #report-root .report-kpi-submetrics {
 
 html.ls-mobile #report-root canvas {
   max-width: 100%;
+}
+
+/* =========================================================
+   v3.2.1 Mobile Compaction
+   - Topbar meta: single-row (auth status + Cloud buttons)
+   - Report: Overview KPI only (no charts/graphs/other subtabs)
+   ========================================================= */
+
+html.ls-mobile #report-root .report-subtabs {
+  display: none !important;
+}
+
+html.ls-mobile #report-root #overview-metrics {
+  display: none !important;
+}
+
+html.ls-mobile #report-root .report-kpi-card {
+  padding: 10px;
+}
+
+html.ls-mobile #report-root .report-kpi-title {
+  font-size: 13px;
+}
+
+html.ls-mobile #report-root .report-kpi-main .report-kpi-value {
+  font-size: 15px;
+}
+
+html.ls-mobile #report-root .submetric-label {
+  font-size: 11px;
+}
+
+html.ls-mobile #report-root .submetric-value {
+  font-size: 12px;
 }
