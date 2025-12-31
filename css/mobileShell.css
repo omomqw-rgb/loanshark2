@@ -533,3 +533,61 @@
   color: #e5e7eb;
   white-space: nowrap;
 }
+
+/* ===== v3.1.1 Mobile Cloud Load (explicit) ===== */
+.mobile-shell .mobile-topbar {
+  padding: 12px 12px 10px;
+  background: rgba(11, 18, 32, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.mobile-shell .mobile-topbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mobile-shell .mobile-topbar-title {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.mobile-shell .mobile-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-shell .m-cloud-load-btn {
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(59, 130, 246, 0.18);
+  color: #e5e7eb;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mobile-shell .m-cloud-load-btn:active {
+  transform: translateY(1px);
+}
+
+.mobile-shell .m-cloud-load-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mobile-shell .m-cloud-load-status {
+  margin-top: 8px;
+  min-height: 16px;
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.78);
+}
+

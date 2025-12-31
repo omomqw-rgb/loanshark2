@@ -942,7 +942,9 @@ function applyMobileReadonlyToScheduleModal() {
       }
     } catch (eEngine) {}
 
-    // Cloud Save/Load (explicitly forbidden in Mobile)
+    // Cloud policy in Mobile (v3.1.1):
+    // - Save is forbidden (write-blocked)
+    // - Load is allowed (read-only)
     try {
       if (App.data) {
         if (typeof App.data.saveToSupabase === 'function') {
@@ -953,13 +955,8 @@ function applyMobileReadonlyToScheduleModal() {
           };
         }
 
-        if (typeof App.data.loadAllFromSupabase === 'function') {
-          if (!_mobileCapabilityGuard.originals.loadAllFromSupabase) _mobileCapabilityGuard.originals.loadAllFromSupabase = App.data.loadAllFromSupabase;
-          App.data.loadAllFromSupabase = function () {
-            blockWrite('cloud-load');
-            return (typeof Promise !== 'undefined' && Promise && typeof Promise.resolve === 'function') ? Promise.resolve(null) : null;
-          };
-        }
+        // IMPORTANT: Do NOT override App.data.loadAllFromSupabase in Mobile.
+        // Mobile must be able to explicitly Load (Cloud) while remaining read-only.
       }
     } catch (e3) {}
   }
@@ -1034,6 +1031,90 @@ function buildMobileShell() {
     var root = document.createElement('div');
     root.id = 'mobile-shell';
     root.className = 'mobile-shell';
+
+    // v3.1.1 Mobile: Explicit Cloud Load button (Read-only Load / Write-block)
+    // - MUST be user-triggered (no auto load)
+    // - Desktop에는 생성되지 않음 (Mobile Shell 전용)
+    var topbar = document.createElement('div');
+    topbar.className = 'mobile-topbar';
+
+    var topbarRow = document.createElement('div');
+    topbarRow.className = 'mobile-topbar-row';
+    topbar.appendChild(topbarRow);
+
+    var topTitle = document.createElement('div');
+    topTitle.className = 'mobile-topbar-title';
+    topTitle.textContent = 'LoanShark (Mobile Read-only)';
+    topbarRow.appendChild(topTitle);
+
+    var topActions = document.createElement('div');
+    topActions.className = 'mobile-topbar-actions';
+    topbarRow.appendChild(topActions);
+
+    var cloudLoadBtn = document.createElement('button');
+    cloudLoadBtn.type = 'button';
+    cloudLoadBtn.id = 'm-cloud-load-btn';
+    cloudLoadBtn.className = 'm-cloud-load-btn';
+    cloudLoadBtn.textContent = '☁ Cloud Load';
+    topActions.appendChild(cloudLoadBtn);
+
+    var cloudLoadStatus = document.createElement('div');
+    cloudLoadStatus.id = 'm-cloud-load-status';
+    cloudLoadStatus.className = 'm-cloud-load-status';
+    cloudLoadStatus.setAttribute('aria-live', 'polite');
+    cloudLoadStatus.textContent = '';
+    topbar.appendChild(cloudLoadStatus);
+
+    root.appendChild(topbar);
+
+    function setCloudLoadStatus(msg) {
+      try {
+        if (!cloudLoadStatus) return;
+        cloudLoadStatus.textContent = msg || '';
+      } catch (e) {}
+    }
+
+    function mobileSafeAlert(msg) {
+      try { window.alert(msg); } catch (e) {}
+    }
+
+    async function handleMobileCloudLoad() {
+      if (!App || !App.data || typeof App.data.loadAllFromSupabase !== 'function') {
+        setCloudLoadStatus('Cloud Load 기능을 사용할 수 없습니다.');
+        mobileSafeAlert('Cloud Load 기능을 사용할 수 없습니다.');
+        return;
+      }
+
+      try { if (cloudLoadBtn) cloudLoadBtn.disabled = true; } catch (e0) {}
+      setCloudLoadStatus('Cloud Load 중...');
+
+      try {
+        var p = App.data.loadAllFromSupabase();
+        if (p && typeof p.then === 'function') {
+          await p;
+        }
+
+        setCloudLoadStatus('Cloud Load 완료');
+
+        // Re-render Mobile views explicitly (Mobile Shell is not part of Desktop render pipeline)
+        try { renderMobileDebtors(); } catch (e1) {}
+        try { renderMobileCalendar(); } catch (e2) {}
+        try { renderMobileMonitoring(); } catch (e3) {}
+        try { renderMobileReport(); } catch (e4) {}
+      } catch (err) {
+        console.error('[Mobile] Cloud Load failed:', err);
+        setCloudLoadStatus('Cloud Load 실패');
+        mobileSafeAlert('Cloud Load 실패 — 네트워크/로그인 상태를 확인해주세요.');
+      } finally {
+        try { if (cloudLoadBtn) cloudLoadBtn.disabled = false; } catch (e5) {}
+      }
+    }
+
+    if (cloudLoadBtn) {
+      cloudLoadBtn.addEventListener('click', function () {
+        handleMobileCloudLoad();
+      });
+    }
 
     var tabs = document.createElement('div');
     tabs.id = 'mobile-tabs';
