@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"/>
-<title>Loan Shark v1.0 · Loan & Claim Scheduler</title>
+<title>Loan Shark v3.2 · Panel-based Mobile Compatibility</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="css/app.css" rel="stylesheet"/>
 <link rel="stylesheet" href="css/debtorDetail.css" />
@@ -13,9 +13,10 @@
 <header class="topbar">
 <div class="topbar-main">
 <div class="brand">
-    Loan Shark v1.0
+    Loan Shark v3.2
 </div>
 <nav class="tab-strip top-tabs" data-tab-root="">
+<button class="tab-btn tab-btn--debtors" data-tab="debtors" type="button">채무자관리</button>
 <button class="tab-btn is-active" data-tab="calendar" type="button">Calendar</button>
 <button class="tab-btn" data-tab="monitoring" type="button">Monitoring</button>
 <button class="tab-btn" data-tab="report" type="button">Report</button>
@@ -86,6 +87,9 @@
 </aside>
 <main class="main">
 <section class="card main-card">
+<section class="tab-panel" id="tab-debtors">
+  <div id="mobile-debtor-host"></div>
+</section>
 <section class="tab-panel is-active" id="tab-calendar">
 <div id="calendar-root"></div>
 </section>
@@ -601,6 +605,7 @@
 <script src="js/vendor/chart.umd.min.js"></script>
 <script src="js/ui/layout.js"></script>
 <script src="js/ui/events.js"></script>
+<script src="js/ui/mobile.js"></script>
   <script src="js/ui/operationModal.js"></script>
   <script src="js/ui/availableCapitalModal.js"></script>
 <script src="js/modules/debtorDetail.info.js"></script>

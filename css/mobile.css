@@ -1,0 +1,224 @@
+/* mobile.css - LoanShark v3.2
+   Panel-based mobile compatibility layer (READ-ONLY).
+   - Reuses PC panels, only reflows/overrides layout + blocks write actions on mobile.
+*/
+
+/* Desktop default: Debtor tab is hidden (sidepanel is always visible on PC). */
+.tab-btn--debtors { display: none; }
+
+/* =========================================================
+   Mobile Layout Switch (enabled by JS: html.ls-mobile)
+   ========================================================= */
+html.ls-mobile {
+  /* Compact overall spacing for handheld */
+  -webkit-text-size-adjust: 100%;
+}
+
+html.ls-mobile .app {
+  max-width: 100%;
+  padding: 10px 10px 60px;
+}
+
+html.ls-mobile .topbar {
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+html.ls-mobile .topbar-main {
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+html.ls-mobile .topbar-meta {
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+html.ls-mobile .top-tabs {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.ls-mobile .top-tabs::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+html.ls-mobile .tab-btn {
+  padding: 9px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Mobile: expose Debtor tab as the first tab */
+html.ls-mobile .tab-btn--debtors { display: inline-flex; }
+
+/* Save/Load controls: wrap & enlarge tap targets */
+html.ls-mobile .save-load-controls {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html.ls-mobile .save-load-controls .nav-btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+/* Main shell becomes single-column (side panel is moved into the Debtor tab) */
+html.ls-mobile .body-row {
+  grid-template-columns: 1fr;
+  column-gap: 0;
+}
+
+html.ls-mobile .side {
+  display: none;
+}
+
+html.ls-mobile .main {
+  min-width: 0;
+}
+
+/* =========================================================
+   Debtor Sidepanel (reused PC panel, moved into #tab-debtors)
+   ========================================================= */
+html.ls-mobile #tab-debtors #debtor-sidepanel {
+  width: 100% !important;
+  min-width: 0 !important;
+  border-right: none !important;
+  min-height: 0;
+}
+
+html.ls-mobile #tab-debtors .debtor-sidepanel.is-expanded,
+html.ls-mobile #tab-debtors .debtor-sidepanel.is-collapsed {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Prevent collapsed mode from hiding content on mobile */
+html.ls-mobile #tab-debtors .debtor-sidepanel.is-collapsed .debtor-sidepanel-title,
+html.ls-mobile #tab-debtors .debtor-sidepanel.is-collapsed .debtor-sidepanel-body {
+  display: flex !important;
+}
+
+html.ls-mobile #tab-debtors .debtor-sidepanel-toggle-icon {
+  display: none !important;
+}
+
+/* Touch spacing */
+html.ls-mobile #tab-debtors .dlist-topbar {
+  gap: 8px;
+}
+
+html.ls-mobile #tab-debtors .dlist-search-input {
+  padding: 10px 10px;
+  font-size: 14px;
+}
+
+html.ls-mobile #tab-debtors .debtor-list-panel .dlist-item {
+  padding: 12px 10px !important;
+}
+
+html.ls-mobile #tab-debtors .dlist-active-toggle {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+html.ls-mobile #tab-debtors .dlist-view-switch .dlist-view-btn {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+/* =========================================================
+   Read-only visual treatment (enabled by JS: html.ls-readonly)
+   ========================================================= */
+html.ls-readonly button[disabled],
+html.ls-readonly select[disabled],
+html.ls-readonly input[disabled] {
+  opacity: 0.45;
+  filter: grayscale(0.15);
+  cursor: not-allowed !important;
+}
+
+/* Elements blocked by capture-guard (non-form clickable rows) */
+html.ls-readonly .ls-blocked-click {
+  cursor: not-allowed !important;
+}
+
+/* =========================================================
+   Calendar (mobile: right panel only + date nav controls)
+   ========================================================= */
+html.ls-mobile #calendar-root .calendar-mobile-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+html.ls-mobile #calendar-root .calendar-mobile-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+html.ls-mobile #calendar-root .calendar-mobile-nav-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,0.75);
+  background: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+html.ls-mobile #calendar-root .calendar-sidepanel.calendar-sidepanel--mobile {
+  padding: 12px 12px 14px;
+}
+
+html.ls-mobile #calendar-root .calendar-day-detail .day-detail-list {
+  max-height: none;
+}
+
+/* =========================================================
+   Monitoring (PC UI, stacked for mobile)
+   ========================================================= */
+html.ls-mobile #monitoring-root .monitoring-container {
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 12px;
+}
+
+/* Slightly larger typography for handheld */
+html.ls-mobile #monitoring-root {
+  --mon-card-primary-size: 14px;
+  --mon-card-secondary-size: 12px;
+  --mon-card-tertiary-size: 11px;
+}
+
+/* =========================================================
+   Report (PC Overview UI, responsive grid)
+   ========================================================= */
+html.ls-mobile #report-root {
+  padding: 12px 12px 18px;
+}
+
+html.ls-mobile #report-root .report-kpi-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+html.ls-mobile #report-root .report-kpi-submetrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html.ls-mobile #report-root canvas {
+  max-width: 100%;
+}

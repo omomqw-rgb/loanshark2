@@ -5,8 +5,6 @@
   App.auth = App.auth || {};
 
   var isInitialized = false;
-  var isDocumentClickBound = false;
-  var onFormSubmit = null;
 
   function getSupabase() {
     if (!App.supabase) {
@@ -130,37 +128,14 @@
   function bindEvents() {
     var els = getAuthElements();
 
-    if (!isDocumentClickBound) {
-      document.addEventListener('click', handleDocumentClick);
-      isDocumentClickBound = true;
-    }
+    document.addEventListener('click', handleDocumentClick);
 
-    if (els.formEl && !onFormSubmit) {
-      onFormSubmit = function (event) {
+    if (els.formEl) {
+      els.formEl.addEventListener('submit', function (event) {
         event.preventDefault();
         loginWithPassword(els.formEl);
-      };
-      els.formEl.addEventListener('submit', onFormSubmit);
+      });
     }
-  }
-
-  // Mobile Mode Phase 1: allow temporarily disabling Desktop-level global listeners
-  // without destroying auth/session state.
-  function pause() {
-    if (isDocumentClickBound) {
-      document.removeEventListener('click', handleDocumentClick);
-      isDocumentClickBound = false;
-    }
-    closeModal();
-  }
-
-  function resume() {
-    if (!isInitialized) return;
-    if (!isDocumentClickBound) {
-      document.addEventListener('click', handleDocumentClick);
-      isDocumentClickBound = true;
-    }
-    updateAuthUI();
   }
 
   async function handleAuthResult(user) {
@@ -271,14 +246,6 @@
   }
 
   App.auth.init = init;
-  // Desktop lifecycle helpers (used by Mode Switcher).
-  App.auth.pause = pause;
-  App.auth.resume = resume;
-  App.auth.activate = function () {
-    if (!isInitialized) init();
-    else resume();
-  };
-  App.auth.deactivate = pause;
   App.auth.openModal = openModal;
   App.auth.closeModal = closeModal;
   App.auth.updateAuthUI = updateAuthUI;

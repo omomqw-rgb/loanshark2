@@ -3,9 +3,6 @@ window.App = window.App || {};
 App.debtorPanel = App.debtorPanel || {};
 
 App.debtorPanel.init = function() {
-  if (App.debtorPanel._initialized) return;
-  App.debtorPanel._initialized = true;
-
   var panel = document.getElementById('debtor-sidepanel');
   if (!panel) return;
   var header = panel.querySelector('.debtor-sidepanel-header');
@@ -64,12 +61,6 @@ App.debtorPanel.showDetail = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Mobile Mode Phase 1: Desktop DOM exists in HTML, but Desktop Shell may be intentionally
-  // not mounted/initialized. Avoid attaching Desktop listeners when runtime mode is mobile.
-  try {
-    if (window.App && App.runtime && App.runtime.mode === 'mobile') return;
-  } catch (e) {}
-
   if (App.debtorPanel && typeof App.debtorPanel.init === 'function') {
     App.debtorPanel.init();
   }

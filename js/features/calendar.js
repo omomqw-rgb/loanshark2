@@ -798,6 +798,12 @@ summary.appendChild(chipOverdue);
       calState.currentDate = toISODate(nextMonth);
     } else if (action === 'today') {
       calState.currentDate = toISODate(new Date());
+    } else if (action === 'prev-day') {
+      var prevDay = addDays(current, -1);
+      calState.currentDate = toISODate(prevDay);
+    } else if (action === 'next-day') {
+      var nextDay = addDays(current, 1);
+      calState.currentDate = toISODate(nextDay);
     } else if (action === 'week-prev') {
       var prev = addDays(current, -7);
       calState.currentDate = toISODate(prev);
@@ -835,6 +841,14 @@ summary.appendChild(chipOverdue);
   // 일정 행 클릭 처리: 해당 스케줄에 맞는 모달을 열고 해당 회차로 스크롤 및 하이라이트 한다.
   function handleDayItemClick(scheduleId) {
     if (!scheduleId) return;
+
+    // v3.2 Mobile(Read-only): 일정 모달(수정/저장)을 열지 않는다.
+    if (App.ui && App.ui.mobile && typeof App.ui.mobile.isReadOnly === 'function' && App.ui.mobile.isReadOnly()) {
+      if (typeof App.showToast === 'function') {
+        App.showToast('모바일(Read-only)에서는 일정 변경이 불가합니다.');
+      }
+      return;
+    }
 
     var schedules = [];
     if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
@@ -912,6 +926,66 @@ summary.appendChild(chipOverdue);
     });
   }
 
+  // v3.2: Mobile layout detection (panel-based reuse)
+  function isMobileLayout() {
+    try {
+      return !!(App.ui && App.ui.mobile && typeof App.ui.mobile.isMobile === 'function' && App.ui.mobile.isMobile());
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function clearRoot(node) {
+    if (!node) return;
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+  }
+
+  // v3.2 Mobile Calendar: reuse the PC right-side panel (day detail list) only.
+  // - Month grid is NOT rendered on mobile.
+  // - Adds mobile-only date navigation controls (Prev / Today / Next).
+  function renderMobile(root, calState, data) {
+    clearRoot(root);
+
+    var shell = document.createElement('div');
+    shell.className = 'calendar-mobile-shell';
+
+    var nav = document.createElement('div');
+    nav.className = 'calendar-mobile-nav';
+
+    var prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.className = 'calendar-mobile-nav-btn';
+    prevBtn.setAttribute('data-cal-nav', 'prev-day');
+    prevBtn.textContent = '◀ 이전 날짜';
+
+    var todayBtn = document.createElement('button');
+    todayBtn.type = 'button';
+    todayBtn.className = 'calendar-mobile-nav-btn';
+    todayBtn.setAttribute('data-cal-nav', 'today');
+    todayBtn.textContent = '오늘';
+
+    var nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'calendar-mobile-nav-btn';
+    nextBtn.setAttribute('data-cal-nav', 'next-day');
+    nextBtn.textContent = '다음 날짜 ▶';
+
+    nav.appendChild(prevBtn);
+    nav.appendChild(todayBtn);
+    nav.appendChild(nextBtn);
+
+    var sidepanel = document.createElement('aside');
+    sidepanel.className = 'calendar-sidepanel calendar-sidepanel--mobile';
+    sidepanel.appendChild(buildDayDetail(calState, data));
+
+    shell.appendChild(nav);
+    shell.appendChild(sidepanel);
+
+    root.appendChild(shell);
+  }
+
   function render() {
     var root = document.getElementById('calendar-root');
     if (!root) return;
@@ -921,7 +995,12 @@ summary.appendChild(chipOverdue);
     var monthBase = new Date(current.getFullYear(), current.getMonth(), 1);
     var data = buildCalendarData();
 
-    root.innerHTML = '';
+    if (isMobileLayout()) {
+      renderMobile(root, calState, data);
+      return;
+    }
+
+    clearRoot(root);
 
     var shell = document.createElement('div');
     shell.className = 'calendar-shell';
