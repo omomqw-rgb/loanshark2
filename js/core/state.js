@@ -59,4 +59,26 @@
     locale: 'ko-KR',
     currency: 'KRW'
   };
+
+  // ===== Mobile Mode Phase 1 (runtime flags only; does NOT touch App.state) =====
+  // NOTE: This is a runtime-only namespace used for viewport-based mode switching.
+  // It intentionally does not modify Domain/Store/Snapshot formats.
+  App.runtime = App.runtime || {};
+  App.runtime.mobilePhase1 = {
+    enterMaxWidth: 768,
+    exitMinWidth: 1024,
+    resizeDebounceMs: 250,
+    switchCooldownMs: 800
+  };
+
+  // Initial mode: Mobile when width <= 768, otherwise Desktop.
+  // (Hysteresis for subsequent switches is handled by the Mode Switcher.)
+  App.runtime.mode = (function () {
+    try {
+      var w = window && typeof window.innerWidth === 'number' ? window.innerWidth : 9999;
+      return w <= App.runtime.mobilePhase1.enterMaxWidth ? 'mobile' : 'desktop';
+    } catch (e) {
+      return 'desktop';
+    }
+  })();
 })(window);

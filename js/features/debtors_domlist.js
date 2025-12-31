@@ -183,6 +183,10 @@ App.debtors._setActiveOnlyUI = function (isOn) {
 };
 
 App.debtors.initDom = function () {
+  // Prevent duplicate wiring when Desktop Shell is re-mounted.
+  if (App.debtors._domInitialized) return;
+  App.debtors._domInitialized = true;
+
   // Stage 6: Register a safe coordinator renderer that refreshes the filtered list
   // before rendering. This avoids stale list UI after DERIVED rebuilds.
   if (App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_LIST && typeof App.debtors.renderList === "function") {
@@ -319,6 +323,12 @@ App.debtors.initDom = function () {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Mobile Mode Phase 1: Desktop DOM exists in HTML, but Desktop Shell may be intentionally
+  // not mounted/initialized. Avoid attaching Desktop listeners when runtime mode is mobile.
+  try {
+    if (window.App && App.runtime && App.runtime.mode === 'mobile') return;
+  } catch (e) {}
+
   if (document.getElementById("debtor-sidepanel")) {
     App.debtors.initDom();
   }
