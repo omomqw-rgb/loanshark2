@@ -155,13 +155,11 @@
       '[data-action="loan-open-create"]',
       '[data-action="loan-open-edit"]',
       '[data-action="loan-delete"]',
-      '[data-action="loan-open-schedule"]',
 
       // Claim CRUD + schedule edit
       '[data-action="claim-open-create"]',
       '[data-action="claim-open-edit"]',
       '[data-action="claim-delete"]',
-      '[data-action="claim-open-schedule"]',
 
       // Status change (write)
       'select[data-action="card-status-change"]',
@@ -177,6 +175,38 @@
       var list = document.querySelectorAll(selectors[s]);
       for (var i = 0; i < list.length; i++) {
         setDisabledByMobile(list[i], true);
+      }
+    }
+
+    // Seed schedule modal control snapshots early so "value change" guards can reliably revert.
+    // (Some mobile browsers may fire change before focusin.)
+    seedScheduleModalSnapshots();
+  }
+
+  function seedScheduleModalSnapshots() {
+    if (!isReadOnly()) return;
+    var forms = document.querySelectorAll(
+      'form[data-role="modal-form"][data-modal-kind="schedule-loan"], form[data-role="modal-form"][data-modal-kind="schedule-claim"]'
+    );
+    for (var f = 0; f < forms.length; f++) {
+      var form = forms[f];
+      if (!form) continue;
+
+      var controls = form.querySelectorAll('select, input, textarea');
+      for (var i = 0; i < controls.length; i++) {
+        var el = controls[i];
+        if (!el || !el.dataset) continue;
+        if (el.dataset.lsRoSnapshot === '1') continue;
+
+        var tag = (el.tagName || '').toUpperCase();
+        try {
+          el.dataset.lsRoSnapshot = '1';
+          if (tag === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+            el.dataset.lsRoChecked = el.checked ? '1' : '0';
+          } else {
+            el.dataset.lsRoValue = el.value != null ? String(el.value) : '';
+          }
+        } catch (e) {}
       }
     }
   }
@@ -238,12 +268,95 @@
       wrapFn(App.modalManager, 'openDebtorModal', '모바일(Read-only)에서는 생성/수정 모달을 열 수 없습니다.');
       wrapFn(App.modalManager, 'openLoanModal', '모바일(Read-only)에서는 생성/수정 모달을 열 수 없습니다.');
       wrapFn(App.modalManager, 'openClaimModal', '모바일(Read-only)에서는 생성/수정 모달을 열 수 없습니다.');
-      wrapFn(App.modalManager, 'openLoanScheduleModal', '모바일(Read-only)에서는 일정 변경이 불가합니다.');
-      wrapFn(App.modalManager, 'openClaimScheduleModal', '모바일(Read-only)에서는 일정 변경이 불가합니다.');
     }
 
     // KPI detail modals are allowed to open on mobile (view-only).
     // Editing controls inside those modals are disabled via applyReadOnlyUI + capture guards.
+  }
+
+  function isScheduleModalControl(el) {
+    if (!el || !el.closest) return false;
+    var form = el.closest('form[data-role="modal-form"][data-modal-kind]');
+    if (!form) return false;
+    var kind = String(form.getAttribute('data-modal-kind') || '');
+    return kind === 'schedule-loan' || kind === 'schedule-claim';
+  }
+
+  function attachReadOnlyValueGuards() {
+    // NOTE: Mobile Read-only v2 policy
+    // - Opening modals is allowed.
+    // - Blocking happens only when attempting to change values / submit.
+    function ensureSnapshot(el) {
+      if (!el || !el.dataset) return;
+      if (el.dataset.lsRoSnapshot === '1') return;
+
+      var tag = (el.tagName || '').toUpperCase();
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        try {
+          el.dataset.lsRoSnapshot = '1';
+          if (tag === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+            el.dataset.lsRoChecked = el.checked ? '1' : '0';
+          } else {
+            el.dataset.lsRoValue = el.value != null ? String(el.value) : '';
+          }
+        } catch (e) {}
+      }
+    }
+
+    function restoreSnapshot(el) {
+      if (!el || !el.dataset) return;
+      var tag = (el.tagName || '').toUpperCase();
+      if (tag === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+        el.checked = el.dataset.lsRoChecked === '1';
+        return;
+      }
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        if (el.dataset.lsRoValue != null) {
+          el.value = el.dataset.lsRoValue;
+        }
+      }
+    }
+
+    // Snapshot the initial value on focus/touch
+    document.addEventListener('focusin', function (event) {
+      if (!isReadOnly()) return;
+      var el = event && event.target;
+      if (!isScheduleModalControl(el)) return;
+      ensureSnapshot(el);
+    }, true);
+
+    // Touch devices sometimes don't trigger focus before change; capture pointerdown.
+    document.addEventListener('pointerdown', function (event) {
+      if (!isReadOnly()) return;
+      var el = event && event.target;
+      if (!isScheduleModalControl(el)) return;
+      ensureSnapshot(el);
+    }, true);
+
+    // Prevent value changes inside schedule modals.
+    var lastToastAt = 0;
+    function onValueAttempt(event) {
+      if (!isReadOnly()) return;
+      var el = event && event.target;
+      if (!isScheduleModalControl(el)) return;
+
+      // Allow focus/copy, but revert any actual change.
+      ensureSnapshot(el);
+      restoreSnapshot(el);
+
+      if (event && typeof event.stopPropagation === 'function') {
+        event.stopPropagation();
+      }
+      // Do not call preventDefault here: many input/change events are not cancelable.
+      var now = Date.now();
+      if (now - lastToastAt > 900) {
+        lastToastAt = now;
+        showToast('모바일(Read-only)에서는 값 변경이 불가합니다.');
+      }
+    }
+
+    document.addEventListener('change', onValueAttempt, true);
+    document.addEventListener('input', onValueAttempt, true);
   }
 
   function attachCaptureGuards() {
@@ -278,14 +391,6 @@
         return;
       }
 
-      // Block schedule rows that would open edit modals
-      if (t && (t.closest('.day-detail-item') || t.closest('.monitoring-schedule-item'))) {
-        event.preventDefault();
-        event.stopPropagation();
-        showToast('모바일(Read-only)에서는 일정 상세 편집이 불가합니다.');
-        return;
-      }
-
       var actionEl = t && t.closest('[data-action]');
       if (!actionEl) return;
 
@@ -298,11 +403,10 @@
         'loan-open-create': true,
         'loan-open-edit': true,
         'loan-delete': true,
-        'loan-open-schedule': true,
         'claim-open-create': true,
         'claim-open-edit': true,
         'claim-delete': true,
-        'claim-open-schedule': true
+        // NOTE: schedule modal open is allowed on mobile (view-only).
       };
 
       if (blocked[action]) {
@@ -378,6 +482,9 @@
 
     // Write guards should be applied early (before click bindings call into them)
     applyWriteGuards();
+
+    // Value-change guards (schedule modals are view-only on mobile)
+    attachReadOnlyValueGuards();
 
     // Event guards
     attachCaptureGuards();

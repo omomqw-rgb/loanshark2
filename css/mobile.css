@@ -1,4 +1,4 @@
-/* mobile.css - LoanShark v3.2.1
+/* mobile.css - LoanShark v3.2.2
    Panel-based mobile compatibility layer (READ-ONLY).
    - Reuses PC panels, only reflows/overrides layout + blocks write actions on mobile.
 */
@@ -284,4 +284,202 @@ html.ls-mobile #report-root .submetric-label {
 
 html.ls-mobile #report-root .submetric-value {
   font-size: 12px;
+}
+
+/* =========================================================
+   v3.2.2 Mobile Modal Read-only UX
+   - Operation Modal: list-only (no tabs/filters/sort)
+   - Available Capital Modal: summary + recent ledger list (no editor/actions/range)
+   ========================================================= */
+
+/* 운영현황 모달: 탭/필터 제거 + 리스트 중심 */
+html.ls-mobile #operation-modal-root .modal-tabs {
+  display: none !important;
+}
+
+html.ls-mobile #operation-modal-root .log-toolbar,
+html.ls-mobile #operation-modal-root .monitor-toolbar {
+  display: none !important;
+}
+
+html.ls-mobile #operation-modal-root .modal-body {
+  padding: 12px 12px 14px;
+}
+
+html.ls-mobile #operation-modal-root .log-list-root {
+  max-height: 70vh;
+  padding-right: 0;
+}
+
+/* 가용자산 모달: 편집/필터 UI 제거 + 카드형 리스트 */
+html.ls-mobile #available-capital-modal-root .avail-actions,
+html.ls-mobile #available-capital-modal-root .ledger-filter,
+html.ls-mobile #available-capital-modal-root .ledger-editor,
+html.ls-mobile #available-capital-modal-root .ledger-item-actions {
+  display: none !important;
+}
+
+html.ls-mobile #available-capital-modal-root .avail-summary {
+  padding: 10px 12px;
+}
+
+html.ls-mobile #available-capital-modal-root .avail-summary-value {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+/* Make ledger table behave like a vertical card list on mobile */
+html.ls-mobile #available-capital-modal-root .ledger-table-wrap {
+  border: none;
+  background: transparent;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-table thead {
+  display: none !important;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-table,
+html.ls-mobile #available-capital-modal-root .ledger-table tbody,
+html.ls-mobile #available-capital-modal-root .ledger-table tr,
+html.ls-mobile #available-capital-modal-root .ledger-table td {
+  display: block;
+  width: 100%;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-table tbody td {
+  border-bottom: none;
+  padding: 0;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-row {
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px 12px;
+  margin: 10px 0;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-cell-item {
+  margin-bottom: 8px;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-cell-amount {
+  text-align: right;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* Mobile list focuses on date/reason/amount (hide per-row running balance column) */
+html.ls-mobile #available-capital-modal-root .ledger-cell-balance {
+  display: none !important;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-empty-row {
+  border: 1px dashed rgba(148, 163, 184, 0.8);
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.08);
+  padding: 14px 12px;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-empty-cell {
+  padding: 0;
+}
+
+/* =========================================================
+   v3.2.2 Mobile Modal Read-only UX
+   - Operation modal: list-only (no tabs/filters/sort)
+   - Available capital modal: summary + recent ledger list only
+   ========================================================= */
+
+/* 운영현황 모달 (Mobile): 탭/필터/정렬 제거 + 리스트 중심 */
+html.ls-mobile #operation-modal-root .modal-tabs {
+  display: none !important;
+}
+
+html.ls-mobile #operation-modal-root .log-toolbar {
+  display: none !important;
+}
+
+html.ls-mobile #operation-modal-root .modal-header {
+  padding: 10px 12px;
+}
+
+html.ls-mobile #operation-modal-root .modal-body {
+  padding: 10px 12px 14px;
+}
+
+html.ls-mobile #operation-modal-root .log-list-root {
+  max-height: 70vh;
+  padding-right: 0;
+}
+
+/* 가용자산 모달 (Mobile): 수정/필터/기간 버튼 제거 + 카드형 리스트 */
+html.ls-mobile #available-capital-modal-root .avail-actions,
+html.ls-mobile #available-capital-modal-root .ledger-filter,
+html.ls-mobile #available-capital-modal-root .ledger-editor,
+html.ls-mobile #available-capital-modal-root .ledger-item-actions {
+  display: none !important;
+}
+
+html.ls-mobile #available-capital-modal-root .modal-header {
+  padding: 10px 12px;
+}
+
+html.ls-mobile #available-capital-modal-root .avail-summary {
+  padding: 12px 12px 10px;
+}
+
+html.ls-mobile #available-capital-modal-root .avail-summary-value {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* 카드형 리스트: table -> block */
+html.ls-mobile #available-capital-modal-root .ledger-table thead {
+  display: none !important;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-table,
+html.ls-mobile #available-capital-modal-root .ledger-table tbody,
+html.ls-mobile #available-capital-modal-root .ledger-table tr,
+html.ls-mobile #available-capital-modal-root .ledger-table td {
+  display: block;
+  width: 100%;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-table tbody td {
+  border-bottom: none;
+  padding: 0;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-row {
+  border: 1px solid var(--charcoal-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--charcoal-bg-surface);
+  padding: 12px;
+  margin: 10px 0;
+}
+
+/* Balance column is not required on mobile summary view */
+html.ls-mobile #available-capital-modal-root .ledger-cell-balance {
+  display: none;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-cell-item {
+  margin-bottom: 10px;
+}
+
+html.ls-mobile #available-capital-modal-root .ledger-cell-amount {
+  font-size: 16px;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* Empty state: keep centered */
+html.ls-mobile #available-capital-modal-root .ledger-empty-row {
+  border: 1px dashed var(--charcoal-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--charcoal-bg-elevated);
+  padding: 16px 12px;
 }
