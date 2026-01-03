@@ -350,7 +350,24 @@
         if (App.data && typeof App.data.buildDebtorsDetailed === 'function') {
           var bridge = App.data.buildDebtorsDetailed(debtors, loans, claims, schedules);
           if (bridge) {
-            App.data.debtors = Array.isArray(bridge.list) ? bridge.list : [];
+            // v3.2.4: DebtorList global sort policy — ALWAYS name ASC (ko-KR)
+            // - Apply once at the derived(adapter) boundary.
+            // - Do NOT mutate App.state.debtors (persisted/insertion order).
+            var rawList = Array.isArray(bridge.list) ? bridge.list : [];
+            var sortedList = rawList.slice();
+            sortedList.sort(function (a, b) {
+              var an = (a && a.name != null) ? String(a.name) : '';
+              var bn = (b && b.name != null) ? String(b.name) : '';
+              var c = an.localeCompare(bn, 'ko-KR');
+              if (c !== 0) return c;
+
+              // Tie-breaker for deterministic order (same-name debtors)
+              var aid = (a && a.id != null) ? String(a.id) : '';
+              var bid = (b && b.id != null) ? String(b.id) : '';
+              return aid.localeCompare(bid, 'ko-KR');
+            });
+
+            App.data.debtors = sortedList;
             App.data.debtorsDetailed = bridge.byId || {};
           }
         }
