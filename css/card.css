@@ -115,9 +115,21 @@
   display: none;
 }
 
-.card-status-select-inline option {
-  background-color:#111827;
-  color:#111827;
+/* Card status select (진행/완료/꺾기)
+   NOTE:
+   The option list/picker is rendered by the browser/OS (native select UI).
+   Keep it light on desktop cards to match the card surface. */
+html:not(.ls-mobile) .loan-card .card-status-select-inline option,
+html:not(.ls-mobile) .claim-card .card-status-select-inline option {
+  background-color: var(--charcoal-bg-surface, #ffffff);
+  color: var(--charcoal-text-primary, #111827);
+}
+
+/* Best-effort selected state (supported in some browsers) */
+html:not(.ls-mobile) .loan-card .card-status-select-inline option:checked,
+html:not(.ls-mobile) .claim-card .card-status-select-inline option:checked {
+  background-color: var(--charcoal-bg-elevated, #f1f2f4);
+  color: var(--charcoal-text-primary, #111827);
 }
 
 /* Status state: 진행 / 완료 / 꺾기 */
