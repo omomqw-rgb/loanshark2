@@ -784,13 +784,27 @@ function computePortfolioSummary(scope, dateRange) {
       if (status === 'PAID') {
         paid += amount;
       } else if (status === 'PARTIAL') {
-        // 부분납 – 이미 납입된 금액은 partial로, 잔액은 미납으로 처리
+        // 부분납(PARTIAL)은 "상태"일 뿐이며, 잔액(remaining)의 분류는 dueDate 기준으로만 결정한다.
+        // - paidAmount(또는 partialPaidAmount)는 항상 paid로 합산
+        // - remaining = amount - paidAmount
+        //   - dueDate < todayStr  → overdue += remaining
+        //   - dueDate >= todayStr → planned += remaining
         var paidAmt = Number(sc.paidAmount != null ? sc.paidAmount : sc.partialPaidAmount || 0);
         if (paidAmt > 0) {
           paid += paidAmt;
         }
-        if (amount > paidAmt) {
-          overdue += (amount - paidAmt);
+
+        var remaining = amount - paidAmt;
+        if (!isFinite(remaining) || remaining < 0) remaining = 0;
+
+        if (remaining > 0) {
+          // dueDate가 없거나 todayStr 산출이 실패한 경우에도 Monitoring 정의(= dueDate < today)와 동일하게,
+          // overdue 판정은 오직 dueDate < todayStr 일 때만 true가 되도록 한다. 그 외는 planned로 분류한다.
+          if (due && todayStr && due < todayStr) {
+            overdue += remaining;
+          } else {
+            planned += remaining;
+          }
         }
       } else if (status === 'OVERDUE') {
         overdue += amount;
