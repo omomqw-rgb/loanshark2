@@ -8,6 +8,9 @@
 
   var state = {
     isMobile: false,
+    // v3.2.7: Mobile에서도 Desktop과 동일하게 쓰기 기능을 허용한다.
+    // (과거 Mobile Read-only 정책은 제거/미사용화)
+    readOnly: false,
     initialized: false,
     desktopSlot: null,
     observer: null,
@@ -29,7 +32,8 @@
 
     if (isMobile) {
       root.classList.add('ls-mobile');
-      root.classList.add('ls-readonly');
+      // v3.2.7: 모바일에서도 Read-only 클래스를 적용하지 않는다.
+      root.classList.remove('ls-readonly');
     } else {
       root.classList.remove('ls-mobile');
       root.classList.remove('ls-readonly');
@@ -134,8 +138,8 @@
     }
   }
 
-  function applyReadOnlyUI(isMobile) {
-    if (!isMobile) {
+  function applyReadOnlyUI(shouldReadOnly) {
+    if (!shouldReadOnly) {
       restoreDisabledUI();
       return;
     }
@@ -212,7 +216,7 @@
   }
 
   function isReadOnly() {
-    return !!state.isMobile;
+    return !!state.readOnly;
   }
 
   function wrapFn(obj, key, msg) {
@@ -458,6 +462,7 @@
     try {
       state.observer = new MutationObserver(function () {
         if (!state.isMobile) return;
+        if (!isReadOnly()) return;
         applyReadOnlyUI(true);
       });
       state.observer.observe(document.body, { childList: true, subtree: true });
@@ -483,8 +488,9 @@
       state.hasSetInitialTab = true;
     }
 
-    // Apply UI disable (and restore on desktop)
-    applyReadOnlyUI(next);
+    // Apply UI disable only when Read-only policy is enabled.
+    // v3.2.7: default isReadOnly() === false on mobile.
+    applyReadOnlyUI(next && isReadOnly());
   }
 
   function init() {
@@ -494,7 +500,7 @@
     // Public API for feature modules (e.g., calendar)
     App.ui.mobile = App.ui.mobile || {};
     App.ui.mobile.isMobile = function () { return state.isMobile; };
-    App.ui.mobile.isReadOnly = function () { return state.isMobile; };
+    App.ui.mobile.isReadOnly = function () { return isReadOnly(); };
     App.ui.mobile.refresh = function () { refresh(true); };
 
     // Initial state

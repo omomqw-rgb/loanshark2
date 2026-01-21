@@ -1,6 +1,7 @@
-/* mobile.css - LoanShark v3.2.2
-   Panel-based mobile compatibility layer (READ-ONLY).
-   - Reuses PC panels, only reflows/overrides layout + blocks write actions on mobile.
+/* mobile.css - LoanShark v3.2.7
+   Panel-based mobile compatibility layer.
+   - Reuses PC panels and only reflows/overrides layout.
+   - v3.2.7: Mobile에서도 Desktop과 동일하게 쓰기(Create/Edit/Delete/Save) 기능을 허용한다.
 */
 
 /* Desktop default: Debtor tab is hidden (sidepanel is always visible on PC). */
@@ -82,7 +83,8 @@ html.ls-mobile .save-load-controls {
   width: auto;
   display: inline-flex;
   align-items: center;
-  flex-wrap: nowrap;
+  /* v3.2.7: Local/Cloud Save/Load 모두 노출되므로 줄바꿈 허용 */
+  flex-wrap: wrap;
   gap: 8px;
   margin-left: 0;
 }
@@ -94,13 +96,6 @@ html.ls-mobile .save-load-controls .nav-btn {
   font-size: 12px;
   border-radius: 8px;
 }
-
-html.ls-mobile #local-save-btn,
-html.ls-mobile #local-load-trigger,
-html.ls-mobile #local-load-file {
-  display: none !important;
-}
-
 
 /* Main shell becomes single-column (side panel is moved into the Debtor tab) */
 html.ls-mobile .body-row {
