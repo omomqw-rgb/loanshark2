@@ -418,9 +418,7 @@ function mapLoanRow(row) {
         claimTotal: claimTotal,
         overdueAmount: overdueAmount,
         hasAliveSchedule: hasAliveSchedule,
-        hasOverdueSchedule: hasOverdueSchedule,
-        loans: dLoans.slice(),
-        claims: dClaims.slice()
+        hasOverdueSchedule: hasOverdueSchedule
       };
 
       byId[id] = detail;

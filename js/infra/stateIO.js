@@ -298,7 +298,15 @@
     }
 
     // Domain arrays (in-place)
-    replaceArrayInPlace(ensureArray('debtors'), Array.isArray(dataRoot.debtors) ? dataRoot.debtors : []);
+    // v3.2.8: Debtors in App.state must contain human-info only.
+    // Remove legacy ledger copies (loans/claims arrays) and any derived caches
+    // during snapshot apply so legacy snapshots can never re-pollute state.
+    var debtorsSrc = Array.isArray(dataRoot.debtors) ? dataRoot.debtors : [];
+    var debtorsClean = debtorsSrc;
+    if (App.util && typeof App.util.sanitizeDebtorArray === 'function') {
+      debtorsClean = App.util.sanitizeDebtorArray(debtorsSrc);
+    }
+    replaceArrayInPlace(ensureArray('debtors'), debtorsClean);
     replaceArrayInPlace(ensureArray('loans'), Array.isArray(dataRoot.loans) ? dataRoot.loans : []);
     replaceArrayInPlace(ensureArray('claims'), Array.isArray(dataRoot.claims) ? dataRoot.claims : []);
     replaceArrayInPlace(ensureArray('cashLogs'), Array.isArray(dataRoot.cashLogs) ? dataRoot.cashLogs : []);

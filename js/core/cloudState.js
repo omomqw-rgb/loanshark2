@@ -287,8 +287,18 @@
 
     // IMPORTANT (Stage 5): Cloud snapshot must be built from App.state only.
     // App.data is a derived bridge and MUST NOT be used as a source of truth.
+    var rawDebtors = Array.isArray(stateData.debtors) ? stateData.debtors : [];
+    var cleanDebtors = rawDebtors;
+    // v3.2.8: Persist ONLY human-info fields for debtors.
+    // (No legacy ledger copies, no derived caches.)
+    if (util && typeof util.sanitizeDebtorArray === 'function') {
+      cleanDebtors = util.sanitizeDebtorArray(rawDebtors);
+    } else {
+      cleanDebtors = cloneArray(rawDebtors);
+    }
+
     var snapshotData = {
-      debtors: cloneArray(Array.isArray(stateData.debtors) ? stateData.debtors : []),
+      debtors: cleanDebtors,
       loans: cloneArray(Array.isArray(stateData.loans) ? stateData.loans : []),
       claims: cloneArray(Array.isArray(stateData.claims) ? stateData.claims : []),
       schedules: cloneArray(schedulesSnapshot),

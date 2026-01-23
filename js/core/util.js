@@ -393,6 +393,76 @@ function repairLoanClaimDisplayIds() {
       .replace(/'/g, '&#39;');
   }
 
+  // --- Debtor record normalization (SSoT) ---
+  // Policy (v3.2.8):
+  // - App.state.debtors must persist ONLY human-info fields.
+  // - Any ledger copies / derived caches MUST NOT be persisted.
+  // - This sanitizer is shared by:
+  //   - stateIO.applySnapshot (load-time normalization)
+  //   - cloudState.build (cloud payload normalization)
+  //   - local.save (local export normalization)
+
+  function sanitizeDebtorRecord(raw) {
+    if (!isObject(raw)) return null;
+
+    // id is required
+    var id = (typeof raw.id !== 'undefined') ? raw.id : (typeof raw.debtor_id !== 'undefined' ? raw.debtor_id : null);
+    if (id == null) return null;
+    id = String(id);
+
+    // name (legacy: title)
+    var name = (raw.name != null && raw.name !== '') ? raw.name : (raw.title != null ? raw.title : '');
+    name = (name == null) ? '' : String(name);
+
+    // createdAt (legacy: created / created_at)
+    var createdAt = null;
+    if (typeof raw.createdAt !== 'undefined') createdAt = raw.createdAt;
+    else if (typeof raw.created_at !== 'undefined') createdAt = raw.created_at;
+    else if (typeof raw.created !== 'undefined') createdAt = raw.created;
+
+    // note (legacy: memo)
+    var note = null;
+    if (typeof raw.note !== 'undefined') note = raw.note;
+    else if (typeof raw.memo !== 'undefined') note = raw.memo;
+
+    // risk (keep manual/final only; auto is derived/ephemeral)
+    var riskTier = null;
+    if (typeof raw.riskTier !== 'undefined') riskTier = raw.riskTier;
+    else if (typeof raw.risk_tier !== 'undefined') riskTier = raw.risk_tier;
+
+    var riskTierManual = null;
+    if (typeof raw.riskTierManual !== 'undefined') riskTierManual = raw.riskTierManual;
+    else if (typeof raw.risk_tier_manual !== 'undefined') riskTierManual = raw.risk_tier_manual;
+
+    var out = {
+      id: id,
+      name: name
+    };
+
+    if (createdAt != null && createdAt !== '') out.createdAt = createdAt;
+    if (typeof raw.phone !== 'undefined') out.phone = raw.phone;
+    if (typeof raw.gender !== 'undefined') out.gender = raw.gender;
+    if (typeof raw.birth !== 'undefined') out.birth = raw.birth;
+    if (typeof raw.region !== 'undefined') out.region = raw.region;
+    if (typeof raw.job !== 'undefined') out.job = raw.job;
+    if (note != null) out.note = note;
+
+    if (riskTier != null && riskTier !== '') out.riskTier = riskTier;
+    if (riskTierManual != null && riskTierManual !== '') out.riskTierManual = riskTierManual;
+
+    return out;
+  }
+
+  function sanitizeDebtorArray(list) {
+    var out = [];
+    if (!Array.isArray(list) || !list.length) return out;
+    for (var i = 0; i < list.length; i++) {
+      var clean = sanitizeDebtorRecord(list[i]);
+      if (clean) out.push(clean);
+    }
+    return out;
+  }
+
   App.util = {
     pad2: pad2,
     formatDate: formatDate,
@@ -410,7 +480,11 @@ function repairLoanClaimDisplayIds() {
     // displayId repair (existing data)
     displayIdValid: displayIdValid,
     repairDisplayId: repairDisplayId,
-    repairLoanClaimDisplayIds: repairLoanClaimDisplayIds
+    repairLoanClaimDisplayIds: repairLoanClaimDisplayIds,
+
+    // Debtor snapshot normalization (SSoT)
+    sanitizeDebtorRecord: sanitizeDebtorRecord,
+    sanitizeDebtorArray: sanitizeDebtorArray
   };
 
   App.showToast = function (msg) {

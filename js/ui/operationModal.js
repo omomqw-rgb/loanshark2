@@ -191,8 +191,10 @@
 
       // Fallback only when schedules are unavailable.
       if (!hasLoanAlive && !hasClaimAlive) {
-        hasLoanAlive = !!(d.loanCount || (d.loans && d.loans.length));
-        hasClaimAlive = !!(d.claimCount || (d.claims && d.claims.length));
+        // v3.2.8: App.data.debtors no longer carries loans/claims arrays.
+        // Use derived counters only.
+        hasLoanAlive = !!d.loanCount;
+        hasClaimAlive = !!d.claimCount;
       }
 
       if (hasLoanAlive) {

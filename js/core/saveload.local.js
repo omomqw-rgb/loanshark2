@@ -22,7 +22,23 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       if (App.util && typeof App.util.ensureLoanClaimDisplayIds === 'function') {
         App.util.ensureLoanClaimDisplayIds();
       }
-      const data = JSON.stringify(App.state || {}, null, 2);
+
+      // v3.2.8: Export a normalized snapshot (SSoT).
+      // - debtors: human-info fields only (no loans/claims copies, no derived caches)
+      // - loans/claims/schedules/cashLogs: ledger data as-is
+      var state = App.state || {};
+      var payload = state;
+      if (App.util && typeof App.util.sanitizeDebtorArray === 'function') {
+        payload = {};
+        for (var k in state) {
+          if (Object.prototype.hasOwnProperty.call(state, k)) {
+            payload[k] = state[k];
+          }
+        }
+        payload.debtors = App.util.sanitizeDebtorArray(Array.isArray(state.debtors) ? state.debtors : []);
+      }
+
+      const data = JSON.stringify(payload, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
