@@ -532,6 +532,11 @@ function renderAll() {
         App.state.cloud.role = (shareInfo && shareInfo.role) ? shareInfo.role : 'owner';
         App.state.cloud.isShared = !!(shareInfo && shareInfo.isShared);
         App.state.cloud.isReadOnly = !!(shareInfo && shareInfo.isReadOnly);
+        try {
+          var isViewer = !!(App.state.cloud.isShared && App.state.cloud.isReadOnly && App.state.cloud.viewerId && App.state.cloud.targetUserId && App.state.cloud.viewerId !== App.state.cloud.targetUserId);
+          document.documentElement.classList.toggle('ls-viewer', isViewer);
+        } catch (e) {}
+
 
         query = query.eq('user_id', targetUserId);
       }

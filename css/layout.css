@@ -631,3 +631,7 @@
   background: var(--accent, #2563eb);
   color: #ffffff;
 }
+
+
+/* Viewer (read-only shared) UI lockdown */
+.ls-viewer .save-load-controls{display:none !important;}

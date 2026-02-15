@@ -5,6 +5,13 @@
 
   App.local.save = function () {
     try {
+      // Viewer(read-only shared) accounts must not export/import local snapshots.
+      if (App.state && App.state.cloud && App.state.cloud.isShared && App.state.cloud.isReadOnly && App.state.cloud.viewerId && App.state.cloud.targetUserId && App.state.cloud.viewerId !== App.state.cloud.targetUserId) {
+        console.warn('[Local Save] Read-only viewer account. Save is blocked.');
+        App.showToast("읽기 전용 계정입니다 — Local 저장 불가");
+        return;
+      }
+
       // Stage 6.1: Ensure meta counters exist in saved snapshot (ID collision prevention).
       if (App.stateIO && typeof App.stateIO.ensureMeta === 'function') {
         App.stateIO.ensureMeta();
@@ -55,6 +62,13 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
 
   App.local.load = async function (file) {
     try {
+      // Viewer(read-only shared) accounts must not export/import local snapshots.
+      if (App.state && App.state.cloud && App.state.cloud.isShared && App.state.cloud.isReadOnly && App.state.cloud.viewerId && App.state.cloud.targetUserId && App.state.cloud.viewerId !== App.state.cloud.targetUserId) {
+        console.warn('[Local Load] Read-only viewer account. Load is blocked.');
+        App.showToast("읽기 전용 계정입니다 — Local 불러오기 불가");
+        return;
+      }
+
       const text = await file.text();
       const obj = JSON.parse(text);
       if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {

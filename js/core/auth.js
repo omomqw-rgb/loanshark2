@@ -149,6 +149,7 @@
         console.error('[Auth] Failed to load data after login:', err);
       }
     } else if (!App.user) {
+      try { document.documentElement.classList.remove('ls-viewer'); } catch (e) {}
       clearAppDataState();
     }
   }
