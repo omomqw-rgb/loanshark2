@@ -13,6 +13,55 @@
   }
 
 
+
+  async function getCloudShareInfo(supa, viewerId) {
+    // Returns the effective target user_id to load from app_states.
+    // - Default: viewer loads own state (targetUserId = viewerId)
+    // - Shared: if state_shares grants viewer read access to an owner, targetUserId = ownerId
+    if (!supa || !viewerId) {
+      return { targetUserId: null, ownerId: null, viewerId: viewerId || null, role: null, isShared: false, isReadOnly: false };
+    }
+
+    // Default to self
+    var info = { targetUserId: viewerId, ownerId: viewerId, viewerId: viewerId, role: 'owner', isShared: false, isReadOnly: false };
+
+    // If state_shares doesn't exist or RLS blocks it, we silently fall back to self.
+    try {
+      var res = await supa
+        .from('state_shares')
+        .select('owner_id, role, created_at')
+        .eq('viewer_id', viewerId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      var err = res && res.error ? res.error : null;
+      if (err) {
+        return info;
+      }
+
+      var rows = (res && res.data) || [];
+      if (!rows.length) {
+        return info;
+      }
+
+      var row = rows[0] || null;
+      var ownerId = row && row.owner_id ? row.owner_id : null;
+      var role = row && row.role ? row.role : 'read';
+
+      if (ownerId && ownerId !== viewerId) {
+        info.targetUserId = ownerId;
+        info.ownerId = ownerId;
+        info.role = role;
+        info.isShared = true;
+        info.isReadOnly = (role === 'read');
+      }
+
+      return info;
+    } catch (e) {
+      return info;
+    }
+  }
+
   function ensureCloudStateModuleLoaded() {
     if (App.cloudState && typeof App.cloudState.build === 'function' && typeof App.cloudState.apply === 'function') {
       return;
@@ -472,7 +521,19 @@ function renderAll() {
         .select('state_json, updated_at');
 
       if (userId) {
-        query = query.eq('user_id', userId);
+        var shareInfo = await getCloudShareInfo(supa, userId);
+        var targetUserId = (shareInfo && shareInfo.targetUserId) ? shareInfo.targetUserId : userId;
+
+        if (!App.state) App.state = {};
+        App.state.cloud = App.state.cloud || {};
+        App.state.cloud.targetUserId = targetUserId;
+        App.state.cloud.viewerId = userId;
+        App.state.cloud.ownerId = (shareInfo && shareInfo.ownerId) ? shareInfo.ownerId : userId;
+        App.state.cloud.role = (shareInfo && shareInfo.role) ? shareInfo.role : 'owner';
+        App.state.cloud.isShared = !!(shareInfo && shareInfo.isShared);
+        App.state.cloud.isReadOnly = !!(shareInfo && shareInfo.isReadOnly);
+
+        query = query.eq('user_id', targetUserId);
       }
 
       query = query
@@ -1041,6 +1102,13 @@ App.data.saveToSupabase = async function () {
   }
 
   ensureCloudStateModuleLoaded();
+  var shareInfo = await getCloudShareInfo(supa, userId);
+  if (shareInfo && shareInfo.isShared && shareInfo.isReadOnly && shareInfo.targetUserId && shareInfo.targetUserId !== userId) {
+    console.warn('[Cloud Save] Read-only viewer account. Save is blocked.');
+    App.showToast("읽기 전용 계정입니다 — Cloud 저장 불가");
+    return;
+  }
+
   if (!App.cloudState || typeof App.cloudState.build !== 'function') {
     console.error('[Cloud Save] CloudState module is not available.');
     App.showToast("오류 발생 — 다시 시도해주세요.");
