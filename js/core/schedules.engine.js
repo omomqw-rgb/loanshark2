@@ -37,50 +37,9 @@
     return n;
   }
 
-  function getScheduleDueDate(sc) {
-    return (sc && (sc.dueDate || sc.due_date || sc.date || '')) || '';
-  }
-
-  function getScheduleInstallmentNo(sc) {
-    if (!sc || sc.installmentNo == null) return null;
-    var n = Number(sc.installmentNo);
-    if (!isFinite(n)) return null;
-    return n;
-  }
-
-  function parseISODateToUtcDay(dateStr) {
-    if (!dateStr || typeof dateStr !== 'string') return null;
-    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
-    if (!m) return null;
-    var y = Number(m[1]);
-    var mo = Number(m[2]) - 1;
-    var d = Number(m[3]);
-    return Math.floor(Date.UTC(y, mo, d) / 86400000);
-  }
-
-  function diffIsoDays(a, b) {
-    var ad = parseISODateToUtcDay(a);
-    var bd = parseISODateToUtcDay(b);
-    if (ad === null || bd === null) return null;
-    return bd - ad;
-  }
-
-  function nearlyEqualAmounts(a, b, ratio) {
-    var av = toNonNegativeNumber(a);
-    var bv = toNonNegativeNumber(b);
-    if (!av && !bv) return true;
-    var max = Math.max(av, bv, 1);
-    return Math.abs(av - bv) <= max * ratio;
-  }
-
-  function cloneTrace(obj) {
-    return JSON.parse(JSON.stringify(obj || {}));
-  }
-
   var engine = {
     list: [],
     _initialized: false,
-    _lastMergeTrace: null,
 
     _ensureInitialized: function () {
       if (this._initialized && Array.isArray(this.list)) return;
@@ -98,452 +57,6 @@
       var data = App.data || (App.data = {});
       state.schedules = this.list || [];
       data.schedules = this.list || [];
-    },
-
-    _debugLog: function (level, message, payload) {
-      if (typeof console === 'undefined') return;
-      var fn = console[level] || console.log;
-      if (typeof fn !== 'function') return;
-      try {
-        if (typeof payload === 'undefined') {
-          fn.call(console, message);
-        } else {
-          fn.call(console, message, payload);
-        }
-      } catch (e) {
-        try {
-          console.log(message);
-        } catch (ignore) {}
-      }
-    },
-
-    _captureScheduleTotals: function (list) {
-      var result = {
-        paidTotal: 0,
-        partialTotal: 0,
-        overdueTotal: 0,
-        plannedTotal: 0,
-        scheduleCount: 0,
-        statusCounts: {
-          PAID: 0,
-          PARTIAL: 0,
-          OVERDUE: 0,
-          PLANNED: 0,
-          OTHER: 0
-        }
-      };
-      var items = Array.isArray(list) ? list : [];
-      for (var i = 0; i < items.length; i++) {
-        var sc = items[i];
-        if (!sc) continue;
-        result.scheduleCount += 1;
-        var status = String(sc.status || 'PLANNED').toUpperCase();
-        var amount = toNonNegativeNumber(sc.amount);
-        var paidAmount = toNonNegativeNumber(sc.paidAmount != null ? sc.paidAmount : sc.partialPaidAmount);
-        var remaining = Math.max(0, amount - paidAmount);
-        if (status === 'PAID') {
-          result.paidTotal += amount;
-          result.statusCounts.PAID += 1;
-        } else if (status === 'PARTIAL') {
-          result.paidTotal += paidAmount;
-          result.partialTotal += remaining;
-          result.statusCounts.PARTIAL += 1;
-        } else if (status === 'OVERDUE') {
-          result.overdueTotal += amount;
-          result.statusCounts.OVERDUE += 1;
-        } else if (status === 'PLANNED') {
-          result.plannedTotal += amount;
-          result.statusCounts.PLANNED += 1;
-        } else {
-          result.statusCounts.OTHER += 1;
-        }
-      }
-      return result;
-    },
-
-    _diffScheduleTotals: function (beforeTotals, afterTotals) {
-      var keys = ['paidTotal', 'partialTotal', 'overdueTotal', 'plannedTotal', 'scheduleCount'];
-      var diff = {};
-      var hasDelta = false;
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        var beforeValue = Number(beforeTotals && beforeTotals[key] != null ? beforeTotals[key] : 0) || 0;
-        var afterValue = Number(afterTotals && afterTotals[key] != null ? afterTotals[key] : 0) || 0;
-        var delta = afterValue - beforeValue;
-        diff[key] = {
-          before: beforeValue,
-          after: afterValue,
-          delta: delta
-        };
-        if (Math.abs(delta) > 0.000001) hasDelta = true;
-      }
-      diff.hasDelta = hasDelta;
-      return diff;
-    },
-
-    _hasInstallmentContinuityBreak: function (list) {
-      var prevInst = null;
-      var hasGap = false;
-      var hasDuplicate = false;
-      var items = Array.isArray(list) ? list : [];
-      for (var i = 0; i < items.length; i++) {
-        var inst = getScheduleInstallmentNo(items[i]);
-        if (inst === null) continue;
-        if (prevInst !== null) {
-          if (inst === prevInst) hasDuplicate = true;
-          if (inst !== prevInst + 1) hasGap = true;
-        }
-        prevInst = inst;
-      }
-      return {
-        hasGap: hasGap,
-        hasDuplicate: hasDuplicate,
-        broken: hasGap || hasDuplicate
-      };
-    },
-
-    _computeAlignedShiftInfo: function (prevList, nextList) {
-      var minLen = Math.min(prevList.length, nextList.length);
-      var info = {
-        comparable: 0,
-        changed: 0,
-        dominantShiftDays: null,
-        dominantShiftCount: 0,
-        wholeListShift: false
-      };
-      if (!minLen) return info;
-
-      var shiftCountMap = Object.create(null);
-      for (var i = 0; i < minLen; i++) {
-        var prevDue = getScheduleDueDate(prevList[i]);
-        var nextDue = getScheduleDueDate(nextList[i]);
-        var dayDiff = diffIsoDays(prevDue, nextDue);
-        if (dayDiff === null) continue;
-        info.comparable += 1;
-        if (dayDiff !== 0) {
-          info.changed += 1;
-          var key = String(dayDiff);
-          shiftCountMap[key] = (shiftCountMap[key] || 0) + 1;
-          if (shiftCountMap[key] > info.dominantShiftCount) {
-            info.dominantShiftCount = shiftCountMap[key];
-            info.dominantShiftDays = dayDiff;
-          }
-        }
-      }
-
-      if (info.comparable > 0 && info.changed > 0 && info.dominantShiftCount >= Math.ceil(info.comparable * 0.6)) {
-        info.wholeListShift = true;
-      }
-
-      return info;
-    },
-
-    _computeSequenceDriftInfo: function (prevList, nextList) {
-      var minLen = Math.min(prevList.length, nextList.length);
-      var firstMismatch = -1;
-      var mismatchCount = 0;
-      for (var i = 0; i < minLen; i++) {
-        var prevInst = getScheduleInstallmentNo(prevList[i]);
-        var nextInst = getScheduleInstallmentNo(nextList[i]);
-        var prevDue = getScheduleDueDate(prevList[i]);
-        var nextDue = getScheduleDueDate(nextList[i]);
-        var sameInst = (prevInst === null && nextInst === null) || (prevInst !== null && nextInst !== null && prevInst === nextInst);
-        var sameDue = prevDue === nextDue;
-        if (!sameInst || !sameDue) {
-          if (firstMismatch < 0) firstMismatch = i;
-          mismatchCount += 1;
-        }
-      }
-      return {
-        firstMismatch: firstMismatch,
-        mismatchCount: mismatchCount,
-        suffixShiftLikely: firstMismatch >= 0 && mismatchCount >= Math.ceil(Math.max(1, minLen) * 0.5)
-      };
-    },
-
-    _computeAmountPatternChange: function (prevList, nextList) {
-      var minLen = Math.min(prevList.length, nextList.length);
-      if (!minLen) {
-        return {
-          comparable: 0,
-          changed: 0,
-          significant: false
-        };
-      }
-      var changed = 0;
-      for (var i = 0; i < minLen; i++) {
-        var prevAmount = toNonNegativeNumber(prevList[i] && prevList[i].amount);
-        var nextAmount = toNonNegativeNumber(nextList[i] && nextList[i].amount);
-        if (!nearlyEqualAmounts(prevAmount, nextAmount, 0.25)) {
-          changed += 1;
-        }
-      }
-      return {
-        comparable: minLen,
-        changed: changed,
-        significant: changed >= Math.ceil(minLen * 0.6)
-      };
-    },
-
-    _detectStructureChange: function (kind, prevList, nextList) {
-      var report = {
-        kind: kind,
-        changed: false,
-        reasons: [],
-        countDelta: Math.abs((prevList || []).length - (nextList || []).length),
-        previousCount: (prevList || []).length,
-        nextCount: (nextList || []).length,
-        installmentBreak: {
-          previous: this._hasInstallmentContinuityBreak(prevList),
-          next: this._hasInstallmentContinuityBreak(nextList)
-        },
-        shiftInfo: this._computeAlignedShiftInfo(prevList || [], nextList || []),
-        sequenceDrift: this._computeSequenceDriftInfo(prevList || [], nextList || []),
-        amountPattern: this._computeAmountPatternChange(prevList || [], nextList || [])
-      };
-
-      if (report.countDelta > 0) {
-        report.reasons.push('count-changed');
-      }
-      if (report.installmentBreak.previous.broken || report.installmentBreak.next.broken) {
-        report.reasons.push('installment-continuity-break');
-      }
-      if (report.shiftInfo.wholeListShift) {
-        report.reasons.push('dueDate-whole-list-shift');
-      }
-      if (report.sequenceDrift.suffixShiftLikely) {
-        report.reasons.push('sequence-drift');
-      }
-      if (report.amountPattern.significant) {
-        report.reasons.push('amount-pattern-changed');
-      }
-      if (kind === 'claim' && report.countDelta > 0) {
-        report.reasons.push('claim-structure-count-change');
-      }
-
-      report.changed = report.reasons.length > 0;
-      return report;
-    },
-
-    _evaluateScheduleMatch: function (kind, prevMatched, next, matchType, prevIndex, nextIndex, structureReport) {
-      var score = 0;
-      var reasons = [];
-      var prevInst = getScheduleInstallmentNo(prevMatched);
-      var nextInst = getScheduleInstallmentNo(next);
-      var prevDue = getScheduleDueDate(prevMatched);
-      var nextDue = getScheduleDueDate(next);
-      var amountMatchStrong = nearlyEqualAmounts(prevMatched && prevMatched.amount, next && next.amount, 0.05);
-      var amountMatchLoose = nearlyEqualAmounts(prevMatched && prevMatched.amount, next && next.amount, 0.2);
-      var dueDiffDays = diffIsoDays(prevDue, nextDue);
-
-      if (matchType === 'installment') {
-        score += 5;
-        reasons.push('same-installment');
-      } else if (matchType === 'dueDate') {
-        score += 3;
-        reasons.push('same-dueDate');
-      } else if (matchType === 'order') {
-        score += 1;
-        reasons.push('order-fallback');
-      }
-
-      if (prevInst !== null && nextInst !== null && prevInst === nextInst) {
-        score += 2;
-        reasons.push('installment-confirmed');
-      } else if (prevInst !== null && nextInst !== null && Math.abs(prevInst - nextInst) <= 1) {
-        score += 1;
-        reasons.push('installment-nearby');
-      }
-
-      if (prevDue && nextDue && prevDue === nextDue) {
-        score += 2;
-        reasons.push('dueDate-confirmed');
-      } else if (dueDiffDays !== null && Math.abs(dueDiffDays) <= 3) {
-        score += 1;
-        reasons.push('dueDate-nearby');
-      }
-
-      if (amountMatchStrong) {
-        score += 2;
-        reasons.push('amount-close');
-      } else if (amountMatchLoose) {
-        score += 1;
-        reasons.push('amount-similar');
-      }
-
-      if (prevIndex === nextIndex) {
-        score += 1;
-        reasons.push('same-index');
-      }
-
-      if (structureReport && structureReport.changed) {
-        score -= 2;
-        reasons.push('structure-change-penalty');
-      }
-
-      if (matchType === 'order') {
-        score -= 2;
-      }
-
-      if (kind === 'claim') {
-        if (matchType === 'dueDate') {
-          score -= 1;
-          reasons.push('claim-dueDate-penalty');
-        }
-        if (!amountMatchLoose) {
-          score -= 2;
-          reasons.push('claim-amount-mismatch');
-        }
-      }
-
-      var tier = 'LOW';
-      if (kind === 'claim') {
-        if (score >= 8) tier = 'HIGH';
-        else if (score >= 5) tier = 'MEDIUM';
-      } else {
-        if (score >= 7) tier = 'HIGH';
-        else if (score >= 4) tier = 'MEDIUM';
-      }
-
-      if (structureReport && structureReport.changed && matchType === 'order') {
-        tier = 'LOW';
-      }
-
-      return {
-        score: score,
-        tier: tier,
-        reasons: reasons,
-        matchType: matchType,
-        dueDiffDays: dueDiffDays,
-        amountClose: amountMatchStrong,
-        amountSimilar: amountMatchLoose
-      };
-    },
-
-    _canUseOrderFallback: function (kind, structureReport, trace) {
-      var allowed = true;
-      var reasons = [];
-      if (structureReport && structureReport.changed) {
-        allowed = false;
-        reasons.push('structure-change');
-      }
-      if (kind === 'claim') {
-        allowed = false;
-        reasons.push('claim-order-fallback-disabled');
-      }
-      if (trace && trace.beforeTotals && trace.beforeTotals.statusCounts) {
-        var partialCount = Number(trace.beforeTotals.statusCounts.PARTIAL || 0);
-        var overdueCount = Number(trace.beforeTotals.statusCounts.OVERDUE || 0);
-        if (partialCount > 0 || overdueCount > 1) {
-          allowed = false;
-          reasons.push('risky-runtime-status-present');
-        }
-      }
-      return {
-        allowed: allowed,
-        reasons: reasons
-      };
-    },
-
-    _applyPreservedScheduleState: function (kind, next, prevMatched, confidence, trace) {
-      var prevStatus = String(prevMatched.status || '').toUpperCase();
-      var nextAmount = toNonNegativeNumber(next.amount);
-      var prevPaid = toNonNegativeNumber(prevMatched.paidAmount != null ? prevMatched.paidAmount : prevMatched.partialPaidAmount);
-      var prevPartial = toNonNegativeNumber(prevMatched.partialPaidAmount);
-      var tier = confidence && confidence.tier ? confidence.tier : 'LOW';
-
-      if (tier === 'LOW') {
-        trace.skippedPreserve += 1;
-        return;
-      }
-
-      if (tier === 'HIGH' && prevMatched.id != null) {
-        next.id = toStr(prevMatched.id);
-      }
-
-      if (prevMatched.memo != null && typeof next.memo === 'undefined' && tier !== 'LOW') {
-        next.memo = prevMatched.memo;
-      }
-
-      if (kind === 'claim' && !nextAmount) {
-        nextAmount = toNonNegativeNumber(prevMatched.amount);
-        next.amount = nextAmount;
-      }
-
-      if (prevStatus === 'PAID') {
-        next.status = 'PAID';
-        next.paidAmount = nextAmount;
-        next.partialPaidAmount = 0;
-        return;
-      }
-
-      if (prevStatus === 'PARTIAL') {
-        if (tier !== 'HIGH') {
-          trace.partialPreserveBlocked += 1;
-          trace.skippedPreserve += 1;
-          this._debugLog('log', '[SchedulesEngine] partial preserve skipped due to low confidence', {
-            kind: kind,
-            confidence: confidence,
-            previousId: prevMatched.id != null ? String(prevMatched.id) : null,
-            nextInstallmentNo: next.installmentNo != null ? Number(next.installmentNo) : null,
-            nextDueDate: getScheduleDueDate(next)
-          });
-          return;
-        }
-        var clampedPaid = prevPaid;
-        if (nextAmount > 0 && clampedPaid > nextAmount) clampedPaid = nextAmount;
-        next.status = 'PARTIAL';
-        next.partialPaidAmount = clampedPaid || prevPartial;
-        next.paidAmount = clampedPaid;
-        trace.partialPreserveSuccess += 1;
-        return;
-      }
-
-      next.paidAmount = 0;
-      next.partialPaidAmount = 0;
-
-      if (prevStatus === 'OVERDUE') {
-        if (tier === 'HIGH') {
-          next.status = 'OVERDUE';
-        }
-        return;
-      }
-
-      if (prevStatus === 'PLANNED') {
-        next.status = 'PLANNED';
-      }
-    },
-
-    _finalizeMergeTrace: function (trace) {
-      trace.afterTotals = this._captureScheduleTotals(trace.outputSchedules || []);
-      trace.totalsDiff = this._diffScheduleTotals(trace.beforeTotals, trace.afterTotals);
-      this._lastMergeTrace = cloneTrace(trace);
-
-      this._debugLog('log', '[SchedulesEngine] merge trace', {
-        kind: trace.kind,
-        ownerId: trace.ownerId,
-        directMatches: trace.directMatches,
-        dueDateMatches: trace.dueDateMatches,
-        orderFallback: trace.orderFallback,
-        skippedPreserve: trace.skippedPreserve,
-        partialPreserveSuccess: trace.partialPreserveSuccess,
-        partialPreserveBlocked: trace.partialPreserveBlocked,
-        confidenceDistribution: trace.confidenceDistribution,
-        structureChange: trace.structureChange
-      });
-
-      if (trace.structureChange && trace.structureChange.changed) {
-        this._debugLog('warn', '[SchedulesEngine] structure change detected; conservative preserve mode enabled', trace.structureChange);
-      }
-
-      if (trace.totalsDiff && trace.totalsDiff.hasDelta) {
-        this._debugLog('warn', '[SchedulesEngine] merge totals changed after rebuild', {
-          kind: trace.kind,
-          ownerId: trace.ownerId,
-          diff: trace.totalsDiff,
-          structureChange: trace.structureChange && trace.structureChange.reasons ? trace.structureChange.reasons : []
-        });
-      }
     },
 
     initEmpty: function () {
@@ -625,34 +138,6 @@
       var prevByInstallment = Object.create(null);
       var prevByDueDate = Object.create(null);
       var todayStr = null;
-      var structureReport = this._detectStructureChange(kind, prevList, nextList);
-      var ownerId = owner && owner.id != null ? String(owner.id) : null;
-      var trace = {
-        kind: kind,
-        ownerId: ownerId,
-        previousCount: prevList.length,
-        nextCount: nextList.length,
-        directMatches: 0,
-        dueDateMatches: 0,
-        orderFallback: {
-          attempted: 0,
-          allowed: 0,
-          blocked: 0,
-          blockedReasons: []
-        },
-        skippedPreserve: 0,
-        partialPreserveSuccess: 0,
-        partialPreserveBlocked: 0,
-        confidenceDistribution: {
-          HIGH: 0,
-          MEDIUM: 0,
-          LOW: 0
-        },
-        structureChange: structureReport,
-        beforeTotals: this._captureScheduleTotals(prevList),
-        outputSchedules: out,
-        sampleMatches: []
-      };
 
       if (App.util && typeof App.util.todayISODate === 'function') {
         todayStr = App.util.todayISODate();
@@ -692,75 +177,67 @@
         return -1;
       }
 
-      var fallbackPolicy = this._canUseOrderFallback(kind, structureReport, trace);
-      if (!fallbackPolicy.allowed) {
-        trace.orderFallback.blockedReasons = fallbackPolicy.reasons.slice();
-      }
-
       for (var j = 0; j < nextList.length; j++) {
         var next = shallowClone(nextList[j]);
         if (!next) continue;
 
         var matchedIndex = -1;
-        var matchType = 'none';
         var nextInstKey = (next.installmentNo != null) ? String(next.installmentNo) : '';
         if (nextInstKey && typeof prevByInstallment[nextInstKey] !== 'undefined') {
           var instIndex = prevByInstallment[nextInstKey];
-          if (!matchedPrevIndexes[instIndex]) {
-            matchedIndex = instIndex;
-            matchType = 'installment';
-          }
+          if (!matchedPrevIndexes[instIndex]) matchedIndex = instIndex;
         }
 
         if (matchedIndex < 0) {
           var nextDueKey = next.dueDate || next.due_date || '';
-          if (nextDueKey) {
-            matchedIndex = findUnmatchedIndexByDueDate(nextDueKey);
-            if (matchedIndex >= 0) matchType = 'dueDate';
-          }
+          if (nextDueKey) matchedIndex = findUnmatchedIndexByDueDate(nextDueKey);
         }
 
         if (matchedIndex < 0) {
-          trace.orderFallback.attempted += 1;
-          if (fallbackPolicy.allowed) {
-            matchedIndex = findFirstUnmatchedIndex();
-            if (matchedIndex >= 0) {
-              trace.orderFallback.allowed += 1;
-              matchType = 'order';
-            }
-          } else {
-            trace.orderFallback.blocked += 1;
-          }
+          matchedIndex = findFirstUnmatchedIndex();
         }
 
         if (matchedIndex >= 0) {
           matchedPrevIndexes[matchedIndex] = true;
           var prevMatched = prevList[matchedIndex];
-          var confidence = this._evaluateScheduleMatch(kind, prevMatched, next, matchType, matchedIndex, j, structureReport);
-          if (confidence && confidence.tier && trace.confidenceDistribution[confidence.tier] != null) {
-            trace.confidenceDistribution[confidence.tier] += 1;
-          }
-
-          if (matchType === 'installment') trace.directMatches += 1;
-          else if (matchType === 'dueDate') trace.dueDateMatches += 1;
-
-          if (trace.sampleMatches.length < 8) {
-            trace.sampleMatches.push({
-              matchType: matchType,
-              confidence: confidence,
-              prevId: prevMatched && prevMatched.id != null ? String(prevMatched.id) : null,
-              prevInstallmentNo: prevMatched && prevMatched.installmentNo != null ? Number(prevMatched.installmentNo) : null,
-              nextInstallmentNo: next && next.installmentNo != null ? Number(next.installmentNo) : null,
-              prevDueDate: getScheduleDueDate(prevMatched),
-              nextDueDate: getScheduleDueDate(next)
-            });
-          }
-
           if (prevMatched) {
-            this._applyPreservedScheduleState(kind, next, prevMatched, confidence, trace);
+            var prevStatus = String(prevMatched.status || '').toUpperCase();
+            var nextAmount = toNonNegativeNumber(next.amount);
+            var prevPaid = toNonNegativeNumber(prevMatched.paidAmount != null ? prevMatched.paidAmount : prevMatched.partialPaidAmount);
+            var prevPartial = toNonNegativeNumber(prevMatched.partialPaidAmount);
+
+            if (prevMatched.id != null) {
+              next.id = toStr(prevMatched.id);
+            }
+
+            if (prevMatched.memo != null && typeof next.memo === 'undefined') {
+              next.memo = prevMatched.memo;
+            }
+
+            if (kind === 'claim' && !nextAmount) {
+              nextAmount = toNonNegativeNumber(prevMatched.amount);
+              next.amount = nextAmount;
+            }
+
+            if (prevStatus === 'PAID') {
+              next.status = 'PAID';
+              next.paidAmount = nextAmount;
+              next.partialPaidAmount = 0;
+            } else if (prevStatus === 'PARTIAL') {
+              var clampedPaid = prevPaid;
+              if (nextAmount > 0 && clampedPaid > nextAmount) clampedPaid = nextAmount;
+              next.status = 'PARTIAL';
+              next.partialPaidAmount = clampedPaid || prevPartial;
+              next.paidAmount = clampedPaid;
+            } else {
+              next.paidAmount = 0;
+              next.partialPaidAmount = 0;
+              next.status = (prevStatus === 'OVERDUE') ? 'OVERDUE' : 'PLANNED';
+              if (kind === 'loan') {
+                this._normalizeScheduleStatus(next, todayStr);
+              }
+            }
           }
-        } else {
-          trace.skippedPreserve += 1;
         }
 
         if (kind === 'loan') {
@@ -778,7 +255,6 @@
         out.push(next);
       }
 
-      this._finalizeMergeTrace(trace);
       return out;
     },
 
@@ -1042,11 +518,216 @@
       this._syncAlias();
 
       // Stage 4A: UI 업데이트(모달 close / render / refresh)는 App.api.domain.commit 파이프라인에서 처리한다.
-      if (api && typeof api.closeModal === 'function') {
-        api.closeModal();
+    },
+
+    bulkUpdateFromClaimForm: function (form) {
+      if (!form) return;
+
+      this._ensureInitialized();
+
+      var api = App.features && App.features.debtors;
+      var claimId = form.getAttribute('data-claim-id');
+      var normalizedClaimId = claimId != null ? String(claimId) : claimId;
+      var list = this.list || [];
+
+      // 1단계: 금액 입력값 반영
+      var amountInputs = form.querySelectorAll('input[data-schedule-id]');
+      for (var i = 0; i < amountInputs.length; i++) {
+        var input = amountInputs[i];
+        var sid = input.getAttribute('data-schedule-id');
+        var val = input.value != null ? String(input.value).trim() : '';
+        var num = val === '' ? 0 : Number(val);
+        if (!isFinite(num) || num < 0) num = 0;
+
+        for (var j = 0; j < list.length; j++) {
+          var sc = list[j];
+          if (!sc) continue;
+          if (String(sc.id) === String(sid)) {
+            sc.amount = num;
+            break;
+          }
+        }
       }
+
+      // 2단계: 상태(select)를 기준으로 PLANNED / PAID / OVERDUE 만 처리
+      var selects = form.querySelectorAll('select[data-schedule-id]');
+      for (var k = 0; k < selects.length; k++) {
+        var sel = selects[k];
+        var sid2 = sel.getAttribute('data-schedule-id');
+        var rawStatus = sel.value || 'PLANNED';
+        var status = String(rawStatus).toUpperCase();
+
+        for (var m = 0; m < list.length; m++) {
+          var sc2 = list[m];
+          if (!sc2) continue;
+          if (String(sc2.id) === String(sid2)) {
+            var amount2 = Number(sc2.amount) || 0;
+
+            if (status === 'PAID') {
+              sc2.status = 'PAID';
+              sc2.paidAmount = amount2;
+              sc2.partialPaidAmount = 0;
+            } else if (status === 'OVERDUE') {
+              sc2.status = 'OVERDUE';
+              sc2.paidAmount = 0;
+              sc2.partialPaidAmount = 0;
+            } else {
+              // PARTIAL 등 그 외 값은 모두 PLANNED 로 정규화
+              sc2.status = 'PLANNED';
+              sc2.paidAmount = 0;
+              sc2.partialPaidAmount = 0;
+            }
+
+            break;
+          }
+        }
+      }
+
+      this._syncAlias();
+
+      // Stage 4A: UI 업데이트(모달 close / render / refresh)는 App.api.domain.commit 파이프라인에서 처리한다.
+    },
+
+    removeByDebtorId: function (debtorId) {
+      if (debtorId == null) return;
+      this._ensureInitialized();
+
+      var target = String(debtorId);
+      var list = this.list || [];
+      var next = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) {
+          next.push(sc);
+          continue;
+        }
+        if (String(sc.debtorId) === target) {
+          continue;
+        }
+        next.push(sc);
+      }
+
+      this.list = next;
+      this._syncAlias();
+    },
+
+    removeByLoanId: function (loanId) {
+      if (loanId == null) return;
+      this._ensureInitialized();
+
+      var target = String(loanId);
+      var list = this.list || [];
+      var next = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) {
+          next.push(sc);
+          continue;
+        }
+        if (sc.kind === 'loan' && String(sc.loanId) === target) {
+          continue;
+        }
+        next.push(sc);
+      }
+
+      this.list = next;
+      this._syncAlias();
+    },
+
+    removeByClaimId: function (claimId) {
+      if (claimId == null) return;
+      this._ensureInitialized();
+
+      var target = String(claimId);
+      var list = this.list || [];
+      var next = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) {
+          next.push(sc);
+          continue;
+        }
+        if (sc.kind === 'claim' && String(sc.claimId) === target) {
+          continue;
+        }
+        next.push(sc);
+      }
+
+      this.list = next;
+      this._syncAlias();
+    },
+
+    normalizeAll: function (todayStr) {
+      this._ensureInitialized();
+
+      var list = this.list || [];
+      for (var i = 0; i < list.length; i++) {
+        this._normalizeScheduleStatus(list[i], todayStr);
+      }
+
+      this._syncAlias();
+    },
+
+    getAll: function () {
+      this._ensureInitialized();
+      return this.list || [];
+    },
+
+    getByLoanId: function (loanId) {
+      this._ensureInitialized();
+
+      var target = loanId != null ? String(loanId) : null;
+      var list = this.list || [];
+      var result = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) continue;
+        if (target != null && String(sc.loanId) !== target) continue;
+        result.push(sc);
+      }
+
+      return result;
+    },
+
+    getByClaimId: function (claimId) {
+      this._ensureInitialized();
+
+      var target = claimId != null ? String(claimId) : null;
+      var list = this.list || [];
+      var result = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) continue;
+        if (target != null && String(sc.claimId) !== target) continue;
+        result.push(sc);
+      }
+
+      return result;
+    },
+
+    getByDebtorId: function (debtorId) {
+      this._ensureInitialized();
+
+      var target = debtorId != null ? String(debtorId) : null;
+      var list = this.list || [];
+      var result = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) continue;
+        if (target != null && String(sc.debtorId) !== target) continue;
+        result.push(sc);
+      }
+
+      return result;
     }
   };
 
   App.schedulesEngine = engine;
+
 })(window);
