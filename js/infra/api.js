@@ -110,11 +110,34 @@
     }
   };
 
-  function ensureNavigationRenderersRegistered() {
+  var _calendarRenderer = function () {
+    if (App.features && App.features.calendar && typeof App.features.calendar.renderImpl === 'function') {
+      App.features.calendar.renderImpl();
+    }
+  };
+
+  var _monitoringRenderer = function () {
+    if (App.features && App.features.monitoring && typeof App.features.monitoring.renderImpl === 'function') {
+      App.features.monitoring.renderImpl();
+    }
+  };
+
+  var _reportRenderer = function () {
+    if (App.features && App.features.report && typeof App.features.report.renderImpl === 'function') {
+      App.features.report.renderImpl();
+    }
+  };
+
+  _navDebtorListRenderer._ls_fromUIState = true;
+  _navDebtorDetailRenderer._ls_fromUIState = true;
+  _calendarRenderer._ls_safeFallback = true;
+  _monitoringRenderer._ls_safeFallback = true;
+  _reportRenderer._ls_safeFallback = true;
+
+  function ensureCoreRenderersRegistered() {
     if (!App.renderCoordinator || !App.ViewKey || typeof App.renderCoordinator.register !== 'function') return;
 
     if (App.ViewKey.DEBTOR_LIST) {
-      // If debtorList already registered a safe from-state renderer, don't override it.
       try {
         var existingList =
           App.renderCoordinator &&
@@ -127,13 +150,46 @@
         App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, _navDebtorListRenderer);
       }
     }
+
     if (App.ViewKey.DEBTOR_DETAIL) {
-      // If debtorDetail already registered a safe from-state renderer, don't override it.
       try {
-        var existing = App.renderCoordinator._registry && App.renderCoordinator._registry[App.ViewKey.DEBTOR_DETAIL];
-        if (existing && existing._ls_fromUIState) return;
-      } catch (e) {}
-      App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, _navDebtorDetailRenderer);
+        var existingDetail = App.renderCoordinator._registry && App.renderCoordinator._registry[App.ViewKey.DEBTOR_DETAIL];
+        if (!(existingDetail && existingDetail._ls_fromUIState)) {
+          App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, _navDebtorDetailRenderer);
+        }
+      } catch (e2) {
+        App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, _navDebtorDetailRenderer);
+      }
+    }
+
+    if (App.ViewKey.CALENDAR) {
+      try {
+        if (!App.renderCoordinator._registry || typeof App.renderCoordinator._registry[App.ViewKey.CALENDAR] !== 'function') {
+          App.renderCoordinator.register(App.ViewKey.CALENDAR, _calendarRenderer);
+        }
+      } catch (e3) {
+        App.renderCoordinator.register(App.ViewKey.CALENDAR, _calendarRenderer);
+      }
+    }
+
+    if (App.ViewKey.MONITORING) {
+      try {
+        if (!App.renderCoordinator._registry || typeof App.renderCoordinator._registry[App.ViewKey.MONITORING] !== 'function') {
+          App.renderCoordinator.register(App.ViewKey.MONITORING, _monitoringRenderer);
+        }
+      } catch (e4) {
+        App.renderCoordinator.register(App.ViewKey.MONITORING, _monitoringRenderer);
+      }
+    }
+
+    if (App.ViewKey.REPORT) {
+      try {
+        if (!App.renderCoordinator._registry || typeof App.renderCoordinator._registry[App.ViewKey.REPORT] !== 'function') {
+          App.renderCoordinator.register(App.ViewKey.REPORT, _reportRenderer);
+        }
+      } catch (e5) {
+        App.renderCoordinator.register(App.ViewKey.REPORT, _reportRenderer);
+      }
     }
   }
 
@@ -155,7 +211,7 @@
     if (!App.renderCoordinator || typeof App.renderCoordinator.invalidate !== 'function') return;
 
     traceCommit(reason, keys);
-    ensureNavigationRenderersRegistered();
+    ensureCoreRenderersRegistered();
     enableCoordinator();
     App.renderCoordinator.invalidate(keys);
     disableCoordinatorSoon();
@@ -166,6 +222,13 @@
       commitInternal(opts);
     };
   }
+
+  if (typeof App.api.ensureRenderersRegistered !== 'function') {
+    App.api.ensureRenderersRegistered = function () {
+      ensureCoreRenderersRegistered();
+    };
+  }
+  ensureCoreRenderersRegistered();
 
   function setDebtorPanelDetailState(debtorId) {
     var id = (debtorId != null) ? String(debtorId) : null;

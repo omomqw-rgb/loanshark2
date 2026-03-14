@@ -19,6 +19,24 @@
     return copy;
   }
 
+  function sortSchedulesForMatching(list) {
+    return (list || []).slice().sort(function (a, b) {
+      var ai = Number(a && a.installmentNo != null ? a.installmentNo : 0) || 0;
+      var bi = Number(b && b.installmentNo != null ? b.installmentNo : 0) || 0;
+      if (ai !== bi) return ai - bi;
+      var ad = (a && (a.dueDate || a.due_date || '')) || '';
+      var bd = (b && (b.dueDate || b.due_date || '')) || '';
+      if (ad === bd) return 0;
+      return ad < bd ? -1 : 1;
+    });
+  }
+
+  function toNonNegativeNumber(value) {
+    var n = Number(value);
+    if (!isFinite(n) || n < 0) return 0;
+    return n;
+  }
+
   var engine = {
     list: [],
     _initialized: false,
@@ -112,6 +130,142 @@
       sc.status = 'PLANNED';
     },
 
+    _mergeRuntimeScheduleState: function (kind, owner, previousSchedules, nextSchedules) {
+      var out = [];
+      var prevList = sortSchedulesForMatching(previousSchedules);
+      var nextList = sortSchedulesForMatching(nextSchedules);
+      var matchedPrevIndexes = Object.create(null);
+      var prevByInstallment = Object.create(null);
+      var prevByDueDate = Object.create(null);
+      var todayStr = null;
+
+      if (App.util && typeof App.util.todayISODate === 'function') {
+        todayStr = App.util.todayISODate();
+      } else {
+        todayStr = new Date().toISOString().slice(0, 10);
+      }
+
+      for (var i = 0; i < prevList.length; i++) {
+        var prev = prevList[i];
+        if (!prev) continue;
+
+        var instKey = (prev.installmentNo != null) ? String(prev.installmentNo) : '';
+        if (instKey && typeof prevByInstallment[instKey] === 'undefined') {
+          prevByInstallment[instKey] = i;
+        }
+
+        var dueKey = prev.dueDate || prev.due_date || '';
+        if (dueKey) {
+          if (!prevByDueDate[dueKey]) prevByDueDate[dueKey] = [];
+          prevByDueDate[dueKey].push(i);
+        }
+      }
+
+      function findUnmatchedIndexByDueDate(dueKey) {
+        var indexes = prevByDueDate[dueKey] || [];
+        for (var di = 0; di < indexes.length; di++) {
+          var idx = indexes[di];
+          if (!matchedPrevIndexes[idx]) return idx;
+        }
+        return -1;
+      }
+
+      function findFirstUnmatchedIndex() {
+        for (var fi = 0; fi < prevList.length; fi++) {
+          if (!matchedPrevIndexes[fi]) return fi;
+        }
+        return -1;
+      }
+
+      for (var j = 0; j < nextList.length; j++) {
+        var next = shallowClone(nextList[j]);
+        if (!next) continue;
+
+        var matchedIndex = -1;
+        var nextInstKey = (next.installmentNo != null) ? String(next.installmentNo) : '';
+        if (nextInstKey && typeof prevByInstallment[nextInstKey] !== 'undefined') {
+          var instIndex = prevByInstallment[nextInstKey];
+          if (!matchedPrevIndexes[instIndex]) matchedIndex = instIndex;
+        }
+
+        if (matchedIndex < 0) {
+          var nextDueKey = next.dueDate || next.due_date || '';
+          if (nextDueKey) matchedIndex = findUnmatchedIndexByDueDate(nextDueKey);
+        }
+
+        if (matchedIndex < 0) {
+          matchedIndex = findFirstUnmatchedIndex();
+        }
+
+        if (matchedIndex >= 0) {
+          matchedPrevIndexes[matchedIndex] = true;
+          var prevMatched = prevList[matchedIndex];
+          if (prevMatched) {
+            var prevStatus = String(prevMatched.status || '').toUpperCase();
+            var nextAmount = toNonNegativeNumber(next.amount);
+            var prevPaid = toNonNegativeNumber(prevMatched.paidAmount != null ? prevMatched.paidAmount : prevMatched.partialPaidAmount);
+            var prevPartial = toNonNegativeNumber(prevMatched.partialPaidAmount);
+
+            if (prevMatched.id != null) {
+              next.id = toStr(prevMatched.id);
+            }
+
+            if (prevMatched.memo != null && typeof next.memo === 'undefined') {
+              next.memo = prevMatched.memo;
+            }
+
+            if (kind === 'claim' && !nextAmount) {
+              nextAmount = toNonNegativeNumber(prevMatched.amount);
+              next.amount = nextAmount;
+            }
+
+            if (prevStatus === 'PAID') {
+              next.status = 'PAID';
+              next.paidAmount = nextAmount;
+              next.partialPaidAmount = 0;
+            } else if (prevStatus === 'PARTIAL') {
+              var clampedPaid = prevPaid;
+              if (nextAmount > 0 && clampedPaid > nextAmount) clampedPaid = nextAmount;
+              next.status = 'PARTIAL';
+              next.partialPaidAmount = clampedPaid || prevPartial;
+              next.paidAmount = clampedPaid;
+            } else {
+              next.paidAmount = 0;
+              next.partialPaidAmount = 0;
+              next.status = (prevStatus === 'OVERDUE') ? 'OVERDUE' : 'PLANNED';
+              if (kind === 'loan') {
+                this._normalizeScheduleStatus(next, todayStr);
+              }
+            }
+          }
+        }
+
+        if (kind === 'loan') {
+          this._normalizeScheduleStatus(next, todayStr);
+        } else {
+          var claimAmount = toNonNegativeNumber(next.amount);
+          next.amount = claimAmount;
+          if ((String(next.status || '').toUpperCase() === 'PARTIAL') && claimAmount <= 0) {
+            next.status = 'PLANNED';
+            next.paidAmount = 0;
+            next.partialPaidAmount = 0;
+          }
+        }
+
+        out.push(next);
+      }
+
+      return out;
+    },
+
+    _mergeLoanRuntimeScheduleState: function (loan, previousSchedules, nextSchedules) {
+      return this._mergeRuntimeScheduleState('loan', loan, previousSchedules, nextSchedules);
+    },
+
+    _mergeClaimRuntimeScheduleState: function (claim, previousSchedules, nextSchedules) {
+      return this._mergeRuntimeScheduleState('claim', claim, previousSchedules, nextSchedules);
+    },
+
     rebuildForLoan: function (loan) {
       if (!loan || loan.id == null) return;
 
@@ -120,6 +274,7 @@
       var normalizedLoanId = toStr(loan.id);
       var newList = [];
       var current = this.list || [];
+      var previousLoanSchedules = [];
 
       // 1) 기존 loan 스케줄 제거
       for (var i = 0; i < current.length; i++) {
@@ -129,6 +284,7 @@
           continue;
         }
         if (s.kind === 'loan' && toStr(s.loanId) === normalizedLoanId) {
+          previousLoanSchedules.push(shallowClone(s));
           continue;
         }
         newList.push(s);
@@ -139,6 +295,7 @@
       if (App.db && typeof App.db.buildLoanSchedule === 'function') {
         newSchedules = App.db.buildLoanSchedule(loan) || [];
       }
+      newSchedules = this._mergeLoanRuntimeScheduleState(loan, previousLoanSchedules, newSchedules);
 
       for (var j = 0; j < newSchedules.length; j++) {
         var ns = shallowClone(newSchedules[j]);
@@ -193,6 +350,7 @@
       var normalizedClaimId = toStr(claim.id);
       var newList = [];
       var current = this.list || [];
+      var previousClaimSchedules = [];
 
       // 1) 기존 claim 스케줄 제거
       for (var i = 0; i < current.length; i++) {
@@ -202,6 +360,7 @@
           continue;
         }
         if (s.kind === 'claim' && toStr(s.claimId) === normalizedClaimId) {
+          previousClaimSchedules.push(shallowClone(s));
           continue;
         }
         newList.push(s);
@@ -212,6 +371,7 @@
       if (App.db && typeof App.db.buildClaimSchedule === 'function') {
         newSchedules = App.db.buildClaimSchedule(claim) || [];
       }
+      newSchedules = this._mergeClaimRuntimeScheduleState(claim, previousClaimSchedules, newSchedules);
 
       for (var j = 0; j < newSchedules.length; j++) {
         var ns = shallowClone(newSchedules[j]);

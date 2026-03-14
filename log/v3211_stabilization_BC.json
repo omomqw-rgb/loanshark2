@@ -1,0 +1,36 @@
+{
+  "base": "LoanShark_v3.2.11_stabilization_A.zip",
+  "output": "LoanShark_v3.2.12_stabilization_BC.zip",
+  "patches": [
+    {
+      "file": "js/core/schedules.engine.js",
+      "summary": [
+        "Generalized runtime schedule merge helper",
+        "Extended runtime-state preservation from loan to claim",
+        "Claim rebuild now keeps prior schedule amount/status/id where possible"
+      ]
+    },
+    {
+      "file": "js/core/cloudState.js",
+      "summary": [
+        "Snapshot validator now checks required array shape",
+        "Schedule references to loan/claim/debtor must exist before apply",
+        "Pre-cloud-load backup stored in localStorage before valid apply"
+      ]
+    },
+    {
+      "file": "js/infra/stateIO.js",
+      "summary": [
+        "Sanitized UI state after snapshot apply",
+        "Prevents invalid activeTab/calendar/debtorPanel state during render transition"
+      ]
+    },
+    {
+      "file": "js/infra/api.js",
+      "summary": [
+        "Core fallback renderers are registered immediately at bootstrap",
+        "Added App.api.ensureRenderersRegistered helper"
+      ]
+    }
+  ]
+}

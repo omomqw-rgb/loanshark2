@@ -1,0 +1,15 @@
+{
+  "patchId": "v3210_stabilization_A",
+  "baseVersion": "LoanShark_v3.2.10_viewer_ui_lockdown",
+  "summary": [
+    "loan edit rebuild now preserves runtime schedule state by matching prior installments",
+    "cloud load blocks legacy/unsupported or empty snapshots instead of resetting domain data",
+    "commit path now ensures core render fallbacks are registered for calendar/monitoring/report"
+  ],
+  "files": [
+    "js/core/schedules.engine.js",
+    "js/core/cloudState.js",
+    "js/core/data.js",
+    "js/infra/api.js"
+  ]
+}

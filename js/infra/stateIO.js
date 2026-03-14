@@ -277,6 +277,37 @@
     // Minimal fallback: do nothing (Stage 4+ always provides commitAll).
   }
 
+  function sanitizeUIStateAfterApply() {
+    ensureState();
+    var ui = App.state.ui || (App.state.ui = {});
+    var validTabs = { debtors: true, calendar: true, monitoring: true, report: true };
+    if (!validTabs[ui.activeTab]) {
+      ui.activeTab = 'calendar';
+    }
+
+    ui.calendar = ui.calendar || {};
+    if (ui.calendar.view !== 'month' && ui.calendar.view !== 'week') {
+      ui.calendar.view = (App.getDefaultCalendarView ? App.getDefaultCalendarView() : 'week');
+    }
+    if (ui.calendar.sortMode !== 'type' && ui.calendar.sortMode !== 'status') {
+      ui.calendar.sortMode = 'type';
+    }
+    if (typeof ui.calendar.currentDate !== 'string' || !ui.calendar.currentDate) {
+      ui.calendar.currentDate = (App.util && typeof App.util.todayISODate === 'function') ? App.util.todayISODate() : new Date().toISOString().slice(0, 10);
+    }
+
+    ui.debtorPanel = ui.debtorPanel || {};
+    if (ui.debtorPanel.mode !== 'list' && ui.debtorPanel.mode !== 'detail') {
+      ui.debtorPanel.mode = 'list';
+    }
+    if (typeof ui.debtorPanel.page !== 'number' || !isFinite(ui.debtorPanel.page) || ui.debtorPanel.page < 1) {
+      ui.debtorPanel.page = 1;
+    }
+    if (typeof ui.debtorPanel.searchQuery !== 'string') {
+      ui.debtorPanel.searchQuery = '';
+    }
+  }
+
   App.stateIO = App.stateIO || {};
 
   // Apply snapshot into the current App.state without replacing App.state reference.
@@ -333,6 +364,8 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
 
     // Stage 6.1: Apply meta counters (monotonic IDs) from snapshot when present.
     applyMetaFromSnapshot(snapshot, dataRoot);
+
+    sanitizeUIStateAfterApply();
 
     // Stage 6.1: keepUI=true can leave a stale selectedDebtorId after Load.
     // If the selected debtor no longer exists, return to list mode to prevent blank/stuck detail panel.

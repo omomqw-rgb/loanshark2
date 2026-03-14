@@ -572,6 +572,7 @@ function renderAll() {
       var rawState = rows[0].state_json || null;
 
       var hasCloudStateModule = App.cloudState && typeof App.cloudState.apply === 'function';
+      var hasCloudValidator = App.cloudState && typeof App.cloudState.validateSnapshot === 'function';
       var version = rawState && rawState.version;
       var isV1Snapshot = !!(rawState && (version === 1 || version === '1') && rawState.data && typeof rawState.data === 'object');
 
@@ -582,84 +583,29 @@ function renderAll() {
           return;
         }
 
+        var validation = hasCloudValidator
+          ? App.cloudState.validateSnapshot(rawState, { rejectEmptyData: true })
+          : { ok: true };
+
+        if (!validation.ok) {
+          console.warn('[Cloud Load] Snapshot rejected before apply:', validation.reason, validation.counts || {});
+          App.showToast("Cloud Load 차단 — 비정상 또는 빈 스냅샷입니다.");
+          return;
+        }
+
         // Stage 5: App.cloudState.apply() → App.stateIO.applySnapshot() → App.api.commitAll()
         // No direct state swapping or manual renders here.
-        App.cloudState.apply(rawState);
+        var applied = App.cloudState.apply(rawState, { rejectEmptyData: true });
+        if (!applied) {
+          App.showToast("Cloud Load 차단 — 비정상 스냅샷입니다.");
+          return;
+        }
         App.showToast("Cloud Load 완료 — 최신 데이터가 반영되었습니다.");
         return;
       }
 
-      console.warn('[Cloud Load] Legacy cloud state detected. Applying UI only and resetting data.');
-
-      // Preserve legacy UI payload (when present) BEFORE applying the reset snapshot.
-      if (!App.state) App.state = {};
-      App.state.ui = App.state.ui || {};
-
-      if (rawState && rawState.ui) {
-        if (rawState.ui.calendar) {
-          App.state.ui.calendar = App.state.ui.calendar || {};
-          var legacyCal = rawState.ui.calendar;
-          var todayISO = (App.util && typeof App.util.todayISODate === 'function')
-            ? App.util.todayISODate()
-            : new Date().toISOString().slice(0, 10);
-
-          // IMPORTANT: Calendar view must only change by explicit user action.
-          // Legacy cloud payload may contain view, but applying it would override
-          // the in-memory default (WEEK) or the user's current selection.
-          // Therefore: keep current view if valid; otherwise fall back to the
-          // single-source default.
-          var currentView = App.state.ui.calendar.view;
-          if (currentView !== 'month' && currentView !== 'week') {
-            App.state.ui.calendar.view = (App.getDefaultCalendarView ? App.getDefaultCalendarView() : 'week');
-          }
-          App.state.ui.calendar.sortMode = legacyCal.sortMode || App.state.ui.calendar.sortMode || 'type';
-          App.state.ui.calendar.currentDate = legacyCal.currentDate || App.state.ui.calendar.currentDate || todayISO;
-        }
-
-        if (typeof rawState.ui.activeTab === 'string') {
-          App.state.ui.activeTab = rawState.ui.activeTab;
-        }
-
-        if (rawState.ui.debtorPanel) {
-          App.state.ui.debtorPanel = App.state.ui.debtorPanel || {};
-          var legacyPanel = rawState.ui.debtorPanel;
-          App.state.ui.debtorPanel.mode = legacyPanel.mode || App.state.ui.debtorPanel.mode || 'list';
-          App.state.ui.debtorPanel.page = legacyPanel.page || App.state.ui.debtorPanel.page || 1;
-          App.state.ui.debtorPanel.searchQuery = legacyPanel.searchQuery || App.state.ui.debtorPanel.searchQuery || '';
-          App.state.ui.debtorPanel.selectedDebtorId =
-            typeof legacyPanel.selectedDebtorId === 'undefined'
-              ? (typeof App.state.ui.debtorPanel.selectedDebtorId === 'undefined'
-                  ? null
-                  : App.state.ui.debtorPanel.selectedDebtorId)
-              : legacyPanel.selectedDebtorId;
-        }
-      }
-
-      // Reset domain data via stateIO (keeps UI state by default)
-      if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
-        App.stateIO.applySnapshot({
-          debtors: [],
-          loans: [],
-          claims: [],
-          cashLogs: [],
-          schedules: [],
-          riskSettings: null
-        }, { keepUI: true });
-      } else if (App.stateIO && typeof App.stateIO.resetDataKeepUI === 'function') {
-        App.stateIO.resetDataKeepUI();
-      } else {
-        // Fallback (should not happen): minimal reset without render calls.
-        if (!App.state) App.state = {};
-        if (Array.isArray(App.state.debtors)) App.state.debtors.length = 0;
-        if (Array.isArray(App.state.loans)) App.state.loans.length = 0;
-        if (Array.isArray(App.state.claims)) App.state.claims.length = 0;
-        if (Array.isArray(App.state.cashLogs)) App.state.cashLogs.length = 0;
-        if (App.schedulesEngine && typeof App.schedulesEngine.initEmpty === 'function') {
-          App.schedulesEngine.initEmpty();
-        }
-      }
-
-      App.showToast("Cloud Load 완료 — 최신 데이터가 반영되었습니다.");
+      console.warn('[Cloud Load] Legacy/unsupported cloud state detected. Load aborted without applying data reset.');
+      App.showToast("Cloud Load 차단 — 구버전 또는 비정상 스냅샷입니다.");
       return;
     } catch (err) {
       console.error('[Data] Failed to load data from Supabase:', err);

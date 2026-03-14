@@ -142,6 +142,145 @@
     normalizeScheduleIdsInPlace(data.schedules);
   }
 
+  function getSnapshotDataRoot(snapshot) {
+    if (snapshot && isObject(snapshot.data)) return snapshot.data;
+    return null;
+  }
+
+  function getArrayCount(value) {
+    return Array.isArray(value) ? value.length : 0;
+  }
+
+  function isValidArrayField(dataRoot, key) {
+    return Object.prototype.hasOwnProperty.call(dataRoot, key) && Array.isArray(dataRoot[key]);
+  }
+
+  function buildIdIndex(list) {
+    var map = Object.create(null);
+    list = Array.isArray(list) ? list : [];
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      if (!isObject(item) || item.id == null) continue;
+      map[String(item.id)] = item;
+    }
+    return map;
+  }
+
+  function validateScheduleReferences(dataRoot) {
+    var result = { ok: true, reason: '', invalidCount: 0 };
+    var debtorById = buildIdIndex(dataRoot.debtors);
+    var loanById = buildIdIndex(dataRoot.loans);
+    var claimById = buildIdIndex(dataRoot.claims);
+    var schedules = Array.isArray(dataRoot.schedules) ? dataRoot.schedules : [];
+
+    for (var i = 0; i < schedules.length; i++) {
+      var sc = schedules[i];
+      if (!isObject(sc)) {
+        result.ok = false;
+        result.reason = 'schedule_not_object';
+        result.invalidCount += 1;
+        break;
+      }
+      var kind = String(sc.kind || '').toLowerCase();
+      if (kind !== 'loan' && kind !== 'claim') {
+        result.ok = false;
+        result.reason = 'schedule_kind_invalid';
+        result.invalidCount += 1;
+        break;
+      }
+      if (kind === 'loan') {
+        var loanId = sc.loanId != null ? String(sc.loanId) : '';
+        if (!loanId || !loanById[loanId]) {
+          result.ok = false;
+          result.reason = 'schedule_loan_missing';
+          result.invalidCount += 1;
+          break;
+        }
+      } else {
+        var claimId = sc.claimId != null ? String(sc.claimId) : '';
+        if (!claimId || !claimById[claimId]) {
+          result.ok = false;
+          result.reason = 'schedule_claim_missing';
+          result.invalidCount += 1;
+          break;
+        }
+      }
+      if (sc.debtorId != null && !debtorById[String(sc.debtorId)]) {
+        result.ok = false;
+        result.reason = 'schedule_debtor_missing';
+        result.invalidCount += 1;
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  function validateSnapshot(snapshot, opts) {
+    opts = opts || {};
+
+    var result = {
+      ok: false,
+      reason: '',
+      counts: {
+        debtors: 0,
+        loans: 0,
+        claims: 0,
+        schedules: 0,
+        cashLogs: 0
+      }
+    };
+
+    if (!snapshot || !isObject(snapshot)) {
+      result.reason = 'snapshot_missing';
+      return result;
+    }
+
+    var version = snapshot.version;
+    if (!(version === 1 || version === '1')) {
+      result.reason = 'unsupported_version';
+      return result;
+    }
+
+    var dataRoot = getSnapshotDataRoot(snapshot);
+    if (!dataRoot || !isObject(dataRoot)) {
+      result.reason = 'data_missing';
+      return result;
+    }
+
+    if (!isValidArrayField(dataRoot, 'debtors') || !isValidArrayField(dataRoot, 'loans') || !isValidArrayField(dataRoot, 'claims') || !isValidArrayField(dataRoot, 'schedules') || !isValidArrayField(dataRoot, 'cashLogs')) {
+      result.reason = 'data_shape_invalid';
+      return result;
+    }
+
+    normalizeAppDataIds(dataRoot);
+
+    result.counts.debtors = getArrayCount(dataRoot.debtors);
+    result.counts.loans = getArrayCount(dataRoot.loans);
+    result.counts.claims = getArrayCount(dataRoot.claims);
+    result.counts.schedules = getArrayCount(dataRoot.schedules);
+    result.counts.cashLogs = getArrayCount(dataRoot.cashLogs);
+
+    var refCheck = validateScheduleReferences(dataRoot);
+    result.integrity = refCheck;
+    if (!refCheck.ok) {
+      result.reason = refCheck.reason || 'schedule_ref_invalid';
+      return result;
+    }
+
+    if (opts.rejectEmptyData) {
+      var total = result.counts.debtors + result.counts.loans + result.counts.claims + result.counts.schedules + result.counts.cashLogs;
+      if (total <= 0) {
+        result.reason = 'empty_data';
+        return result;
+      }
+    }
+
+    result.ok = true;
+    result.dataRoot = dataRoot;
+    return result;
+  }
+
   function collectTypeStats(list, field) {
     var stats = Object.create(null);
     if (!list || !list.length) return stats;
@@ -341,38 +480,45 @@
     return snapshot;
   };
 
-  // Supabase에서 가져온 스냅샷을 앱에 반영하는 함수
-  App.cloudState.apply = function (snapshot) {
-    var version = snapshot && snapshot.version;
-    var isV1 = (version === 1 || version === '1');
+  App.cloudState.validateSnapshot = function (snapshot, opts) {
+    return validateSnapshot(snapshot, opts);
+  };
 
-    if (!snapshot || !isV1) {
-      console.warn('[CloudState] Unsupported or missing snapshot. Resetting to empty state.');
-
-      if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
-        App.stateIO.applySnapshot({
-          debtors: [],
-          loans: [],
-          claims: [],
-          cashLogs: [],
-          schedules: [],
-          riskSettings: null
-        }, { keepUI: true });
-      }
-
-      return;
+  function savePreCloudLoadBackup() {
+    try {
+      if (!window.localStorage) return;
+      if (!App.cloudState || typeof App.cloudState.build !== 'function') return;
+      var snapshot = App.cloudState.build();
+      if (!snapshot) return;
+      window.localStorage.setItem('loanshark_pre_cloud_load_backup', JSON.stringify(snapshot));
+      window.localStorage.setItem('loanshark_pre_cloud_load_backup_savedAt', new Date().toISOString());
+    } catch (e) {
+      console.warn('[CloudState] Failed to persist pre-load backup:', e);
     }
+  }
+
+  // Supabase에서 가져온 스냅샷을 앱에 반영하는 함수
+  App.cloudState.apply = function (snapshot, opts) {
+    var validation = validateSnapshot(snapshot, opts);
+
+    if (!validation.ok) {
+      console.warn('[CloudState] Snapshot rejected:', validation.reason, validation.counts || {}, validation.integrity || {});
+      return false;
+    }
+
+    savePreCloudLoadBackup();
 
     // Stage 5: Single pipeline (stateIO → commitAll). No direct state swapping or render calls.
     if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
       App.stateIO.applySnapshot(snapshot, { keepUI: true });
     } else {
       console.error('[CloudState] App.stateIO.applySnapshot is not available.');
-      return;
+      return false;
     }
 
     // ShadowQA: Cloud Load 이후 Loan ↔ Schedule 매핑 무결성 체크 (콘솔 경고/리포트 저장)
     runShadowQA('cloudState.apply');
+    return true;
   };;
 
   // Manual QA hook (optional)
