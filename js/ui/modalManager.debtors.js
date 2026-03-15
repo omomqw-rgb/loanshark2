@@ -930,9 +930,15 @@ function openLoanModal(mode, context) {
   }
 
   function findScheduleById(id) {
-    var schedules = (App.state && App.state.schedules) || [];
-    for (var i = 0; i < schedules.length; i++) {
-      if (String(schedules[i].id) === String(id)) return schedules[i];
+    if (!App.schedulesEngine) return null;
+    if (typeof App.schedulesEngine.findById === 'function') {
+      return App.schedulesEngine.findById(id);
+    }
+    if (typeof App.schedulesEngine.getAll === 'function') {
+      var schedules = App.schedulesEngine.getAll() || [];
+      for (var i = 0; i < schedules.length; i++) {
+        if (String(schedules[i].id) === String(id)) return schedules[i];
+      }
     }
     return null;
   }
@@ -946,9 +952,13 @@ function openLoanModal(mode, context) {
     var loan = findLoanById(loanId);
     if (!loan) return;
 
-    var schedules = (App.state.schedules || []).filter(function (s) {
-      return s.kind === 'loan' && s.loanId === loanId;
-    }).slice().sort(function (a, b) {
+    var schedules = [];
+    if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
+      schedules = (App.schedulesEngine.getByLoanId(loanId) || []).slice();
+    }
+    schedules = schedules.filter(function (s) {
+      return String((s && s.kind) || '').toLowerCase() === 'loan';
+    }).sort(function (a, b) {
       return (a.installmentNo || 0) - (b.installmentNo || 0);
     });
 
@@ -1188,9 +1198,13 @@ function openLoanModal(mode, context) {
     var claim = findClaimById(claimId);
     if (!claim) return;
 
-    var schedules = (App.state.schedules || []).filter(function (s) {
-      return s.kind === 'claim' && s.claimId === claimId;
-    }).slice().sort(function (a, b) {
+    var schedules = [];
+    if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
+      schedules = (App.schedulesEngine.getByClaimId(claimId) || []).slice();
+    }
+    schedules = schedules.filter(function (s) {
+      return String((s && s.kind) || '').toLowerCase() === 'claim';
+    }).sort(function (a, b) {
       return (a.installmentNo || 0) - (b.installmentNo || 0);
     });
 

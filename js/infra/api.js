@@ -386,8 +386,6 @@
         var schedules = [];
         if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
           schedules = App.schedulesEngine.getAll() || [];
-        } else if (Array.isArray(App.state.schedules)) {
-          schedules = App.state.schedules;
         }
 
         // Keep derived loan fields in sync with schedules (same approach as core/data.js).
@@ -1154,10 +1152,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
           list = App.schedulesEngine.getByLoanId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.loanId != null && String(s.loanId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1185,10 +1179,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
           list = App.schedulesEngine.getByLoanId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.loanId != null && String(s.loanId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1487,10 +1477,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
           list = App.schedulesEngine.getByClaimId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.claimId != null && String(s.claimId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1518,10 +1504,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
           list = App.schedulesEngine.getByClaimId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.claimId != null && String(s.claimId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
