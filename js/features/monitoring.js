@@ -9,6 +9,12 @@
     var today = null;
     var tomorrow = null;
     var schedulesByDebtorCache = null;
+    var sectionSortState = {
+      dday: 'name',
+      d1: 'name',
+      overdue: 'name',
+      risk: 'name'
+    };
 
     function createEl(tag, className, text) {
       var el = document.createElement(tag);
@@ -16,6 +22,71 @@
       if (text != null) el.textContent = text;
       return el;
     }
+
+    function getSectionSortValue(sectionKey) {
+      if (!sectionKey) return 'name';
+      var current = sectionSortState[sectionKey];
+      return current === 'amount' ? 'amount' : 'name';
+    }
+
+    function setSectionSortValue(sectionKey, value) {
+      if (!sectionKey) return;
+      sectionSortState[sectionKey] = value === 'amount' ? 'amount' : 'name';
+    }
+
+    function getGroupName(group) {
+      if (!group || !group.debtor) return '';
+      var name = group.debtor.name != null ? String(group.debtor.name) : '';
+      return name.replace(/\s+/g, ' ').trim();
+    }
+
+    function getGroupAmount(group) {
+      if (!group) return 0;
+      if (typeof group.totalAmount === 'number' && isFinite(group.totalAmount)) {
+        return group.totalAmount;
+      }
+      if (group.schedules && group.schedules.length) {
+        var summary = summarizeSchedules(group.schedules);
+        if (summary && typeof summary.totalRemaining === 'number' && isFinite(summary.totalRemaining)) {
+          return summary.totalRemaining;
+        }
+      }
+      return 0;
+    }
+
+    function sortGroups(groups, sectionKey) {
+      var list = Array.isArray(groups) ? groups.slice() : [];
+      var sortBy = getSectionSortValue(sectionKey);
+
+      list.sort(function (a, b) {
+        var amountDiff = getGroupAmount(b) - getGroupAmount(a);
+        var nameA = getGroupName(a);
+        var nameB = getGroupName(b);
+        var nameDiff = nameA.localeCompare(nameB, 'ko');
+
+        if (sortBy === 'amount') {
+          if (amountDiff !== 0) return amountDiff;
+          return nameDiff;
+        }
+
+        if (nameDiff !== 0) return nameDiff;
+        return amountDiff;
+      });
+
+      return list;
+    }
+
+    function handleSectionSortChange(event) {
+      var target = event && event.target;
+      if (!target) return;
+
+      var sectionKey = target.getAttribute('data-sort-section');
+      if (!sectionKey) return;
+
+      setSectionSortValue(sectionKey, target.value);
+      render();
+    }
+
 
     function recomputeDateAnchors() {
       if (App.date && typeof App.date.getToday === 'function') {
@@ -801,13 +872,39 @@
         var titleEl = createEl('h2', 'monitoring-title', meta.title);
         headerRow.appendChild(titleEl);
 
+        var controlWrap = createEl('div', 'monitoring-header-controls');
+
         if (meta.key === 'dday' || meta.key === 'd1' || meta.key === 'overdue') {
           var totalEl = createEl('div', 'monitoring-total');
           totalEl.setAttribute('data-total', meta.key);
           var label = meta.key === 'overdue' ? '연체 합계' : '합계';
           totalEl.textContent = label + ' ₩0';
-          headerRow.appendChild(totalEl);
+          controlWrap.appendChild(totalEl);
         }
+
+        var sortWrap = createEl('label', 'monitoring-sort');
+        sortWrap.setAttribute('aria-label', meta.title + ' 정렬');
+
+        var sortLabel = createEl('span', 'monitoring-sort-label', '정렬');
+        sortWrap.appendChild(sortLabel);
+
+        var sortSelect = createEl('select', 'monitoring-sort-select');
+        sortSelect.setAttribute('data-sort-section', meta.key);
+
+        var optName = createEl('option', '', '이름순');
+        optName.value = 'name';
+        sortSelect.appendChild(optName);
+
+        var optAmount = createEl('option', '', '금액순');
+        optAmount.value = 'amount';
+        sortSelect.appendChild(optAmount);
+
+        sortSelect.value = getSectionSortValue(meta.key);
+        sortSelect.addEventListener('change', handleSectionSortChange);
+        sortWrap.appendChild(sortSelect);
+
+        controlWrap.appendChild(sortWrap);
+        headerRow.appendChild(controlWrap);
 
         section.appendChild(headerRow);
 
@@ -864,6 +961,8 @@
       while (listEl.firstChild) {
         listEl.removeChild(listEl.firstChild);
       }
+
+      groups = sortGroups(groups, sectionKey);
 
       if (!groups || !groups.length) {
         var empty = createEl('div', 'monitoring-empty', '표시할 항목이 없습니다.');
