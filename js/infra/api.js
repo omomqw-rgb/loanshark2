@@ -140,17 +140,11 @@
 
   var _navDebtorDetailRenderer = function () {
     var id = null;
-    var panelMode = null;
     try {
-      if (App.state && App.state.ui && App.state.ui.debtorPanel) {
-        id = App.state.ui.debtorPanel.selectedDebtorId;
-        panelMode = App.state.ui.debtorPanel.mode;
-      }
+      id = (App.state && App.state.ui && App.state.ui.debtorPanel) ? App.state.ui.debtorPanel.selectedDebtorId : null;
     } catch (e) {
       id = null;
-      panelMode = null;
     }
-    if (panelMode !== 'detail') return;
     if (id == null) return;
     id = String(id);
     if (!id) return;
@@ -486,10 +480,7 @@
     App.api.ui.openDebtorList = function () {
       runUiMutation('ui.openDebtorList', function () {
         setDebtorPanelListState();
-      }, {
-        forcedMode: 'list',
-        normalizeSelection: false
-      });
+      }, { forcedMode: 'list' });
     };
   }
 

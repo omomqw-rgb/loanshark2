@@ -10,11 +10,6 @@ App.debtorDetail.renderImpl = function(id){
    var debtorId = id != null ? String(id) : null;
    if (!debtorId) return;
 
-   var panelState = App.state && App.state.ui && App.state.ui.debtorPanel
-      ? App.state.ui.debtorPanel
-      : null;
-   if (!panelState || panelState.mode !== 'detail') return;
-
    // locate panel root
    var panelRoot = document.getElementById('debtor-panel-root');
    if (!panelRoot) return;
@@ -82,11 +77,7 @@ App.debtorDetail.render._deprecatedInvalidateWrapper = true;
 // (Keeps renderImpl unchanged; ensures invalidate-only pipeline works.)
 if (App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_DETAIL) {
    var __renderDebtorDetailFromState = function () {
-      var panelState = App.state && App.state.ui && App.state.ui.debtorPanel
-         ? App.state.ui.debtorPanel
-         : null;
-      if (!panelState || panelState.mode !== 'detail') return;
-      var id = panelState.selectedDebtorId;
+      var id = App.state && App.state.ui && App.state.ui.debtorPanel && App.state.ui.debtorPanel.selectedDebtorId;
       if (id == null) return;
       if (App.debtorDetail && typeof App.debtorDetail.renderImpl === 'function') {
          App.debtorDetail.renderImpl(String(id));
@@ -114,9 +105,5 @@ App.debtorDetail.show = function(){
 // NEW: simple binding to detect detail render completion
 // (Assumes detail engine writes into #debtor-panel-root)
 document.addEventListener("detail-render-complete", function(){
-   var panelState = App.state && App.state.ui && App.state.ui.debtorPanel
-      ? App.state.ui.debtorPanel
-      : null;
-   if (!panelState || panelState.mode !== 'detail') return;
    App.debtorDetail.show();
 });
