@@ -3,11 +3,18 @@
   if (!window.App) window.App = {};
   var App = window.App;
 
-  // Stage 1: stub only. Real derived-data rebuild will be introduced in later stages.
+  App.derived = App.derived || {};
+  if (!Array.isArray(App.derived.debtors)) {
+    App.derived.debtors = [];
+  }
+  if (!App.derived.debtorsById || typeof App.derived.debtorsById !== 'object') {
+    App.derived.debtorsById = {};
+  }
+
   if (typeof App.rebuildDerived !== 'function') {
-    App.rebuildDerived = function (reason) {
-      // Intentionally no-op in stage 1.
-      // No DOM access. No render calls.
+    App.rebuildDerived = function () {
+      // Namespace bootstrap only.
+      // Real rebuild implementation is provided by js/infra/api.js.
       return;
     };
   }

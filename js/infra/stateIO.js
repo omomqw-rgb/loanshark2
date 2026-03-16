@@ -382,13 +382,10 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       if (!exists) {
         panel.selectedDebtorId = null;
         panel.mode = 'list';
-        if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
-          App.debtorPanel.showList();
-        }
       }
     }
 
-commitAllOnce();
+    commitAllOnce();
   };
 
   // Reset data arrays + schedules while preserving UI state
@@ -422,12 +419,9 @@ commitAllOnce();
     if (App.state.ui && App.state.ui.debtorPanel) {
       App.state.ui.debtorPanel.selectedDebtorId = null;
       App.state.ui.debtorPanel.mode = 'list';
-      if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
-        App.debtorPanel.showList();
-      }
     }
 
-commitAllOnce();
+    commitAllOnce();
   };
 
 

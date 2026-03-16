@@ -1,0 +1,38 @@
+{
+  "patch": "LoanShark_v3.2.16_ssot_core_unification",
+  "base": "LoanShark_v3.2.15_ssot_finalization_boundary_lock.zip",
+  "summary": {
+    "renderRegistryOwner": "feature/module owned only",
+    "derivedStore": "App.derived",
+    "scheduleSSOT": "App.schedulesEngine.list",
+    "debtorPanelVisibility": "syncFromState(App.state.ui.debtorPanel)",
+    "bootstrap": "js/app.js single entry + App.api.commitAll()"
+  },
+  "touchedFiles": [
+    "js/app.js",
+    "js/core/cloudState.js",
+    "js/core/schedules.engine.js",
+    "js/features/calendar.js",
+    "js/features/debtors.handlers.js",
+    "js/features/debtors.js",
+    "js/features/debtors_domlist.js",
+    "js/features/monitoring.js",
+    "js/features/report.js",
+    "js/infra/api.js",
+    "js/infra/derived.js",
+    "js/infra/stateIO.js",
+    "js/modules/debtorDetail.dom.js",
+    "js/ui/debtorPanel.dom.js",
+    "js/ui/operationModal.js"
+  ],
+  "verification": {
+    "nodeSyntaxCheck": true,
+    "ownerRegisterSearch": {
+      "debtorList": 1,
+      "debtorDetail": 1,
+      "calendar": 1,
+      "monitoring": 1,
+      "report": 1
+    }
+  }
+}

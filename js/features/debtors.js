@@ -46,7 +46,6 @@
       App.modalManager.init();
     }
     attachPanelEvents();
-    render();
   }
 
   /* ===== Event wiring: Panel / List / Detail ===== */
@@ -66,21 +65,28 @@
         var el = t.closest('[data-action="debtor-select"]');
         var id = el.getAttribute('data-debtor-id');
         if (!id) return;
-        App.state.ui.debtorPanel.selectedDebtorId = id;
-        App.state.ui.debtorPanel.mode = 'detail';
-        render();
-        refreshOtherViews();
-        if (window.App && App.debtorDetail && typeof App.debtorDetail.render === 'function') {
-          App.debtorDetail.render(String(id));
+        if (App.api && App.api.view && typeof App.api.view.openDebtorDetail === 'function') {
+          App.api.view.openDebtorDetail(id);
+        } else {
+          App.state.ui.debtorPanel.selectedDebtorId = id;
+          App.state.ui.debtorPanel.mode = 'detail';
+          if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+            App.api.view.invalidate([App.ViewKey.DEBTOR_DETAIL, App.ViewKey.DEBTOR_LIST]);
+          }
         }
         return;
       }
 
       if (t.closest('[data-action="debtor-open-list"]')) {
-        App.state.ui.debtorPanel.mode = 'list';
-        App.state.ui.debtorPanel.selectedDebtorId = null;
-        render();
-        refreshOtherViews();
+        if (App.api && App.api.view && typeof App.api.view.openDebtorList === 'function') {
+          App.api.view.openDebtorList();
+        } else {
+          App.state.ui.debtorPanel.mode = 'list';
+          App.state.ui.debtorPanel.selectedDebtorId = null;
+          if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+            App.api.view.invalidate([App.ViewKey.DEBTOR_LIST, App.ViewKey.DEBTOR_DETAIL]);
+          }
+        }
         return;
       }
 
@@ -202,7 +208,9 @@
         var ui = App.state.ui.debtorPanel;
         if (ui.page > 1) {
           ui.page -= 1;
-          render();
+          if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+            App.api.view.invalidate(App.ViewKey.DEBTOR_LIST);
+          }
         }
         return;
       }
@@ -210,7 +218,9 @@
       if (t.closest('[data-action="debtor-page-next"]')) {
         var ui2 = App.state.ui.debtorPanel;
         ui2.page += 1;
-        render();
+        if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+          App.api.view.invalidate(App.ViewKey.DEBTOR_LIST);
+        }
         return;
       }
 
@@ -224,7 +234,9 @@
           ui3.sortDir = 'desc';
         }
         ui3.page = 1;
-        render();
+        if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+          App.api.view.invalidate(App.ViewKey.DEBTOR_LIST);
+        }
         return;
       }
     });
@@ -244,6 +256,9 @@
         var value = t.value || '';
         App.state.ui.debtorPanel.searchQuery = value;
         App.state.ui.debtorPanel.page = 1;
+        if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+          App.api.view.invalidate(App.ViewKey.DEBTOR_LIST);
+        }
       }
     });
 
@@ -288,16 +303,26 @@
       }
 
       if (updated) {
-        // Refresh dependent views (calendar, report, summary, detail)
         var debtor = getSelectedDebtor();
         var debtorId = debtor && debtor.id != null ? String(debtor.id) : null;
 
-        if (App.features && App.features.debtors && typeof App.features.debtors.refreshOtherViews === 'function') {
-          App.features.debtors.refreshOtherViews();
-        }
-
-        if (window.App && App.debtorDetail && typeof App.debtorDetail.render === 'function' && debtorId) {
-          App.debtorDetail.render(debtorId);
+        if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
+          App.api.commit({
+            reason: 'debtors.cardStatusChange',
+            invalidate: [
+              App.ViewKey.DEBTOR_DETAIL,
+              App.ViewKey.DEBTOR_LIST,
+              App.ViewKey.CALENDAR,
+              App.ViewKey.REPORT
+            ]
+          });
+        } else {
+          if (App.features && App.features.debtors && typeof App.features.debtors.refreshOtherViews === 'function') {
+            App.features.debtors.refreshOtherViews();
+          }
+          if (window.App && App.debtorDetail && typeof App.debtorDetail.render === 'function' && debtorId) {
+            App.debtorDetail.render(debtorId);
+          }
         }
       }
     });
@@ -442,13 +467,7 @@ function render() {
       return;
     }
 
-    // Last resort: call legacy render entrypoints (may warn).
-    if (window.App && App.features && App.features.report && typeof App.features.report.render === 'function') {
-      App.features.report.render();
-    }
-    if (window.App && App.features && App.features.calendar && typeof App.features.calendar.render === 'function') {
-      App.features.calendar.render();
-    }
+    return;
   }
 
 

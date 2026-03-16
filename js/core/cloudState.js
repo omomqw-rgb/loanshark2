@@ -308,18 +308,13 @@
       } catch (e) {
         schedules = [];
       }
-    } else {
-      schedules = (App.state && App.state.schedules) || [];
     }
 
     var engineListRef = (App.schedulesEngine && App.schedulesEngine.list) || null;
-    var stateSchedulesRef = (App.state && App.state.schedules) || null;
-    var dataSchedulesRef = (App.data && App.data.schedules) || null;
 
-    var aliasConsistency = {
+    var engineConsistency = {
       engineHasList: !!engineListRef,
-      stateAlias: !!(engineListRef && stateSchedulesRef === engineListRef),
-      dataAlias: !!(engineListRef && dataSchedulesRef === engineListRef)
+      engineLength: Array.isArray(engineListRef) ? engineListRef.length : 0
     };
 
     var loanById = Object.create(null);
@@ -372,7 +367,7 @@
       loansMissingSchedules: missingLoanScheduleIds,
       orphanLoanSchedules: orphanLoanSchedules,
       orphanClaimSchedules: orphanClaimSchedules,
-      aliasConsistency: aliasConsistency,
+      engineConsistency: engineConsistency,
       typeStats: {
         loanId: collectTypeStats(loans, 'id'),
         scheduleLoanId: collectTypeStats(schedules, 'loanId'),

@@ -130,8 +130,8 @@
   }
 
   function collectMonitorTargets() {
-    var data = App.data || {};
-    var derivedDebtors = Array.isArray(data.debtors) ? data.debtors : [];
+    var derived = App.derived || {};
+    var derivedDebtors = Array.isArray(derived.debtors) ? derived.debtors : [];
     var debtorsById = buildDebtorNameIndex();
 
     // Build alive-kind index from schedules (read-only).
@@ -145,8 +145,6 @@
       } catch (e) {
         schedules = [];
       }
-    } else if (App.state && Array.isArray(App.state.schedules)) {
-      schedules = App.state.schedules;
     }
 
     var aliveKindByDebtor = Object.create(null);

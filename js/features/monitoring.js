@@ -130,8 +130,8 @@
     }
 
     function getDebtors() {
-      var data = App.data || {};
-      var debtors = data.debtors || (App.state && App.state.debtors) || [];
+      var derived = App.derived || {};
+      var debtors = derived.debtors || (App.state && App.state.debtors) || [];
       if (!Array.isArray(debtors)) return [];
       return debtors;
     }
@@ -1003,11 +1003,9 @@
     }
 
     function init() {
-      // Stage 2: Register the actual monitoring render implementation (observer-only). No behavior change.
       if (App.renderCoordinator && App.ViewKey && App.ViewKey.MONITORING) {
         App.renderCoordinator.register(App.ViewKey.MONITORING, render);
       }
-      render();
     }
 
     return {

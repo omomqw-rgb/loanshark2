@@ -1031,11 +1031,9 @@ summary.appendChild(chipOverdue);
   function init() {
     ensureCalendarState();
     bindEvents();
-    // Stage 2: Register the actual render implementation (observer-only). No behavior change.
     if (App.renderCoordinator && App.ViewKey && App.ViewKey.CALENDAR) {
       App.renderCoordinator.register(App.ViewKey.CALENDAR, render);
     }
-    render();
   }
 
   App.features.calendar = {

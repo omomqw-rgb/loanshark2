@@ -102,16 +102,16 @@ function handleDebtorDelete() {
 
 
     function handleLoanScheduleSave(form) {
-      if (App.schedulesEngine && typeof App.schedulesEngine.bulkUpdateFromLoanForm === 'function') {
-        App.schedulesEngine.bulkUpdateFromLoanForm(form);
+      if (App.api && App.api.domain && App.api.domain.schedule && typeof App.api.domain.schedule.saveLoanFromForm === 'function') {
+        App.api.domain.schedule.saveLoanFromForm(form);
       }
     }
 
 
 
   function handleClaimScheduleSave(form) {
-      if (App.schedulesEngine && typeof App.schedulesEngine.bulkUpdateFromClaimForm === 'function') {
-        App.schedulesEngine.bulkUpdateFromClaimForm(form);
+      if (App.api && App.api.domain && App.api.domain.schedule && typeof App.api.domain.schedule.saveClaimFromForm === 'function') {
+        App.api.domain.schedule.saveClaimFromForm(form);
       }
     }
 

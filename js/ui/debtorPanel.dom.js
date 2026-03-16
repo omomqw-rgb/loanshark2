@@ -1,67 +1,90 @@
-// Debtor sidepanel control (v146 rebuilt)
+// Debtor sidepanel control (SSOT syncFromState)
 window.App = window.App || {};
 App.debtorPanel = App.debtorPanel || {};
 
-App.debtorPanel.init = function() {
-  var panel = document.getElementById('debtor-sidepanel');
-  if (!panel) return;
-  var header = panel.querySelector('.debtor-sidepanel-header');
-  if (!header) return;
+(function () {
+  var initialized = false;
 
-  header.addEventListener('click', function () {
-    var isCollapsed = panel.classList.contains('is-collapsed');
+  function ensurePanelState() {
+    App.state = App.state || {};
+    App.state.ui = App.state.ui || {};
+    App.state.ui.debtorPanel = App.state.ui.debtorPanel || {
+      mode: 'list',
+      selectedDebtorId: null,
+      searchQuery: '',
+      page: 1
+    };
+    return App.state.ui.debtorPanel;
+  }
 
-    if (isCollapsed) {
-      panel.classList.remove('is-collapsed');
-      panel.classList.add('is-expanded');
-    } else {
-      panel.classList.remove('is-expanded');
-      panel.classList.add('is-collapsed');
-    }
+  function getElements() {
+    return {
+      panel: document.getElementById('debtor-sidepanel'),
+      search: document.querySelector('.dlist-topbar'),
+      filterbar: document.querySelector('.dlist-filterbar'),
+      pagination: document.querySelector('.dlist-pagination'),
+      list: document.getElementById('debtor-list-root'),
+      detail: document.getElementById('debtor-panel-root')
+    };
+  }
 
-    var aside = document.querySelector('.side');
-    if (aside) {
-      if (panel.classList.contains('is-collapsed')) {
-        aside.classList.add('is-collapsed');
-      } else {
-        aside.classList.remove('is-collapsed');
+  App.debtorPanel.syncFromState = function () {
+    var ui = ensurePanelState();
+    var els = getElements();
+
+    var mode = (ui && ui.mode === 'detail') ? 'detail' : 'list';
+    var showList = (mode === 'list');
+
+    if (els.search) els.search.style.display = showList ? '' : 'none';
+    if (els.filterbar) els.filterbar.style.display = showList ? '' : 'none';
+    if (els.pagination) els.pagination.style.display = showList ? '' : 'none';
+    if (els.list) els.list.style.display = showList ? '' : 'none';
+    if (els.detail) els.detail.style.display = showList ? 'none' : 'block';
+  };
+
+  App.debtorPanel.init = function () {
+    var panel = document.getElementById('debtor-sidepanel');
+    if (!panel) return;
+
+    if (!initialized) {
+      initialized = true;
+      var header = panel.querySelector('.debtor-sidepanel-header');
+      if (header) {
+        header.addEventListener('click', function () {
+          var isCollapsed = panel.classList.contains('is-collapsed');
+
+          if (isCollapsed) {
+            panel.classList.remove('is-collapsed');
+            panel.classList.add('is-expanded');
+          } else {
+            panel.classList.remove('is-expanded');
+            panel.classList.add('is-collapsed');
+          }
+
+          var aside = document.querySelector('.side');
+          if (aside) {
+            if (panel.classList.contains('is-collapsed')) {
+              aside.classList.add('is-collapsed');
+            } else {
+              aside.classList.remove('is-collapsed');
+            }
+          }
+        });
       }
     }
-  });
-};
 
-App.debtorPanel.showList = function() {
-  var search = document.querySelector('.dlist-topbar');
-  var filterbar = document.querySelector('.dlist-filterbar');
-  var pagination = document.querySelector('.dlist-pagination');
-  var list = document.getElementById('debtor-list-root');
-  var detail = document.getElementById('debtor-panel-root');
+    App.debtorPanel.syncFromState();
+  };
 
-  if (search) search.style.display = '';
-  if (filterbar) filterbar.style.display = '';
-  if (pagination) pagination.style.display = '';
-  if (list) list.style.display = '';
-  if (detail) detail.style.display = 'none';
-};
+  App.debtorPanel.showList = function () {
+    var ui = ensurePanelState();
+    ui.mode = 'list';
+    App.debtorPanel.syncFromState();
+  };
 
-App.debtorPanel.showDetail = function() {
-
-  var search = document.querySelector('.dlist-topbar');
-  var filterbar = document.querySelector('.dlist-filterbar');
-  var pagination = document.querySelector('.dlist-pagination');
-  var list = document.getElementById('debtor-list-root');
-  var detail = document.getElementById('debtor-panel-root');
-
-  if (search) search.style.display = 'none';
-  if (filterbar) filterbar.style.display = 'none';
-  if (pagination) pagination.style.display = 'none';
-  if (list) list.style.display = 'none';
-  if (detail) detail.style.display = 'block';
-
-};
-
-document.addEventListener('DOMContentLoaded', function () {
-  if (App.debtorPanel && typeof App.debtorPanel.init === 'function') {
-    App.debtorPanel.init();
-  }
-});
+  App.debtorPanel.showDetail = function () {
+    var ui = ensurePanelState();
+    ui.mode = 'detail';
+    App.debtorPanel.syncFromState();
+  };
+})();

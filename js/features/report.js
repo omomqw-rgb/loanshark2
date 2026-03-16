@@ -322,11 +322,9 @@ html += '</div>';
   }
 
 function init() {
-    // Stage 2: Register the actual report render implementation (observer-only). No behavior change.
     if (App.renderCoordinator && App.ViewKey && App.ViewKey.REPORT) {
       App.renderCoordinator.register(App.ViewKey.REPORT, render);
     }
-    render();
     bindEvents();
   }
 

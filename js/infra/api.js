@@ -64,133 +64,10 @@
     });
   }
 
-  // Stage 6: Make render registration stable (no per-call anonymous functions)
-  // so that duplicate register warnings are meaningful.
-  var _navDebtorListRenderer = function () {
-    // DOM list mode
-    if (App.debtors && typeof App.debtors.updateFilteredList === 'function' && typeof App.debtors.renderList === 'function') {
-      App.debtors.updateFilteredList();
-      App.debtors.renderList();
-      return;
-    }
-    // Legacy list mode fallback (should be rare in v001)
-    if (App.features && App.features.debtors && typeof App.features.debtors.render === 'function') {
-      App.features.debtors.render();
-    }
-  };
-
-  var _navDebtorDetailRenderer = function () {
-    var id = null;
-    try {
-      id = (App.state && App.state.ui && App.state.ui.debtorPanel) ? App.state.ui.debtorPanel.selectedDebtorId : null;
-    } catch (e) {
-      id = null;
-    }
-    if (id == null) return;
-    id = String(id);
-    if (!id) return;
-
-    // Prefer the real DOM render implementation when available.
-    if (App.debtorDetail && typeof App.debtorDetail._renderImpl === 'function') {
-      App.debtorDetail._renderImpl(id);
-      return;
-    }
-
-    // Backward fallbacks (avoid hard crash if stage ordering is unexpected)
-    if (App.debtorDetail && typeof App.debtorDetail.renderImpl === 'function') {
-      App.debtorDetail.renderImpl(id);
-      return;
-    }
-    if (App.debtorDetail && typeof App.debtorDetail.render === 'function' && !App.debtorDetail.render._deprecatedInvalidateWrapper) {
-      App.debtorDetail.render(id);
-      return;
-    }
-    if (App.debtors && typeof App.debtors.openDetail === 'function') {
-      App.debtors.openDetail(id);
-    }
-  };
-
-  var _calendarRenderer = function () {
-    if (App.features && App.features.calendar && typeof App.features.calendar.renderImpl === 'function') {
-      App.features.calendar.renderImpl();
-    }
-  };
-
-  var _monitoringRenderer = function () {
-    if (App.features && App.features.monitoring && typeof App.features.monitoring.renderImpl === 'function') {
-      App.features.monitoring.renderImpl();
-    }
-  };
-
-  var _reportRenderer = function () {
-    if (App.features && App.features.report && typeof App.features.report.renderImpl === 'function') {
-      App.features.report.renderImpl();
-    }
-  };
-
-  _navDebtorListRenderer._ls_fromUIState = true;
-  _navDebtorDetailRenderer._ls_fromUIState = true;
-  _calendarRenderer._ls_safeFallback = true;
-  _monitoringRenderer._ls_safeFallback = true;
-  _reportRenderer._ls_safeFallback = true;
-
+  // SSOT: renderer ownership belongs to the concrete feature/module files.
+  // api.js only dispatches invalidate/commit and never pre-registers fallback renderers.
   function ensureCoreRenderersRegistered() {
-    if (!App.renderCoordinator || !App.ViewKey || typeof App.renderCoordinator.register !== 'function') return;
-
-    if (App.ViewKey.DEBTOR_LIST) {
-      try {
-        var existingList =
-          App.renderCoordinator &&
-          App.renderCoordinator._registry &&
-          App.renderCoordinator._registry[App.ViewKey.DEBTOR_LIST];
-        if (!(existingList && existingList._ls_fromUIState)) {
-          App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, _navDebtorListRenderer);
-        }
-      } catch (e) {
-        App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, _navDebtorListRenderer);
-      }
-    }
-
-    if (App.ViewKey.DEBTOR_DETAIL) {
-      try {
-        var existingDetail = App.renderCoordinator._registry && App.renderCoordinator._registry[App.ViewKey.DEBTOR_DETAIL];
-        if (!(existingDetail && existingDetail._ls_fromUIState)) {
-          App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, _navDebtorDetailRenderer);
-        }
-      } catch (e2) {
-        App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, _navDebtorDetailRenderer);
-      }
-    }
-
-    if (App.ViewKey.CALENDAR) {
-      try {
-        if (!App.renderCoordinator._registry || typeof App.renderCoordinator._registry[App.ViewKey.CALENDAR] !== 'function') {
-          App.renderCoordinator.register(App.ViewKey.CALENDAR, _calendarRenderer);
-        }
-      } catch (e3) {
-        App.renderCoordinator.register(App.ViewKey.CALENDAR, _calendarRenderer);
-      }
-    }
-
-    if (App.ViewKey.MONITORING) {
-      try {
-        if (!App.renderCoordinator._registry || typeof App.renderCoordinator._registry[App.ViewKey.MONITORING] !== 'function') {
-          App.renderCoordinator.register(App.ViewKey.MONITORING, _monitoringRenderer);
-        }
-      } catch (e4) {
-        App.renderCoordinator.register(App.ViewKey.MONITORING, _monitoringRenderer);
-      }
-    }
-
-    if (App.ViewKey.REPORT) {
-      try {
-        if (!App.renderCoordinator._registry || typeof App.renderCoordinator._registry[App.ViewKey.REPORT] !== 'function') {
-          App.renderCoordinator.register(App.ViewKey.REPORT, _reportRenderer);
-        }
-      } catch (e5) {
-        App.renderCoordinator.register(App.ViewKey.REPORT, _reportRenderer);
-      }
-    }
+    return;
   }
 
   function traceCommit(reason, keys) {
@@ -211,7 +88,6 @@
     if (!App.renderCoordinator || typeof App.renderCoordinator.invalidate !== 'function') return;
 
     traceCommit(reason, keys);
-    ensureCoreRenderersRegistered();
     enableCoordinator();
     App.renderCoordinator.invalidate(keys);
     disableCoordinatorSoon();
@@ -225,18 +101,93 @@
 
   if (typeof App.api.ensureRenderersRegistered !== 'function') {
     App.api.ensureRenderersRegistered = function () {
-      ensureCoreRenderersRegistered();
+      return;
     };
   }
-  ensureCoreRenderersRegistered();
+
+  function ensureDebtorPanelState() {
+    if (!App.state) App.state = {};
+    if (!App.state.ui) App.state.ui = {};
+    if (!App.state.ui.debtorPanel) {
+      App.state.ui.debtorPanel = {
+        mode: 'list',
+        selectedDebtorId: null,
+        page: 1,
+        searchQuery: ''
+      };
+    }
+    return App.state.ui.debtorPanel;
+  }
+
+  function debtorExistsById(debtorId) {
+    var id = (debtorId != null) ? String(debtorId) : null;
+    if (!id) return false;
+    var list = (App.state && Array.isArray(App.state.debtors)) ? App.state.debtors : [];
+    for (var i = 0; i < list.length; i++) {
+      var debtor = list[i];
+      if (!debtor || debtor.id == null) continue;
+      if (String(debtor.id) === id) return true;
+    }
+    return false;
+  }
+
+  function firstDebtorId() {
+    var list = (App.state && Array.isArray(App.state.debtors)) ? App.state.debtors : [];
+    for (var i = 0; i < list.length; i++) {
+      var debtor = list[i];
+      if (!debtor || debtor.id == null) continue;
+      return String(debtor.id);
+    }
+    return null;
+  }
+
+  function normalizeDebtorSelection(preferredDebtorId, forcedMode) {
+    var panel = ensureDebtorPanelState();
+    var preferredId = (preferredDebtorId != null) ? String(preferredDebtorId) : null;
+    var selectedId = panel.selectedDebtorId != null ? String(panel.selectedDebtorId) : null;
+
+    if (preferredId && debtorExistsById(preferredId)) {
+      panel.selectedDebtorId = preferredId;
+      panel.mode = forcedMode || 'detail';
+      return panel.selectedDebtorId;
+    }
+
+    if (selectedId && debtorExistsById(selectedId)) {
+      panel.selectedDebtorId = selectedId;
+      if (forcedMode) panel.mode = forcedMode;
+      else if (panel.mode !== 'detail' && panel.mode !== 'list') panel.mode = 'detail';
+      return panel.selectedDebtorId;
+    }
+
+    var fallbackId = firstDebtorId();
+    if (fallbackId) {
+      panel.selectedDebtorId = fallbackId;
+      panel.mode = forcedMode || 'detail';
+      return fallbackId;
+    }
+
+    panel.selectedDebtorId = null;
+    panel.mode = 'list';
+    return null;
+  }
+
+  function finalizeDomainMutation(reason, invalidate, preferredDebtorId, forcedMode) {
+    normalizeDebtorSelection(preferredDebtorId, forcedMode);
+    if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
+      App.api.commit({ reason: reason, invalidate: invalidate });
+      return;
+    }
+    if (App.api && typeof App.api.commitAll === 'function') {
+      App.api.commitAll();
+    }
+  }
 
   function setDebtorPanelDetailState(debtorId) {
     var id = (debtorId != null) ? String(debtorId) : null;
     if (!id) return;
-    if (App.state && App.state.ui && App.state.ui.debtorPanel) {
-      App.state.ui.debtorPanel.mode = 'detail';
-      App.state.ui.debtorPanel.selectedDebtorId = id;
-    }
+    var panel = ensureDebtorPanelState();
+    panel.mode = 'detail';
+    panel.selectedDebtorId = id;
   }
 
   function findLoanById(loanId) {
@@ -321,11 +272,7 @@
       if (!id) return;
 
       cleanupOrphanModalBackdrop('view.openDebtorDetail');
-
-      if (App.state && App.state.ui && App.state.ui.debtorPanel) {
-        App.state.ui.debtorPanel.mode = 'detail';
-        App.state.ui.debtorPanel.selectedDebtorId = id;
-      }
+      normalizeDebtorSelection(id, 'detail');
 
       // Do not call render() directly. Use commit → invalidate.
       if (App.ViewKey) {
@@ -340,20 +287,12 @@
   if (typeof App.api.view.openDebtorList !== 'function') {
     App.api.view.openDebtorList = function () {
       cleanupOrphanModalBackdrop('view.openDebtorList');
-      if (App.state && App.state.ui && App.state.ui.debtorPanel) {
-        App.state.ui.debtorPanel.mode = 'list';
-        App.state.ui.debtorPanel.selectedDebtorId = null;
-      }
-
-      // Keep existing visibility behavior.
-      if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
-        App.debtorPanel.showList();
-      }
+      normalizeDebtorSelection(null, 'list');
 
       if (App.ViewKey) {
         commitInternal({
           reason: 'view.openDebtorList',
-          invalidate: [App.ViewKey.DEBTOR_LIST]
+          invalidate: [App.ViewKey.DEBTOR_LIST, App.ViewKey.DEBTOR_DETAIL]
         });
       }
     };
@@ -378,6 +317,9 @@
       try {
         if (!App.state) App.state = {};
         if (!App.data) App.data = {};
+        App.derived = App.derived || {};
+        if (!Array.isArray(App.derived.debtors)) App.derived.debtors = [];
+        if (!App.derived.debtorsById || typeof App.derived.debtorsById !== 'object') App.derived.debtorsById = {};
 
         var debtors = Array.isArray(App.state.debtors) ? App.state.debtors : [];
         var loans = Array.isArray(App.state.loans) ? App.state.loans : [];
@@ -386,8 +328,6 @@
         var schedules = [];
         if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
           schedules = App.schedulesEngine.getAll() || [];
-        } else if (Array.isArray(App.state.schedules)) {
-          schedules = App.state.schedules;
         }
 
         // Keep derived loan fields in sync with schedules (same approach as core/data.js).
@@ -430,8 +370,8 @@
               return aid.localeCompare(bid, 'ko-KR');
             });
 
-            App.data.debtors = sortedList;
-            App.data.debtorsDetailed = bridge.byId || {};
+            App.derived.debtors = sortedList;
+            App.derived.debtorsById = bridge.byId || {};
           }
         }
       } catch (e) {
@@ -570,40 +510,24 @@
       App.state.debtors.push(newDebtor);
 
       // Legacy UX: auto-open detail after create
-      if (!App.state.ui) App.state.ui = {};
-      if (!App.state.ui.debtorPanel) App.state.ui.debtorPanel = { mode: 'detail', selectedDebtorId: newId, page: 1 };
-      App.state.ui.debtorPanel.page = 1;
-
-      if (App.api && App.api.view && typeof App.api.view.openDebtorDetail === 'function') {
-        App.api.view.openDebtorDetail(newId);
-      } else {
-        // Fallback: just set selection state
-        App.state.ui.debtorPanel.mode = 'detail';
-        App.state.ui.debtorPanel.selectedDebtorId = newId;
-      }
+      var panel = ensureDebtorPanelState();
+      panel.page = 1;
+      panel.mode = 'detail';
+      panel.selectedDebtorId = newId;
 
       // Close modal on success (legacy UX)
       if (App.modalManager && typeof App.modalManager.close === 'function') {
         App.modalManager.close();
       }
 
-      // Stage 6: Narrow invalidate scope (still keeps UX identical)
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'debtor-create',
-          invalidate: [
+      finalizeDomainMutation('debtor-create', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        // Fallback (safety)
-        App.api.commitAll();
-      }
+          ], newId, 'detail');
     };
   }
 
@@ -657,10 +581,8 @@
       debtor.riskTier = finalTier;
 
       // Keep selection on the edited debtor (legacy UX)
-      if (!App.state.ui) App.state.ui = {};
-      if (!App.state.ui.debtorPanel) App.state.ui.debtorPanel = {};
       if (id != null) {
-        App.state.ui.debtorPanel.selectedDebtorId = String(id);
+        setDebtorPanelDetailState(id);
       }
 
       // Close modal on success (legacy UX)
@@ -668,22 +590,14 @@
         App.modalManager.close();
       }
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'debtor-edit',
-          invalidate: [
+      finalizeDomainMutation('debtor-edit', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], id, 'detail');
     };
   }
 
@@ -720,35 +634,14 @@
         App.schedulesEngine.removeByDebtorId(id);
       }
 
-      // Legacy UX: go back to list
-      if (App.api && App.api.view && typeof App.api.view.openDebtorList === 'function') {
-        App.api.view.openDebtorList();
-      } else {
-        if (!state.ui) state.ui = {};
-        if (!state.ui.debtorPanel) state.ui.debtorPanel = {};
-        state.ui.debtorPanel.mode = 'list';
-        state.ui.debtorPanel.selectedDebtorId = null;
-        if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
-          App.debtorPanel.showList();
-        }
-      }
-
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'debtor-delete',
-          invalidate: [
+      finalizeDomainMutation('debtor-delete', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], null, 'list');
     };
   }
 
@@ -961,22 +854,14 @@
         App.modalManager.close();
       }
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'loan-create',
-          invalidate: [
+      finalizeDomainMutation('loan-create', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], debtorId, 'detail');
     };
   }
 
@@ -1053,22 +938,14 @@
         App.modalManager.close();
       }
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'loan-edit',
-          invalidate: [
+      finalizeDomainMutation('loan-edit', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], loan && loan.debtorId != null ? loan.debtorId : null, 'detail');
     };
   }
 
@@ -1117,22 +994,14 @@
         }
       }
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'loan-delete',
-          invalidate: [
+      finalizeDomainMutation('loan-delete', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], loan && loan.debtorId != null ? loan.debtorId : null, 'detail');
     };
   }
   // Stage 4A: Schedule save domain API
@@ -1154,10 +1023,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
           list = App.schedulesEngine.getByLoanId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.loanId != null && String(s.loanId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1185,10 +1050,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByLoanId === 'function') {
           list = App.schedulesEngine.getByLoanId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.loanId != null && String(s.loanId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1236,21 +1097,13 @@
         App.modalManager.close();
       }
 
-      // Stage 6: Narrow invalidate scope (schedule-save affects monitoring/report)
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'schedule-save-loan',
-          invalidate: [
+      finalizeDomainMutation('schedule-save-loan', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], loan && loan.debtorId != null ? loan.debtorId : null, 'detail');
     };
   }
 
@@ -1321,22 +1174,14 @@
       // Keep current debtor detail view (legacy UX)
       setDebtorPanelDetailState(debtorId);
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'claim-create',
-          invalidate: [
+      finalizeDomainMutation('claim-create', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], debtorId, 'detail');
     };
   }
 
@@ -1400,22 +1245,14 @@
         setDebtorPanelDetailState(claim.debtorId);
       }
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'claim-edit',
-          invalidate: [
+      finalizeDomainMutation('claim-edit', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], claim && claim.debtorId != null ? claim.debtorId : null, 'detail');
     };
   }
 
@@ -1452,22 +1289,14 @@
         setDebtorPanelDetailState(claim.debtorId);
       }
 
-      // Stage 6: Narrow invalidate scope
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'claim-delete',
-          invalidate: [
+      finalizeDomainMutation('claim-delete', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_LIST,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], claim && claim.debtorId != null ? claim.debtorId : null, 'detail');
     };
   }
 
@@ -1487,10 +1316,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
           list = App.schedulesEngine.getByClaimId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.claimId != null && String(s.claimId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1518,10 +1343,6 @@
         var list = null;
         if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
           list = App.schedulesEngine.getByClaimId(id);
-        } else if (App.state && Array.isArray(App.state.schedules)) {
-          list = App.state.schedules.filter(function (s) {
-            return s && s.claimId != null && String(s.claimId) === id;
-          });
         }
         if (!Array.isArray(list)) return;
         for (var i = 0; i < list.length; i++) {
@@ -1569,21 +1390,13 @@
         App.modalManager.close();
       }
 
-      // Stage 6: Narrow invalidate scope (schedule-save affects monitoring/report)
-      if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-        App.api.commit({
-          reason: 'schedule-save-claim',
-          invalidate: [
+      finalizeDomainMutation('schedule-save-claim', [
             App.ViewKey.DERIVED,
             App.ViewKey.DEBTOR_DETAIL,
             App.ViewKey.CALENDAR,
             App.ViewKey.MONITORING,
             App.ViewKey.REPORT
-          ]
-        });
-      } else if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      }
+          ], claim && claim.debtorId != null ? claim.debtorId : null, 'detail');
     };
   }
 })(window);

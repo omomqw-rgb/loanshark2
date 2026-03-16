@@ -1,31 +1,9 @@
 (function (window, document) {
   'use strict';
   var App = window.App || (window.App = {});
+  var initialized = false;
 
-  function init() {
-    if (App.ui && App.ui.layout && App.ui.layout.init) {
-      App.ui.layout.init();
-    }
-    if (App.ui && App.ui.events && App.ui.events.init) {
-      App.ui.events.init();
-    }
-    if (App.features && App.features.debtors && App.features.debtors.init) {
-      App.features.debtors.init();
-    }
-    if (App.features && App.features.calendar && App.features.calendar.init) {
-      App.features.calendar.init();
-    }
-    if (App.features && App.features.monitoring && App.features.monitoring.init) {
-      App.features.monitoring.init();
-    }
-    if (App.features && App.features.report && App.features.report.init) {
-      App.features.report.init();
-    }
-    if (App.auth && App.auth.init) {
-      App.auth.init();
-    }
-
-    // Save / Load button bindings
+  function bindSaveLoadButtons() {
     var localSaveBtn = document.getElementById('local-save-btn');
     if (localSaveBtn && App.local && typeof App.local.save === 'function') {
       localSaveBtn.addEventListener('click', function () {
@@ -62,13 +40,57 @@
     }
   }
 
+  function init() {
+    if (initialized) return;
+    initialized = true;
+
+    if (App.ui && App.ui.layout && App.ui.layout.init) {
+      App.ui.layout.init();
+    }
+    if (App.ui && App.ui.events && App.ui.events.init) {
+      App.ui.events.init();
+    }
+    if (App.debtorPanel && App.debtorPanel.init) {
+      App.debtorPanel.init();
+    }
+    if (App.ui && App.ui.mobile && App.ui.mobile.init) {
+      App.ui.mobile.init();
+    }
+
+    if (App.features && App.features.debtors && App.features.debtors.init) {
+      App.features.debtors.init();
+    }
+    if (App.debtors && App.debtors.initDom) {
+      App.debtors.initDom();
+    }
+    if (App.debtorDetail && App.debtorDetail.init) {
+      App.debtorDetail.init();
+    }
+
+    if (App.features && App.features.calendar && App.features.calendar.init) {
+      App.features.calendar.init();
+    }
+    if (App.features && App.features.monitoring && App.features.monitoring.init) {
+      App.features.monitoring.init();
+    }
+    if (App.features && App.features.report && App.features.report.init) {
+      App.features.report.init();
+    }
+
+    if (App.auth && App.auth.init) {
+      App.auth.init();
+    }
+
+    bindSaveLoadButtons();
+
+    if (App.api && typeof App.api.commitAll === 'function') {
+      App.api.commitAll();
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 })(window, document);
-
-
-
-
