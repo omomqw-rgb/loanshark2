@@ -4,6 +4,13 @@
   var App = window.App || (window.App = {});
   var util = App.util || {};
 
+  function getCanonicalAppVersion() {
+    if (App.meta && typeof App.meta.version === 'string' && App.meta.version.trim()) {
+      return String(App.meta.version);
+    }
+    return 'unknown';
+  }
+
   function getTodayISODate() {
     if (util && typeof util.todayISODate === 'function') {
       return util.todayISODate();
@@ -311,18 +318,26 @@
     }
 
     var engineListRef = (App.schedulesEngine && App.schedulesEngine.list) || null;
-    var stateSchedulesRef = (App.state && App.state.schedules) || null;
-    var dataSchedulesRef = (App.data && App.data.schedules) || null;
+    var selectedDebtorId = (App.state && App.state.ui && App.state.ui.debtorPanel)
+      ? App.state.ui.debtorPanel.selectedDebtorId
+      : null;
 
-    var aliasConsistency = {
-      engineHasList: !!engineListRef,
-      stateAlias: !!(engineListRef && stateSchedulesRef === engineListRef),
-      dataAlias: !!(engineListRef && dataSchedulesRef === engineListRef)
+    var legacyScheduleFields = {
+      stateHasScheduleArray: !!(App.state && Array.isArray(App.state.schedules)),
+      dataHasScheduleArray: !!(App.data && Array.isArray(App.data.schedules))
     };
 
+    var debtorById = Object.create(null);
     var loanById = Object.create(null);
     var claimById = Object.create(null);
     var scheduleCountByLoan = Object.create(null);
+
+    var debtors = (App.state && App.state.debtors) || [];
+    for (var di = 0; di < debtors.length; di++) {
+      var debtor = debtors[di];
+      if (!debtor || debtor.id == null) continue;
+      debtorById[String(debtor.id)] = debtor;
+    }
 
     for (var i = 0; i < loans.length; i++) {
       var loan = loans[i];
@@ -370,7 +385,33 @@
       loansMissingSchedules: missingLoanScheduleIds,
       orphanLoanSchedules: orphanLoanSchedules,
       orphanClaimSchedules: orphanClaimSchedules,
-      aliasConsistency: aliasConsistency,
+      selection: {
+        selectedDebtorId: selectedDebtorId != null ? String(selectedDebtorId) : null,
+        isValid: selectedDebtorId == null ? true : !!debtorById[String(selectedDebtorId)]
+      },
+      uiState: {
+        activeTab: (App.state && App.state.ui) ? (App.state.ui.activeTab || null) : null,
+        activeTabValid: !!(App.state && App.state.ui && (App.state.ui.activeTab === 'debtors' || App.state.ui.activeTab === 'calendar' || App.state.ui.activeTab === 'monitoring' || App.state.ui.activeTab === 'report')),
+        calendar: {
+          view: (App.state && App.state.ui && App.state.ui.calendar) ? App.state.ui.calendar.view || null : null,
+          viewValid: !!(App.state && App.state.ui && App.state.ui.calendar && (App.state.ui.calendar.view === 'month' || App.state.ui.calendar.view === 'week')),
+          sortMode: (App.state && App.state.ui && App.state.ui.calendar) ? App.state.ui.calendar.sortMode || null : null,
+          sortModeValid: !!(App.state && App.state.ui && App.state.ui.calendar && (App.state.ui.calendar.sortMode === 'type' || App.state.ui.calendar.sortMode === 'status')),
+          currentDate: (App.state && App.state.ui && App.state.ui.calendar) ? App.state.ui.calendar.currentDate || null : null,
+          currentDateValid: !!(App.state && App.state.ui && App.state.ui.calendar && typeof App.state.ui.calendar.currentDate === 'string' && App.state.ui.calendar.currentDate)
+        }
+      },
+      pipelineDiagnostics: {
+        finalizeMutationCount: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.finalizeMutationCount || 0) : 0,
+        finalizeBootstrapCount: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.finalizeBootstrapCount || 0) : 0,
+        commitAllOutsideFinalize: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.commitAllOutsideFinalize || 0) : 0,
+        rebuildDerivedOutsideFinalize: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.rebuildDerivedOutsideFinalize || 0) : 0,
+        flushNowOutsideFinalize: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.flushNowOutsideFinalize || 0) : 0,
+        bootstrapDirectRenderCount: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.bootstrapDirectRenderCount || 0) : 0,
+        pureRenderViolationCount: (App.diagnostics && App.diagnostics.pipeline) ? Number(App.diagnostics.pipeline.pureRenderViolationCount || 0) : 0
+      },
+      legacyScheduleFields: legacyScheduleFields,
+      engineOnly: !!engineListRef,
       typeStats: {
         loanId: collectTypeStats(loans, 'id'),
         scheduleLoanId: collectTypeStats(schedules, 'loanId'),
@@ -448,7 +489,7 @@
     var snapshot = {
       version: 1,
       savedAt: new Date().toISOString(),
-      appVersion: (App.meta && App.meta.version) || 'v326_schedule_cloudload_bugfix',
+      appVersion: getCanonicalAppVersion(),
 
       ui: {
         calendar: {

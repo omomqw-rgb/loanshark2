@@ -3,6 +3,7 @@
 
   var App = window.App || (window.App = {});
   App.features = App.features || {};
+  ensureRendererRegistered();
   var util = App.util || {};
 
   var DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
@@ -67,30 +68,73 @@
     return 'week';
   }
 
-  function ensureCalendarState() {
+  function ensureCalendarContainer() {
     var state = App.state || (App.state = {});
     state.ui = state.ui || {};
-    if (!state.ui.calendar) {
-      var today = new Date();
-      state.ui.calendar = {
-        view: getDefaultCalendarView(), // 'month' | 'week'
-        currentDate: toISODate(today),
-        // 주 상세 패널의 정렬 모드. 'type' = 대출/채권 타입 기준, 'status' = 상태 기준
-        sortMode: 'type'
-      };
-    } else {
-      if (!state.ui.calendar.currentDate) {
-        state.ui.calendar.currentDate = toISODate(new Date());
-      }
-      if (state.ui.calendar.view !== 'month' && state.ui.calendar.view !== 'week') {
-        state.ui.calendar.view = getDefaultCalendarView();
-      }
-      // sortMode 기본값 지정
-      if (!state.ui.calendar.sortMode) {
-        state.ui.calendar.sortMode = 'type';
-      }
+    if (!state.ui.calendar || typeof state.ui.calendar !== 'object') {
+      state.ui.calendar = {};
     }
     return state.ui.calendar;
+  }
+
+  function sanitizeCalendarUiState() {
+    if (App.stateIO && typeof App.stateIO.sanitizeCalendarUIState === 'function') {
+      return App.stateIO.sanitizeCalendarUIState();
+    }
+
+    var calState = ensureCalendarContainer();
+    if (calState.view !== 'month' && calState.view !== 'week') {
+      calState.view = getDefaultCalendarView();
+    }
+    if (calState.sortMode !== 'type' && calState.sortMode !== 'status') {
+      calState.sortMode = 'type';
+    }
+    if (typeof calState.currentDate !== 'string' || !calState.currentDate) {
+      calState.currentDate = toISODate(new Date());
+    }
+    return calState;
+  }
+
+  function getCalendarState() {
+    var ui = App.state && App.state.ui && App.state.ui.calendar ? App.state.ui.calendar : null;
+    var currentDate = (ui && typeof ui.currentDate === 'string' && ui.currentDate) ? ui.currentDate : toISODate(new Date());
+    var view = (ui && (ui.view === 'month' || ui.view === 'week')) ? ui.view : getDefaultCalendarView();
+    var sortMode = (ui && (ui.sortMode === 'type' || ui.sortMode === 'status')) ? ui.sortMode : 'type';
+    return {
+      view: view,
+      currentDate: currentDate,
+      sortMode: sortMode
+    };
+  }
+
+  function finalizeCalendarUi(reason) {
+    if (App.api && typeof App.api.finalizeMutation === 'function') {
+      App.api.finalizeMutation(reason || 'ui.calendar.finalize', { normalizeSelection: false });
+      return;
+    }
+    if (App.api && typeof App.api.finalizeBootstrap === 'function') {
+      App.api.finalizeBootstrap(reason || 'ui.calendar.finalize', { normalizeSelection: false });
+    }
+  }
+
+  function mutateCalendarUi(reason, mutator) {
+    if (App.api && typeof App.api.runUiMutation === 'function') {
+      App.api.runUiMutation(reason || 'ui.calendar.mutate', function () {
+        var calState = sanitizeCalendarUiState();
+        if (typeof mutator === 'function') {
+          mutator(calState);
+        }
+        sanitizeCalendarUiState();
+      }, { normalizeSelection: false });
+      return;
+    }
+
+    var fallbackState = sanitizeCalendarUiState();
+    if (typeof mutator === 'function') {
+      mutator(fallbackState);
+    }
+    sanitizeCalendarUiState();
+    finalizeCalendarUi(reason || 'ui.calendar.mutate.fallback');
   }
 
   function buildIndex(list, key) {
@@ -787,55 +831,65 @@ summary.appendChild(chipOverdue);
   }
 
   function handleNav(action) {
-    var calState = ensureCalendarState();
+    var calState = getCalendarState();
     var current = parseISODate(calState.currentDate) || new Date();
+    var nextDate = null;
 
     if (action === 'prev-month') {
       var prevMonth = addMonths(new Date(current.getFullYear(), current.getMonth(), 1), -1);
-      calState.currentDate = toISODate(prevMonth);
+      nextDate = toISODate(prevMonth);
     } else if (action === 'next-month') {
       var nextMonth = addMonths(new Date(current.getFullYear(), current.getMonth(), 1), 1);
-      calState.currentDate = toISODate(nextMonth);
+      nextDate = toISODate(nextMonth);
     } else if (action === 'today') {
-      calState.currentDate = toISODate(new Date());
+      nextDate = toISODate(new Date());
     } else if (action === 'prev-day') {
       var prevDay = addDays(current, -1);
-      calState.currentDate = toISODate(prevDay);
+      nextDate = toISODate(prevDay);
     } else if (action === 'next-day') {
       var nextDay = addDays(current, 1);
-      calState.currentDate = toISODate(nextDay);
+      nextDate = toISODate(nextDay);
     } else if (action === 'week-prev') {
       var prev = addDays(current, -7);
-      calState.currentDate = toISODate(prev);
+      nextDate = toISODate(prev);
     } else if (action === 'week-next') {
       var next = addDays(current, 7);
-      calState.currentDate = toISODate(next);
+      nextDate = toISODate(next);
     }
 
-    render();
+    if (!nextDate || nextDate === calState.currentDate) return;
+    mutateCalendarUi('ui.calendar.navigate', function (nextState) {
+      nextState.currentDate = nextDate;
+    });
   }
 
   function handleViewToggle(view) {
-    var calState = ensureCalendarState();
+    var calState = getCalendarState();
     if (view !== 'month' && view !== 'week') return;
     if (calState.view === view) return;
-    calState.view = view;
-    render();
+    mutateCalendarUi('ui.calendar.setView', function (nextState) {
+      nextState.view = view;
+    });
   }
 
   function handleSelectDate(dateStr) {
     if (!dateStr) return;
-    var calState = ensureCalendarState();
-    calState.currentDate = dateStr;
-    render();
+    var calState = getCalendarState();
+    if (calState.currentDate === dateStr) return;
+    mutateCalendarUi('ui.calendar.selectDate', function (nextState) {
+      nextState.currentDate = dateStr;
+    });
   }
 
   // 정렬 토글 처리: 상태 모드와 타입 모드 사이를 전환한다.
   function handleDaySortToggle() {
-    var calState = ensureCalendarState();
+    var calState = getCalendarState();
     var mode = calState.sortMode || 'type';
-    calState.sortMode = (mode === 'type') ? 'status' : 'type';
-    render();
+    var nextMode = (mode === 'type') ? 'status' : 'type';
+    if (nextMode === mode) return;
+    mutateCalendarUi('ui.calendar.toggleSort', function (nextState) {
+      nextState.sortMode = nextMode;
+    });
   }
 
   // 일정 행 클릭 처리: 해당 스케줄에 맞는 모달을 열고 해당 회차로 스크롤 및 하이라이트 한다.
@@ -990,7 +1044,7 @@ summary.appendChild(chipOverdue);
     var root = document.getElementById('calendar-root');
     if (!root) return;
 
-    var calState = ensureCalendarState();
+    var calState = getCalendarState();
     var current = parseISODate(calState.currentDate) || new Date();
     var monthBase = new Date(current.getFullYear(), current.getMonth(), 1);
     var data = buildCalendarData();
@@ -1029,13 +1083,15 @@ summary.appendChild(chipOverdue);
   }
 
   function init() {
-    ensureCalendarState();
+    sanitizeCalendarUiState();
     bindEvents();
-    // Stage 2: Register the actual render implementation (observer-only). No behavior change.
+    ensureRendererRegistered();
+  }
+
+  function ensureRendererRegistered() {
     if (App.renderCoordinator && App.ViewKey && App.ViewKey.CALENDAR) {
       App.renderCoordinator.register(App.ViewKey.CALENDAR, render);
     }
-    render();
   }
 
   App.features.calendar = {

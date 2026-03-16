@@ -1,0 +1,61 @@
+{
+  "version": "v3.2.19_pure_render_fallback_cleanup",
+  "base": "LoanShark_v3.2.18_UI_finalize_lock.zip",
+  "modifiedFiles": [
+    "js/infra/api.js",
+    "js/infra/stateIO.js",
+    "js/ui/events.js",
+    "js/features/calendar.js",
+    "js/features/debtors.js",
+    "js/ui/availableCapitalModal.js",
+    "js/features/monitoring.js",
+    "js/features/report.js",
+    "js/app.js",
+    "js/core/cloudState.js"
+  ],
+  "implemented": {
+    "finalizeBootstrap": true,
+    "finalizeCommonWrapper": true,
+    "uiShellPureRender": true,
+    "calendarPureReadRender": true,
+    "stateIOSanitizeExports": true,
+    "bootstrapSingleFinalize": true,
+    "diagnosticPipelineCounters": true
+  },
+  "staticChecks": {
+    "nodeCheck": "passed",
+    "ensureUiStateRemaining": [],
+    "ensureCalendarStateRemaining": [],
+    "fallbackDirectFinalizeRemaining": [],
+    "bootstrapRenderCallsRemaining": [
+      "js/features/monitoring.js:87:      render();"
+    ],
+    "finalizeBootstrapRefs": [
+      "js/infra/api.js:26:      finalizeBootstrapCount: 0,",
+      "js/infra/api.js:51:    if (kind === 'bootstrap') notePipelineCounter('finalizeBootstrapCount');",
+      "js/infra/api.js:403:  function finalizeBootstrap(reason, opts) {",
+      "js/infra/api.js:445:  if (typeof App.api.finalizeBootstrap !== 'function') {",
+      "js/infra/api.js:446:    App.api.finalizeBootstrap = function (reason, opts) {",
+      "js/infra/api.js:447:      finalizeBootstrap(reason, opts);",
+      "js/infra/api.js:683:      if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/infra/api.js:684:        App.api.finalizeBootstrap('view.openDebtorList.fallback', { normalizeSelection: false });",
+      "js/infra/stateIO.js:273:    if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/infra/stateIO.js:274:      App.api.finalizeBootstrap(reason || 'stateIO.finalize', opts || { normalizeSelection: false });",
+      "js/ui/events.js:67:    if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/ui/events.js:68:      App.api.finalizeBootstrap(reason || 'ui.shell.finalize', { normalizeSelection: false });",
+      "js/features/calendar.js:115:    if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/features/calendar.js:116:      App.api.finalizeBootstrap(reason || 'ui.calendar.finalize', { normalizeSelection: false });",
+      "js/app.js:10:    if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/app.js:11:      App.api.finalizeBootstrap('app.init', { normalizeSelection: true });",
+      "js/features/debtors.js:374:    if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/features/debtors.js:375:      App.api.finalizeBootstrap('refreshOtherViews', { normalizeSelection: true });",
+      "js/ui/availableCapitalModal.js:663:      if (App.api && typeof App.api.finalizeBootstrap === 'function') {",
+      "js/ui/availableCapitalModal.js:664:        App.api.finalizeBootstrap('cashLogs-change', { normalizeSelection: false });"
+    ]
+  },
+  "notes": [
+    "Targeted bootstrap direct render calls were removed from debtors/calendar/monitoring/report/ui shell init paths; app bootstrap now converges through App.api.finalizeBootstrap.",
+    "Monitoring still contains local event-handler render() usage for section sort changes; this is not part of bootstrap/finalize fallback and was left intact.",
+    "Direct commitAll/rebuildDerived/flushNow hits reported by static search are limited to js/infra/api.js finalizeCommon and instrumentation wrappers."
+  ]
+}

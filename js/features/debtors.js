@@ -46,7 +46,6 @@
       App.modalManager.init();
     }
     attachPanelEvents();
-    render();
   }
 
   /* ===== Event wiring: Panel / List / Detail ===== */
@@ -66,21 +65,16 @@
         var el = t.closest('[data-action="debtor-select"]');
         var id = el.getAttribute('data-debtor-id');
         if (!id) return;
-        App.state.ui.debtorPanel.selectedDebtorId = id;
-        App.state.ui.debtorPanel.mode = 'detail';
-        render();
-        refreshOtherViews();
-        if (window.App && App.debtorDetail && typeof App.debtorDetail.render === 'function') {
-          App.debtorDetail.render(String(id));
+        if (App.api && App.api.ui && typeof App.api.ui.selectDebtor === 'function') {
+          App.api.ui.selectDebtor(id);
         }
         return;
       }
 
       if (t.closest('[data-action="debtor-open-list"]')) {
-        App.state.ui.debtorPanel.mode = 'list';
-        App.state.ui.debtorPanel.selectedDebtorId = null;
-        render();
-        refreshOtherViews();
+        if (App.api && App.api.ui && typeof App.api.ui.openDebtorList === 'function') {
+          App.api.ui.openDebtorList();
+        }
         return;
       }
 
@@ -189,42 +183,31 @@
           if (body) body.classList.add('collapsed');
         }
 
-        if (!App.state) App.state = {};
-        if (target === 'loans') {
-          App.state.loansCollapsed = !isCollapsed;
-        } else if (target === 'claims') {
-          App.state.claimsCollapsed = !isCollapsed;
+        if (App.api && App.api.ui && typeof App.api.ui.setSectionCollapsed === 'function') {
+          App.api.ui.setSectionCollapsed(target, !isCollapsed);
         }
         return;
       }
 
       if (t.closest('[data-action="debtor-page-prev"]')) {
-        var ui = App.state.ui.debtorPanel;
-        if (ui.page > 1) {
-          ui.page -= 1;
-          render();
+        if (App.api && App.api.ui && typeof App.api.ui.changeDebtorPage === 'function') {
+          App.api.ui.changeDebtorPage(-1);
         }
         return;
       }
 
       if (t.closest('[data-action="debtor-page-next"]')) {
-        var ui2 = App.state.ui.debtorPanel;
-        ui2.page += 1;
-        render();
+        if (App.api && App.api.ui && typeof App.api.ui.changeDebtorPage === 'function') {
+          App.api.ui.changeDebtorPage(1);
+        }
         return;
       }
 
       if (t.closest('[data-action="debtor-sort"]')) {
         var sortKey = t.getAttribute('data-sort-key') || 'createdAt';
-        var ui3 = App.state.ui.debtorPanel;
-        if (ui3.sortKey === sortKey) {
-          ui3.sortDir = (ui3.sortDir === 'asc') ? 'desc' : 'asc';
-        } else {
-          ui3.sortKey = sortKey;
-          ui3.sortDir = 'desc';
+        if (App.api && App.api.ui && typeof App.api.ui.setDebtorSort === 'function') {
+          App.api.ui.setDebtorSort(sortKey);
         }
-        ui3.page = 1;
-        render();
         return;
       }
     });
@@ -242,8 +225,9 @@
       if (t.matches('[data-role="debtor-search"]')) {
         if (isComposing) return;
         var value = t.value || '';
-        App.state.ui.debtorPanel.searchQuery = value;
-        App.state.ui.debtorPanel.page = 1;
+        if (App.api && App.api.ui && typeof App.api.ui.setDebtorSearchQuery === 'function') {
+          App.api.ui.setDebtorSearchQuery(value);
+        }
       }
     });
 
@@ -257,48 +241,8 @@
       var newStatus = t.value;
       if (!id || !newStatus) return;
 
-      if (!App.state) App.state = {};
-      var updated = false;
-
-      if (kind === 'loan') {
-        var loans = App.state.loans || [];
-        for (var i = 0; i < loans.length; i++) {
-          if (String(loans[i].id) === String(id)) {
-            loans[i].cardStatus = newStatus;
-            updated = true;
-            break;
-          }
-        }
-      } else if (kind === 'claim') {
-        var claims = App.state.claims || [];
-        for (var j = 0; j < claims.length; j++) {
-          if (String(claims[j].id) === String(id)) {
-            claims[j].cardStatus = newStatus;
-            updated = true;
-            break;
-          }
-        }
-      }
-
-      // Reflect status on card DOM (CSS class)
-      var cardEl = t.closest('.loan-card, .claim-card');
-      if (cardEl) {
-        cardEl.classList.remove('card-status-진행', 'card-status-완료', 'card-status-꺾기');
-        cardEl.classList.add('card-status-' + newStatus);
-      }
-
-      if (updated) {
-        // Refresh dependent views (calendar, report, summary, detail)
-        var debtor = getSelectedDebtor();
-        var debtorId = debtor && debtor.id != null ? String(debtor.id) : null;
-
-        if (App.features && App.features.debtors && typeof App.features.debtors.refreshOtherViews === 'function') {
-          App.features.debtors.refreshOtherViews();
-        }
-
-        if (window.App && App.debtorDetail && typeof App.debtorDetail.render === 'function' && debtorId) {
-          App.debtorDetail.render(debtorId);
-        }
+      if (App.api && App.api.domain && App.api.domain.cardStatus && typeof App.api.domain.cardStatus.set === 'function') {
+        App.api.domain.cardStatus.set(kind, id, newStatus);
       }
     });
   }
@@ -415,39 +359,20 @@ function render() {
   
   var __refreshOtherViewsWarned = false;
   function refreshOtherViews() {
-    // Stage 6: legacy hook. Keep behavior (other views refreshed) but route through invalidate.
     if (!__refreshOtherViewsWarned) {
       __refreshOtherViewsWarned = true;
       try {
-        console.warn('[DEPRECATED] refreshOtherViews() called. Prefer commit/invalidate.');
+        console.warn('[DEPRECATED] refreshOtherViews() called. Prefer commitAll mutation pipeline.');
       } catch (e) {}
     }
 
-    // Summary is not part of ViewKey set; keep legacy call if it exists.
-    if (window.App && App.features && App.features.summary && typeof App.features.summary.render === 'function') {
-      App.features.summary.render();
-    }
-
-    if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
-      App.api.commit({
-        reason: 'refreshOtherViews',
-        invalidate: [App.ViewKey.CALENDAR, App.ViewKey.REPORT]
-      });
+    if (App.api && typeof App.api.finalizeMutation === 'function') {
+      App.api.finalizeMutation('refreshOtherViews', { normalizeSelection: true });
       return;
     }
 
-    // Fallback (no direct DOM render): best-effort invalidation only.
-    if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
-      App.api.view.invalidate([App.ViewKey.CALENDAR, App.ViewKey.REPORT]);
-      return;
-    }
-
-    // Last resort: call legacy render entrypoints (may warn).
-    if (window.App && App.features && App.features.report && typeof App.features.report.render === 'function') {
-      App.features.report.render();
-    }
-    if (window.App && App.features && App.features.calendar && typeof App.features.calendar.render === 'function') {
-      App.features.calendar.render();
+    if (App.api && typeof App.api.finalizeBootstrap === 'function') {
+      App.api.finalizeBootstrap('refreshOtherViews', { normalizeSelection: true });
     }
   }
 

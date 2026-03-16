@@ -269,23 +269,30 @@
     }
   }
 
-  function commitAllOnce() {
-    if (App.api && typeof App.api.commitAll === 'function') {
-      App.api.commitAll();
+  function finalizeOnce(reason, opts) {
+    if (App.api && typeof App.api.finalizeBootstrap === 'function') {
+      App.api.finalizeBootstrap(reason || 'stateIO.finalize', opts || { normalizeSelection: false });
       return;
     }
-    // Minimal fallback: do nothing (Stage 4+ always provides commitAll).
+    if (App.api && typeof App.api.finalizeMutation === 'function') {
+      App.api.finalizeMutation(reason || 'stateIO.finalize', opts || { normalizeSelection: false });
+      return;
+    }
+    // Minimal fallback: do nothing (Stage 4+ always provides finalize helpers).
   }
 
-  function sanitizeUIStateAfterApply() {
-    ensureState();
-    var ui = App.state.ui || (App.state.ui = {});
+  function sanitizeActiveTabInPlace(ui) {
+    ui = ui || {};
     var validTabs = { debtors: true, calendar: true, monitoring: true, report: true };
     if (!validTabs[ui.activeTab]) {
       ui.activeTab = 'calendar';
     }
+    return ui;
+  }
 
-    ui.calendar = ui.calendar || {};
+  function sanitizeCalendarUiStateInPlace(ui) {
+    ui = ui || {};
+    ui.calendar = isObject(ui.calendar) ? ui.calendar : {};
     if (ui.calendar.view !== 'month' && ui.calendar.view !== 'week') {
       ui.calendar.view = (App.getDefaultCalendarView ? App.getDefaultCalendarView() : 'week');
     }
@@ -295,8 +302,12 @@
     if (typeof ui.calendar.currentDate !== 'string' || !ui.calendar.currentDate) {
       ui.calendar.currentDate = (App.util && typeof App.util.todayISODate === 'function') ? App.util.todayISODate() : new Date().toISOString().slice(0, 10);
     }
+    return ui.calendar;
+  }
 
-    ui.debtorPanel = ui.debtorPanel || {};
+  function sanitizeDebtorPanelUiStateInPlace(ui) {
+    ui = ui || {};
+    ui.debtorPanel = isObject(ui.debtorPanel) ? ui.debtorPanel : {};
     if (ui.debtorPanel.mode !== 'list' && ui.debtorPanel.mode !== 'detail') {
       ui.debtorPanel.mode = 'list';
     }
@@ -306,6 +317,16 @@
     if (typeof ui.debtorPanel.searchQuery !== 'string') {
       ui.debtorPanel.searchQuery = '';
     }
+    return ui.debtorPanel;
+  }
+
+  function sanitizeUIStateAfterApply() {
+    ensureState();
+    var ui = App.state.ui || (App.state.ui = {});
+    sanitizeActiveTabInPlace(ui);
+    sanitizeCalendarUiStateInPlace(ui);
+    sanitizeDebtorPanelUiStateInPlace(ui);
+    return ui;
   }
 
   App.stateIO = App.stateIO || {};
@@ -367,28 +388,13 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
 
     sanitizeUIStateAfterApply();
 
-    // Stage 6.1: keepUI=true can leave a stale selectedDebtorId after Load.
-    // If the selected debtor no longer exists, return to list mode to prevent blank/stuck detail panel.
-    var panel = App.state && App.state.ui && App.state.ui.debtorPanel;
-    if (panel && panel.selectedDebtorId && Array.isArray(App.state.debtors)) {
-      var exists = false;
-      for (var di = 0; di < App.state.debtors.length; di++) {
-        var d = App.state.debtors[di];
-        if (d && d.id != null && String(d.id) === String(panel.selectedDebtorId)) {
-          exists = true;
-          break;
-        }
-      }
-      if (!exists) {
-        panel.selectedDebtorId = null;
-        panel.mode = 'list';
-        if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
-          App.debtorPanel.showList();
-        }
-      }
+    // v3.2.17: selection fallback is normalized through the shared mutation/view API.
+    // Rule: keep valid id → else first sorted debtor → else null.
+    if (App.api && App.api.selection && typeof App.api.selection.normalize === 'function') {
+      App.api.selection.normalize(null, null);
     }
 
-commitAllOnce();
+finalizeOnce('stateIO.applySnapshot', { normalizeSelection: false });
   };
 
   // Reset data arrays + schedules while preserving UI state
@@ -422,15 +428,22 @@ commitAllOnce();
     if (App.state.ui && App.state.ui.debtorPanel) {
       App.state.ui.debtorPanel.selectedDebtorId = null;
       App.state.ui.debtorPanel.mode = 'list';
-      if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
-        App.debtorPanel.showList();
-      }
     }
 
-commitAllOnce();
+finalizeOnce('stateIO.resetDataKeepUI', { normalizeSelection: false });
   };
 
 
   // Stage 6.1: Public helper for Local Save (ensures meta counters exist in snapshot)
   App.stateIO.ensureMeta = ensureMetaFromCurrentState;
+  App.stateIO.sanitizeUIState = sanitizeUIStateAfterApply;
+  App.stateIO.sanitizeCalendarUIState = function () {
+    ensureState();
+    return sanitizeCalendarUiStateInPlace(App.state.ui || (App.state.ui = {}));
+  };
+  App.stateIO.sanitizeActiveTabState = function () {
+    ensureState();
+    sanitizeActiveTabInPlace(App.state.ui || (App.state.ui = {}));
+    return App.state.ui;
+  };
 })(window);

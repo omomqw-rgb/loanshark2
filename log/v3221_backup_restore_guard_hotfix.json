@@ -1,0 +1,39 @@
+{
+  "patch_id": "v3.2.21_backup_restore_guard_hotfix",
+  "base_file": "LoanShark_v3.2.20_backup_restore_activation.zip",
+  "output_file": "LoanShark_v3.2.21_backup_restore_guard_hotfix.zip",
+  "modified_files": [
+    "js/core/saveload.local.js",
+    "js/core/cloudState.js",
+    "js/app.js"
+  ],
+  "changes": {
+    "restore_guard": [
+      "normalizeBackupObject now validates snapshots with rejectEmptyData: true",
+      "empty backup rejection message is explicit for empty_data reason",
+      "fallback local validator also rejects empty backup data when rejectEmptyData is requested"
+    ],
+    "app_version": [
+      "App.meta.version is initialized to v3.2.21_backup_restore_guard_hotfix at app bootstrap file load",
+      "cloudState.build uses canonical App.meta.version with unknown fallback",
+      "local backup helpers use App.meta.version first and unknown fallback otherwise"
+    ]
+  },
+  "verification": {
+    "node_check": "passed",
+    "smoke_test": {
+      "app_meta_version": "v3.2.21_backup_restore_guard_hotfix",
+      "cloud_snapshot_app_version": "v3.2.21_backup_restore_guard_hotfix",
+      "backup_envelope_app_version": "v3.2.21_backup_restore_guard_hotfix",
+      "empty_backup_rejected": true,
+      "legacy_restore_ok": true,
+      "restore_applies_keepUI_false": true,
+      "pre_restore_backup_stored": true
+    }
+  },
+  "notes": [
+    "Static syntax checks passed for all JS files.",
+    "Smoke tests were executed in a Node VM with browser stubs.",
+    "Real browser click QA was not executed in this environment."
+  ]
+}

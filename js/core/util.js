@@ -98,24 +98,6 @@
       list = [];
     }
 
-    // Fallback to raw state list when engine helpers are unavailable.
-    if (!list || !list.length) {
-      var st = (window.App && App.state) ? App.state : null;
-      var raw = st && Array.isArray(st.schedules) ? st.schedules : [];
-      list = [];
-      for (var i = 0; i < raw.length; i++) {
-        var sc = raw[i];
-        if (!sc) continue;
-        if (kind === 'loan') {
-          var lid = (typeof sc.loanId !== 'undefined') ? sc.loanId : sc.loan_id;
-          if (lid != null && String(lid) === id) list.push(sc);
-        } else if (kind === 'claim') {
-          var cid = (typeof sc.claimId !== 'undefined') ? sc.claimId : sc.claim_id;
-          if (cid != null && String(cid) === id) list.push(sc);
-        }
-      }
-    }
-
     var min = null;
     for (var j = 0; j < list.length; j++) {
       var s = list[j];
