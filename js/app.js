@@ -1,7 +1,7 @@
 (function (window, document) {
   'use strict';
   var App = window.App || (window.App = {});
-  var CURRENT_APP_VERSION = 'v3.2.21_backup_restore_guard_hotfix';
+  var CURRENT_APP_VERSION = 'v3.2.22_debtor_panel_back_navigation_hotfix';
   App.meta = App.meta || {};
   if (typeof App.meta.version !== 'string' || !App.meta.version.trim()) {
     App.meta.version = CURRENT_APP_VERSION;

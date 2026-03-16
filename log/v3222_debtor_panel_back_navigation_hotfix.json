@@ -1,0 +1,24 @@
+{
+  "patch_id": "v3.2.22_debtor_panel_back_navigation_hotfix",
+  "base_file": "LoanShark_v3.2.21_backup_restore_guard_hotfix.zip",
+  "output_file": "LoanShark_v3.2.22_debtor_panel_back_navigation_hotfix.zip",
+  "modified_files": [
+    "js/infra/api.js",
+    "js/modules/debtorDetail.dom.js",
+    "js/app.js"
+  ],
+  "changes": {
+    "debtor_panel_navigation": [
+      "ui.openDebtorList now finalizes with normalizeSelection: false so explicit list navigation preserves null selection",
+      "api-level debtor detail renderer now requires debtorPanel.mode === detail before rendering",
+      "debtorDetail DOM wrapper and completion hook now ignore non-detail panel mode to prevent list-to-detail rebound"
+    ]
+  },
+  "verification": {
+    "node_check": "passed"
+  },
+  "notes": [
+    "Static syntax checks passed for modified JS files.",
+    "This patch targets the debtor panel back-navigation rebound bug discovered in real usage."
+  ]
+}
