@@ -55,16 +55,10 @@
     _syncAlias: function () {
       var state = App.state || (App.state = {});
       var data = App.data || (App.data = {});
-
-      // v3.2.17: hard-lock schedules SSOT to App.schedulesEngine.list.
-      // Remove all legacy alias arrays so no caller can read/write schedules
-      // through App.state.schedules or App.data.schedules.
-      if (Object.prototype.hasOwnProperty.call(state, 'schedules')) {
-        try { delete state.schedules; } catch (e) { state.schedules = undefined; }
-      }
-      if (Object.prototype.hasOwnProperty.call(data, 'schedules')) {
-        try { delete data.schedules; } catch (e2) { data.schedules = undefined; }
-      }
+      // Legacy compatibility aliases only.
+      // Canonical schedules source of truth is App.schedulesEngine.list.
+      state.schedules = this.list || [];
+      data.schedules = this.list || [];
     },
 
     initEmpty: function () {
@@ -178,6 +172,13 @@
         return -1;
       }
 
+      function findFirstUnmatchedIndex() {
+        for (var fi = 0; fi < prevList.length; fi++) {
+          if (!matchedPrevIndexes[fi]) return fi;
+        }
+        return -1;
+      }
+
       for (var j = 0; j < nextList.length; j++) {
         var next = shallowClone(nextList[j]);
         if (!next) continue;
@@ -192,6 +193,10 @@
         if (matchedIndex < 0) {
           var nextDueKey = next.dueDate || next.due_date || '';
           if (nextDueKey) matchedIndex = findUnmatchedIndexByDueDate(nextDueKey);
+        }
+
+        if (matchedIndex < 0) {
+          matchedIndex = findFirstUnmatchedIndex();
         }
 
         if (matchedIndex >= 0) {
@@ -263,131 +268,143 @@
       return this._mergeRuntimeScheduleState('claim', claim, previousSchedules, nextSchedules);
     },
 
-
-    _normalizeScheduleEntityRefs: function (sc, kind, ownerId, debtorId) {
-      if (!sc || !kind) return sc;
-      if (sc.id != null) sc.id = toStr(sc.id);
-      sc.kind = kind;
-
-      if (kind === 'loan') {
-        sc.loanId = ownerId;
-        sc.claimId = null;
-      } else if (kind === 'claim') {
-        sc.claimId = ownerId;
-        sc.loanId = null;
-      }
-
-      if (debtorId != null) sc.debtorId = debtorId;
-      else if (sc.debtorId != null) sc.debtorId = toStr(sc.debtorId);
-
-      return sc;
-    },
-
-    replaceOwnerSchedules: function (kind, owner, nextSchedules, mergeRuntimeStateFn) {
-      if (!owner || owner.id == null) return [];
-
-      this._ensureInitialized();
-
-      var ownerId = toStr(owner.id);
-      var debtorId = owner.debtorId != null ? toStr(owner.debtorId) : null;
-      var list = this.list || [];
-      var preserved = [];
-      var nextList = [];
-
-      for (var i = 0; i < list.length; i++) {
-        var sc = list[i];
-        if (!sc) {
-          nextList.push(sc);
-          continue;
-        }
-
-        var isOwnerSchedule = false;
-        if (kind === 'loan') {
-          isOwnerSchedule = (String(sc.kind || '').toLowerCase() === 'loan') && toStr(sc.loanId) === ownerId;
-        } else if (kind === 'claim') {
-          isOwnerSchedule = (String(sc.kind || '').toLowerCase() === 'claim') && toStr(sc.claimId) === ownerId;
-        }
-
-        if (isOwnerSchedule) {
-          preserved.push(shallowClone(sc));
-          continue;
-        }
-
-        nextList.push(sc);
-      }
-
-      var baseNextSchedules = Array.isArray(nextSchedules) ? nextSchedules : [];
-      var mergedSchedules = (typeof mergeRuntimeStateFn === 'function')
-        ? mergeRuntimeStateFn.call(this, owner, preserved, baseNextSchedules)
-        : baseNextSchedules.slice();
-
-      for (var j = 0; j < mergedSchedules.length; j++) {
-        var ns = shallowClone(mergedSchedules[j]);
-        if (!ns) continue;
-        this._normalizeScheduleEntityRefs(ns, kind, ownerId, debtorId);
-        nextList.push(ns);
-      }
-
-      this.list = nextList;
-      this._syncAlias();
-      return mergedSchedules;
-    },
-
-    removeByOwner: function (kind, ownerId) {
-      if (ownerId == null || !kind) return;
-      this._ensureInitialized();
-
-      var target = toStr(ownerId);
-      var list = this.list || [];
-      var next = [];
-
-      for (var i = 0; i < list.length; i++) {
-        var sc = list[i];
-        if (!sc) {
-          next.push(sc);
-          continue;
-        }
-
-        var shouldRemove = false;
-        if (kind === 'loan') {
-          shouldRemove = (String(sc.kind || '').toLowerCase() === 'loan') && toStr(sc.loanId) === target;
-        } else if (kind === 'claim') {
-          shouldRemove = (String(sc.kind || '').toLowerCase() === 'claim') && toStr(sc.claimId) === target;
-        }
-
-        if (shouldRemove) continue;
-        next.push(sc);
-      }
-
-      this.list = next;
-      this._syncAlias();
-    },
-
     rebuildForLoan: function (loan) {
       if (!loan || loan.id == null) return;
 
+      this._ensureInitialized();
+
       var normalizedLoanId = toStr(loan.id);
+      var newList = [];
+      var current = this.list || [];
+      var previousLoanSchedules = [];
+
+      // 1) 기존 loan 스케줄 제거
+      for (var i = 0; i < current.length; i++) {
+        var s = current[i];
+        if (!s) {
+          newList.push(s);
+          continue;
+        }
+        if (s.kind === 'loan' && toStr(s.loanId) === normalizedLoanId) {
+          previousLoanSchedules.push(shallowClone(s));
+          continue;
+        }
+        newList.push(s);
+      }
+
+      // 2) 새 스케줄 생성
       var newSchedules = [];
       if (App.db && typeof App.db.buildLoanSchedule === 'function') {
         newSchedules = App.db.buildLoanSchedule(loan) || [];
       }
+      newSchedules = this._mergeLoanRuntimeScheduleState(loan, previousLoanSchedules, newSchedules);
 
-      this.replaceOwnerSchedules('loan', loan, newSchedules, this._mergeLoanRuntimeScheduleState);
+      for (var j = 0; j < newSchedules.length; j++) {
+        var ns = shallowClone(newSchedules[j]);
+        if (!ns) continue;
 
+        if (ns.id != null) ns.id = toStr(ns.id);
+        if (ns.loanId != null) ns.loanId = toStr(ns.loanId);
+        else ns.loanId = normalizedLoanId;
+
+        if (ns.debtorId != null) ns.debtorId = toStr(ns.debtorId);
+        else if (loan.debtorId != null) ns.debtorId = toStr(loan.debtorId);
+
+        if (ns.claimId != null) ns.claimId = toStr(ns.claimId);
+
+        if (!ns.kind) ns.kind = 'loan';
+
+        newList.push(ns);
+      }
+
+      // 3) ID 정규화
+      for (var k = 0; k < newList.length; k++) {
+        var sc = newList[k];
+        if (!sc) continue;
+        if (sc.loanId != null) sc.loanId = toStr(sc.loanId);
+        if (sc.debtorId != null) sc.debtorId = toStr(sc.debtorId);
+        if (sc.claimId != null) sc.claimId = toStr(sc.claimId);
+        if (sc.id != null) sc.id = toStr(sc.id);
+      }
+
+      this.list = newList;
+      this._syncAlias();
+
+      // 4) Loan 파생 필드 업데이트
       if (App.db && typeof App.db.deriveLoanFields === 'function') {
-        App.db.deriveLoanFields(loan, this.getByLoanId(normalizedLoanId));
+        var loanSchedules = [];
+        for (var m = 0; m < newList.length; m++) {
+          var sc2 = newList[m];
+          if (!sc2) continue;
+          if (sc2.kind === 'loan' && toStr(sc2.loanId) === normalizedLoanId) {
+            loanSchedules.push(sc2);
+          }
+        }
+        App.db.deriveLoanFields(loan, loanSchedules);
       }
     },
 
     rebuildForClaim: function (claim) {
       if (!claim || claim.id == null) return;
 
+      this._ensureInitialized();
+
+      var normalizedClaimId = toStr(claim.id);
+      var newList = [];
+      var current = this.list || [];
+      var previousClaimSchedules = [];
+
+      // 1) 기존 claim 스케줄 제거
+      for (var i = 0; i < current.length; i++) {
+        var s = current[i];
+        if (!s) {
+          newList.push(s);
+          continue;
+        }
+        if (s.kind === 'claim' && toStr(s.claimId) === normalizedClaimId) {
+          previousClaimSchedules.push(shallowClone(s));
+          continue;
+        }
+        newList.push(s);
+      }
+
+      // 2) 새 스케줄 생성
       var newSchedules = [];
       if (App.db && typeof App.db.buildClaimSchedule === 'function') {
         newSchedules = App.db.buildClaimSchedule(claim) || [];
       }
+      newSchedules = this._mergeClaimRuntimeScheduleState(claim, previousClaimSchedules, newSchedules);
 
-      this.replaceOwnerSchedules('claim', claim, newSchedules, this._mergeClaimRuntimeScheduleState);
+      for (var j = 0; j < newSchedules.length; j++) {
+        var ns = shallowClone(newSchedules[j]);
+        if (!ns) continue;
+
+        if (ns.id != null) ns.id = toStr(ns.id);
+        if (ns.claimId != null) ns.claimId = toStr(ns.claimId);
+        else ns.claimId = normalizedClaimId;
+
+        if (ns.debtorId != null) ns.debtorId = toStr(ns.debtorId);
+        else if (claim.debtorId != null) ns.debtorId = toStr(claim.debtorId);
+
+        if (ns.loanId != null) ns.loanId = toStr(ns.loanId);
+
+        if (!ns.kind) ns.kind = 'claim';
+
+        newList.push(ns);
+      }
+
+      // 3) ID 정규화
+      for (var k = 0; k < newList.length; k++) {
+        var sc = newList[k];
+        if (!sc) continue;
+        if (sc.claimId != null) sc.claimId = toStr(sc.claimId);
+        if (sc.debtorId != null) sc.debtorId = toStr(sc.debtorId);
+        if (sc.loanId != null) sc.loanId = toStr(sc.loanId);
+        if (sc.id != null) sc.id = toStr(sc.id);
+      }
+
+      this.list = newList;
+      this._syncAlias();
     },
 
     updateSchedule: function (id, patch) {
@@ -598,11 +615,51 @@
     },
 
     removeByLoanId: function (loanId) {
-      this.removeByOwner('loan', loanId);
+      if (loanId == null) return;
+      this._ensureInitialized();
+
+      var target = String(loanId);
+      var list = this.list || [];
+      var next = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) {
+          next.push(sc);
+          continue;
+        }
+        if (sc.kind === 'loan' && String(sc.loanId) === target) {
+          continue;
+        }
+        next.push(sc);
+      }
+
+      this.list = next;
+      this._syncAlias();
     },
 
     removeByClaimId: function (claimId) {
-      this.removeByOwner('claim', claimId);
+      if (claimId == null) return;
+      this._ensureInitialized();
+
+      var target = String(claimId);
+      var list = this.list || [];
+      var next = [];
+
+      for (var i = 0; i < list.length; i++) {
+        var sc = list[i];
+        if (!sc) {
+          next.push(sc);
+          continue;
+        }
+        if (sc.kind === 'claim' && String(sc.claimId) === target) {
+          continue;
+        }
+        next.push(sc);
+      }
+
+      this.list = next;
+      this._syncAlias();
     },
 
     normalizeAll: function (todayStr) {
@@ -646,7 +703,6 @@
       for (var i = 0; i < list.length; i++) {
         var sc = list[i];
         if (!sc) continue;
-        if (String(sc.kind || '').toLowerCase() !== 'loan') continue;
         if (target != null && String(sc.loanId) !== target) continue;
         result.push(sc);
       }
@@ -664,7 +720,6 @@
       for (var i = 0; i < list.length; i++) {
         var sc = list[i];
         if (!sc) continue;
-        if (String(sc.kind || '').toLowerCase() !== 'claim') continue;
         if (target != null && String(sc.claimId) !== target) continue;
         result.push(sc);
       }

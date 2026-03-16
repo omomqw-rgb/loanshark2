@@ -8,8 +8,6 @@
 
   if (!App.api.view) App.api.view = {};
   if (!App.api.domain) App.api.domain = {};
-  if (!App.api.selection) App.api.selection = {};
-  if (!App.api.ui) App.api.ui = {};
 
   // Stage 6: Debug flags (default OFF)
   // - Keeps production console noise unchanged unless explicitly enabled.
@@ -17,63 +15,6 @@
   App.debug = App.debug || {};
   if (typeof App.debug.traceCommit !== 'boolean') App.debug.traceCommit = false;
   if (typeof App.debug.traceInvalidate !== 'boolean') App.debug.traceInvalidate = false;
-
-  App.diagnostics = App.diagnostics || {};
-  if (!App.diagnostics.pipeline || typeof App.diagnostics.pipeline !== 'object') {
-    App.diagnostics.pipeline = {
-      finalizeDepth: 0,
-      finalizeMutationCount: 0,
-      finalizeBootstrapCount: 0,
-      commitAllOutsideFinalize: 0,
-      rebuildDerivedOutsideFinalize: 0,
-      flushNowOutsideFinalize: 0,
-      bootstrapDirectRenderCount: 0,
-      pureRenderViolationCount: 0
-    };
-  }
-
-  function getPipelineDiagnostics() {
-    App.diagnostics = App.diagnostics || {};
-    if (!App.diagnostics.pipeline || typeof App.diagnostics.pipeline !== 'object') {
-      App.diagnostics.pipeline = {};
-    }
-    return App.diagnostics.pipeline;
-  }
-
-  function notePipelineCounter(name) {
-    var diag = getPipelineDiagnostics();
-    diag[name] = Number(diag[name] || 0) + 1;
-  }
-
-  function enterFinalize(kind) {
-    var diag = getPipelineDiagnostics();
-    diag.finalizeDepth = Number(diag.finalizeDepth || 0) + 1;
-    if (kind === 'bootstrap') notePipelineCounter('finalizeBootstrapCount');
-    else notePipelineCounter('finalizeMutationCount');
-  }
-
-  function exitFinalize() {
-    var diag = getPipelineDiagnostics();
-    var depth = Number(diag.finalizeDepth || 0) - 1;
-    diag.finalizeDepth = depth > 0 ? depth : 0;
-  }
-
-  function isInsideFinalize() {
-    var diag = getPipelineDiagnostics();
-    return Number(diag.finalizeDepth || 0) > 0;
-  }
-
-  if (typeof App.api.noteBootstrapDirectRender !== 'function') {
-    App.api.noteBootstrapDirectRender = function () {
-      notePipelineCounter('bootstrapDirectRenderCount');
-    };
-  }
-
-  if (typeof App.api.notePureRenderViolation !== 'function') {
-    App.api.notePureRenderViolation = function () {
-      notePipelineCounter('pureRenderViolationCount');
-    };
-  }
 
   function scheduleMicrotask(fn) {
     if (typeof queueMicrotask === 'function') return queueMicrotask(fn);
@@ -314,21 +255,9 @@
     }
     return false;
   }
-  function compareDebtorsForSelection(a, b) {
-    var an = (a && a.name != null) ? String(a.name) : '';
-    var bn = (b && b.name != null) ? String(b.name) : '';
-    var cmp = an.localeCompare(bn, 'ko-KR');
-    if (cmp !== 0) return cmp;
-
-    var aid = (a && a.id != null) ? String(a.id) : '';
-    var bid = (b && b.id != null) ? String(b.id) : '';
-    return aid.localeCompare(bid, 'ko-KR');
-  }
-
 
   function firstDebtorId() {
-    var list = (App.state && Array.isArray(App.state.debtors)) ? App.state.debtors.slice() : [];
-    list.sort(compareDebtorsForSelection);
+    var list = (App.state && Array.isArray(App.state.debtors)) ? App.state.debtors : [];
     for (var i = 0; i < list.length; i++) {
       var debtor = list[i];
       if (!debtor || debtor.id == null) continue;
@@ -367,41 +296,15 @@
     return null;
   }
 
-  function finalizeCommon(kind, reason, opts) {
-    var options = opts || {};
-    var shouldNormalize = options.normalizeSelection !== false;
-    var finalizeReason = reason || (kind === 'bootstrap' ? 'bootstrap.finalize' : 'mutation.finalize');
-
-    enterFinalize(kind);
-    try {
-      if (shouldNormalize) {
-        normalizeDebtorSelection(options.preferredDebtorId, options.forcedMode);
-      }
-
-      if (App.api && typeof App.api.commitAll === 'function') {
-        App.api.commitAll();
-      } else if (App.api && typeof App.api.commit === 'function' && App.ViewKeySet && App.ViewKeySet.ALL_WITH_DERIVED) {
-        App.api.commit({ reason: finalizeReason, invalidate: App.ViewKeySet.ALL_WITH_DERIVED });
-      }
-
-      if (typeof App.rebuildDerived === 'function') {
-        App.rebuildDerived(finalizeReason);
-      }
-
-      if (App.renderCoordinator && typeof App.renderCoordinator.flushNow === 'function') {
-        App.renderCoordinator.flushNow();
-      }
-    } finally {
-      exitFinalize();
+  function finalizeDomainMutation(reason, invalidate, preferredDebtorId, forcedMode) {
+    normalizeDebtorSelection(preferredDebtorId, forcedMode);
+    if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
+      App.api.commit({ reason: reason, invalidate: invalidate });
+      return;
     }
-  }
-
-  function finalizeMutation(reason, opts) {
-    finalizeCommon('mutation', reason, opts);
-  }
-
-  function finalizeBootstrap(reason, opts) {
-    finalizeCommon('bootstrap', reason, opts);
+    if (App.api && typeof App.api.commitAll === 'function') {
+      App.api.commitAll();
+    }
   }
 
   function setDebtorPanelDetailState(debtorId) {
@@ -410,164 +313,6 @@
     var panel = ensureDebtorPanelState();
     panel.mode = 'detail';
     panel.selectedDebtorId = id;
-  }
-
-
-  function setDebtorPanelListState() {
-    var panel = ensureDebtorPanelState();
-    panel.mode = 'list';
-    panel.selectedDebtorId = null;
-  }
-
-  function runMutation(reason, mutator, preferredDebtorId, forcedMode) {
-    if (typeof mutator === 'function') {
-      mutator();
-    }
-    finalizeMutation(reason || 'mutation.run', {
-      preferredDebtorId: preferredDebtorId,
-      forcedMode: forcedMode
-    });
-  }
-
-  function runUiMutation(reason, mutator, opts) {
-    if (typeof mutator === 'function') {
-      mutator();
-    }
-    finalizeMutation(reason || 'ui.mutation.run', opts || {});
-  }
-
-  if (typeof App.api.finalizeMutation !== 'function') {
-    App.api.finalizeMutation = function (reason, opts) {
-      finalizeMutation(reason, opts);
-    };
-  }
-
-  if (typeof App.api.finalizeBootstrap !== 'function') {
-    App.api.finalizeBootstrap = function (reason, opts) {
-      finalizeBootstrap(reason, opts);
-    };
-  }
-
-  if (typeof App.api.runMutation !== 'function') {
-    App.api.runMutation = function (reason, mutator, preferredDebtorId, forcedMode) {
-      runMutation(reason, mutator, preferredDebtorId, forcedMode);
-    };
-  }
-
-  if (typeof App.api.runUiMutation !== 'function') {
-    App.api.runUiMutation = function (reason, mutator, opts) {
-      runUiMutation(reason, mutator, opts);
-    };
-  }
-
-  if (typeof App.api.selection.normalize !== 'function') {
-    App.api.selection.normalize = function (preferredDebtorId, forcedMode) {
-      return normalizeDebtorSelection(preferredDebtorId, forcedMode);
-    };
-  }
-
-  if (typeof App.api.ui.selectDebtor !== 'function') {
-    App.api.ui.selectDebtor = function (debtorId) {
-      var id = debtorId != null ? String(debtorId) : null;
-      if (!id) return;
-      runUiMutation('ui.selectDebtor', function () {
-        setDebtorPanelDetailState(id);
-      }, { preferredDebtorId: id, forcedMode: 'detail' });
-    };
-  }
-
-  if (typeof App.api.ui.openDebtorList !== 'function') {
-    App.api.ui.openDebtorList = function () {
-      runUiMutation('ui.openDebtorList', function () {
-        setDebtorPanelListState();
-      }, { forcedMode: 'list' });
-    };
-  }
-
-  if (typeof App.api.ui.setDebtorSearchQuery !== 'function') {
-    App.api.ui.setDebtorSearchQuery = function (value) {
-      var nextValue = value != null ? String(value) : '';
-      runUiMutation('ui.setDebtorSearchQuery', function () {
-        var panel = ensureDebtorPanelState();
-        panel.searchQuery = nextValue;
-        panel.page = 1;
-      });
-    };
-  }
-
-  if (typeof App.api.ui.changeDebtorPage !== 'function') {
-    App.api.ui.changeDebtorPage = function (delta) {
-      var n = Number(delta) || 0;
-      if (!n) return;
-      runUiMutation('ui.changeDebtorPage', function () {
-        var panel = ensureDebtorPanelState();
-        var nextPage = Number(panel.page) || 1;
-        nextPage += n;
-        if (nextPage < 1) nextPage = 1;
-        panel.page = nextPage;
-      });
-    };
-  }
-
-  if (typeof App.api.ui.setDebtorSort !== 'function') {
-    App.api.ui.setDebtorSort = function (sortKey) {
-      var key = sortKey ? String(sortKey) : 'createdAt';
-      runUiMutation('ui.setDebtorSort', function () {
-        var panel = ensureDebtorPanelState();
-        if (panel.sortKey === key) {
-          panel.sortDir = (panel.sortDir === 'asc') ? 'desc' : 'asc';
-        } else {
-          panel.sortKey = key;
-          panel.sortDir = 'desc';
-        }
-        panel.page = 1;
-      });
-    };
-  }
-
-  if (typeof App.api.ui.setSectionCollapsed !== 'function') {
-    App.api.ui.setSectionCollapsed = function (target, collapsed) {
-      if (!target) return;
-      var nextValue = !!collapsed;
-      runUiMutation('ui.setSectionCollapsed', function () {
-        if (!App.state) App.state = {};
-        if (target === 'loans') {
-          App.state.loansCollapsed = nextValue;
-        } else if (target === 'claims') {
-          App.state.claimsCollapsed = nextValue;
-        }
-      });
-    };
-  }
-
-  if (!App.api.domain.cardStatus) App.api.domain.cardStatus = {};
-  if (typeof App.api.domain.cardStatus.set !== 'function') {
-    App.api.domain.cardStatus.set = function (kind, id, newStatus) {
-      var targetId = id != null ? String(id) : null;
-      var status = newStatus != null ? String(newStatus) : '';
-      if (!targetId || !status) return;
-
-      var list = [];
-      var ownerDebtorId = null;
-      if (kind === 'loan') {
-        list = (App.state && Array.isArray(App.state.loans)) ? App.state.loans : [];
-      } else if (kind === 'claim') {
-        list = (App.state && Array.isArray(App.state.claims)) ? App.state.claims : [];
-      } else {
-        return;
-      }
-
-      runMutation('domain.cardStatus.set', function () {
-        for (var i = 0; i < list.length; i++) {
-          var item = list[i];
-          if (!item || item.id == null) continue;
-          if (String(item.id) !== targetId) continue;
-          item.cardStatus = status;
-          ownerDebtorId = item.debtorId != null ? String(item.debtorId) : null;
-          break;
-        }
-      }, ownerDebtorId, ownerDebtorId ? 'detail' : null);
-    };
   }
 
   function findLoanById(loanId) {
@@ -601,10 +346,6 @@
   // - Temporarily enable it for one scheduled flush to drive registered renderers
   if (typeof App.api.commitAll !== 'function') {
     App.api.commitAll = function () {
-      if (!isInsideFinalize()) {
-        notePipelineCounter('commitAllOutsideFinalize');
-      }
-
       // Safe fallback: full invalidation (kept intentionally)
       var keys = null;
       if (App.ViewKeySet && App.ViewKeySet.ALL_WITH_DERIVED) {
@@ -618,8 +359,7 @@
           App.ViewKey.DEBTOR_DETAIL,
           App.ViewKey.CALENDAR,
           App.ViewKey.MONITORING,
-          App.ViewKey.REPORT,
-          App.ViewKey.UI_SHELL
+          App.ViewKey.REPORT
         ];
       }
       commitInternal({ reason: 'commitAll', invalidate: keys });
@@ -657,13 +397,14 @@
       if (!id) return;
 
       cleanupOrphanModalBackdrop('view.openDebtorDetail');
-      if (App.api && App.api.ui && typeof App.api.ui.selectDebtor === 'function') {
-        App.api.ui.selectDebtor(id);
-        return;
-      }
       normalizeDebtorSelection(id, 'detail');
-      if (App.api && typeof App.api.finalizeMutation === 'function') {
-        App.api.finalizeMutation('view.openDebtorDetail.fallback', { normalizeSelection: false });
+
+      // Do not call render() directly. Use commit → invalidate.
+      if (App.ViewKey) {
+        commitInternal({
+          reason: 'view.openDebtorDetail',
+          invalidate: [App.ViewKey.DEBTOR_DETAIL, App.ViewKey.DEBTOR_LIST]
+        });
       }
     };
   }
@@ -671,17 +412,18 @@
   if (typeof App.api.view.openDebtorList !== 'function') {
     App.api.view.openDebtorList = function () {
       cleanupOrphanModalBackdrop('view.openDebtorList');
-      if (App.api && App.api.ui && typeof App.api.ui.openDebtorList === 'function') {
-        App.api.ui.openDebtorList();
-        return;
-      }
       normalizeDebtorSelection(null, 'list');
-      if (App.api && typeof App.api.finalizeMutation === 'function') {
-        App.api.finalizeMutation('view.openDebtorList.fallback', { normalizeSelection: false });
-        return;
+
+      // Keep existing visibility behavior.
+      if (App.debtorPanel && typeof App.debtorPanel.showList === 'function') {
+        App.debtorPanel.showList();
       }
-      if (App.api && typeof App.api.finalizeBootstrap === 'function') {
-        App.api.finalizeBootstrap('view.openDebtorList.fallback', { normalizeSelection: false });
+
+      if (App.ViewKey) {
+        commitInternal({
+          reason: 'view.openDebtorList',
+          invalidate: [App.ViewKey.DEBTOR_LIST]
+        });
       }
     };
   }
@@ -699,15 +441,12 @@
   // Stage 4B: Derived-data rebuild implementation
   // - Rebuild App.data.* from App.state (Single Source of Truth)
   // - No DOM access. No render calls.
-  // - Called explicitly from App.api.finalizeMutation() after commitAll().
+  // - Called from RenderCoordinator.flush when ViewKey.DERIVED is invalidated.
   if (typeof App.rebuildDerived !== 'function' || !App.rebuildDerived._stage4B) {
     var rebuildDerivedStage4B = function (reason) {
       try {
         if (!App.state) App.state = {};
         if (!App.data) App.data = {};
-        if (Object.prototype.hasOwnProperty.call(App.data, 'schedules')) {
-          try { delete App.data.schedules; } catch (e0) { App.data.schedules = undefined; }
-        }
 
         var debtors = Array.isArray(App.state.debtors) ? App.state.debtors : [];
         var loans = Array.isArray(App.state.loans) ? App.state.loans : [];
@@ -769,30 +508,6 @@
 
     rebuildDerivedStage4B._stage4B = true;
     App.rebuildDerived = rebuildDerivedStage4B;
-  }
-
-  if (typeof App.rebuildDerived === 'function' && !App.rebuildDerived._lsFinalizeWrapped) {
-    var _rawRebuildDerived = App.rebuildDerived;
-    var rebuildDerivedWrapped = function (reason) {
-      if (!isInsideFinalize()) {
-        notePipelineCounter('rebuildDerivedOutsideFinalize');
-      }
-      return _rawRebuildDerived.call(this, reason);
-    };
-    rebuildDerivedWrapped._stage4B = !!_rawRebuildDerived._stage4B;
-    rebuildDerivedWrapped._lsFinalizeWrapped = true;
-    App.rebuildDerived = rebuildDerivedWrapped;
-  }
-
-  if (App.renderCoordinator && typeof App.renderCoordinator.flushNow === 'function' && !App.renderCoordinator._lsFinalizeWrapped) {
-    var _rawFlushNow = App.renderCoordinator.flushNow;
-    App.renderCoordinator.flushNow = function () {
-      if (!isInsideFinalize()) {
-        notePipelineCounter('flushNowOutsideFinalize');
-      }
-      return _rawFlushNow.apply(App.renderCoordinator, arguments);
-    };
-    App.renderCoordinator._lsFinalizeWrapped = true;
   }
 
   // Stage 4B: Debtor CRUD domain API

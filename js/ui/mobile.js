@@ -78,7 +78,7 @@
     }
   }
 
-  function applyActiveTabDom(tabKey) {
+  function setActiveTab(tabKey) {
     if (!tabKey) return;
 
     var buttons = document.querySelectorAll('.tab-btn[data-tab]');
@@ -87,27 +87,15 @@
     for (var i = 0; i < buttons.length; i++) {
       var b = buttons[i];
       var k = b.getAttribute('data-tab');
-      b.classList.toggle('is-active', k === tabKey);
+      if (k === tabKey) b.classList.add('is-active');
+      else b.classList.remove('is-active');
     }
 
     for (var j = 0; j < panels.length; j++) {
       var p = panels[j];
-      var active = p.id === 'tab-' + tabKey;
-      p.classList.toggle('is-active', active);
-      if (active) p.removeAttribute('hidden');
-      else p.setAttribute('hidden', 'hidden');
+      if (p.id === 'tab-' + tabKey) p.classList.add('is-active');
+      else p.classList.remove('is-active');
     }
-  }
-
-  function setActiveTab(tabKey) {
-    if (!tabKey) return;
-
-    if (App.ui && App.ui.events && typeof App.ui.events.setActiveTab === 'function') {
-      App.ui.events.setActiveTab(tabKey);
-      return;
-    }
-
-    applyActiveTabDom(tabKey);
   }
 
   function showToast(msg) {

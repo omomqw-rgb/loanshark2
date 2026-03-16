@@ -1003,10 +1003,11 @@
     }
 
     function init() {
-      // Stage 2: Register the actual monitoring render implementation (observer-only).
+      // Stage 2: Register the actual monitoring render implementation (observer-only). No behavior change.
       if (App.renderCoordinator && App.ViewKey && App.ViewKey.MONITORING) {
         App.renderCoordinator.register(App.ViewKey.MONITORING, render);
       }
+      render();
     }
 
     return {

@@ -96,7 +96,8 @@
     if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
       return App.schedulesEngine.getAll() || [];
     }
-    return [];
+    var st = App.state || {};
+    return Array.isArray(st.schedules) ? st.schedules : [];
   }
 
   function defaultTitleByType(type, title) {
@@ -655,25 +656,12 @@
     }
 
     function commitReport() {
-      if (App.api && typeof App.api.finalizeMutation === 'function') {
-        App.api.finalizeMutation('cashLogs-change', { normalizeSelection: false });
-        return;
+      if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.REPORT) {
+        App.api.commit({
+          reason: 'cashLogs-change',
+          invalidate: [App.ViewKey.REPORT]
+        });
       }
-
-      if (App.api && typeof App.api.finalizeBootstrap === 'function') {
-        App.api.finalizeBootstrap('cashLogs-change', { normalizeSelection: false });
-      }
-    }
-
-    function applyCashLogMutation(reason, mutator) {
-      if (App.api && typeof App.api.runMutation === 'function') {
-        App.api.runMutation(reason || 'cashLogs-change', mutator, null, null);
-        return;
-      }
-      if (typeof mutator === 'function') {
-        mutator();
-      }
-      commitReport();
     }
 
     function saveEditor() {
@@ -692,34 +680,31 @@
 
       // Mode dispatch
       if (mode === 'INIT') {
-        applyCashLogMutation('cashLogs.init', function () {
-          if (App.cashLedger && typeof App.cashLedger.upsertInitialCapital === 'function') {
-            App.cashLedger.upsertInitialCapital({ date: date, amount: amount, title: title || '초기자본' });
-          }
-        });
+        if (App.cashLedger && typeof App.cashLedger.upsertInitialCapital === 'function') {
+          App.cashLedger.upsertInitialCapital({ date: date, amount: amount, title: title || '초기자본' });
+        }
         hideEditor();
+        commitReport();
         render();
         return;
       }
 
       if (mode === 'MANUAL_IN') {
-        applyCashLogMutation('cashLogs.manualIn', function () {
-          if (App.cashLedger && typeof App.cashLedger.addManualIn === 'function') {
-            App.cashLedger.addManualIn({ date: date, amount: amount, title: title || '수동 유입' });
-          }
-        });
+        if (App.cashLedger && typeof App.cashLedger.addManualIn === 'function') {
+          App.cashLedger.addManualIn({ date: date, amount: amount, title: title || '수동 유입' });
+        }
         hideEditor();
+        commitReport();
         render();
         return;
       }
 
       if (mode === 'MANUAL_OUT') {
-        applyCashLogMutation('cashLogs.manualOut', function () {
-          if (App.cashLedger && typeof App.cashLedger.addManualOut === 'function') {
-            App.cashLedger.addManualOut({ date: date, amount: amount, title: title || '수동 유출' });
-          }
-        });
+        if (App.cashLedger && typeof App.cashLedger.addManualOut === 'function') {
+          App.cashLedger.addManualOut({ date: date, amount: amount, title: title || '수동 유출' });
+        }
         hideEditor();
+        commitReport();
         render();
         return;
       }
@@ -741,16 +726,15 @@
           return;
         }
 
-        applyCashLogMutation('cashLogs.updateEditable', function () {
-          if (App.cashLedger && typeof App.cashLedger.updateEditable === 'function') {
-            App.cashLedger.updateEditable(id, {
-              date: date,
-              amount: amount,
-              title: title
-            });
-          }
-        });
+        if (App.cashLedger && typeof App.cashLedger.updateEditable === 'function') {
+          App.cashLedger.updateEditable(id, {
+            date: date,
+            amount: amount,
+            title: title
+          });
+        }
         hideEditor();
+        commitReport();
         render();
       }
     }
@@ -760,12 +744,11 @@
       if (!isEditableType(type)) return;
       if (!window.confirm('이 로그를 삭제할까요?')) return;
 
-      applyCashLogMutation('cashLogs.deleteEditable', function () {
-        if (App.cashLedger && typeof App.cashLedger.deleteEditable === 'function') {
-          App.cashLedger.deleteEditable(id);
-        }
-      });
+      if (App.cashLedger && typeof App.cashLedger.deleteEditable === 'function') {
+        App.cashLedger.deleteEditable(id);
+      }
       hideEditor();
+      commitReport();
       render();
     }
 

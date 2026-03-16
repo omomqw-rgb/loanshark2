@@ -24,6 +24,7 @@
     debtors: [],
     loans: [],
     claims: [],
+    schedules: [],
     cashLogs: [],
     /*
      * UI related state.  In addition to the existing debtorPanel configuration we
