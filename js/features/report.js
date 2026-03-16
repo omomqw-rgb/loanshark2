@@ -3,6 +3,9 @@
   var App = window.App || (window.App = {});
   App.features = App.features || {};
 
+  var rendererRegistered = false;
+  var initialized = false;
+
   function renderOverviewDonut(host, summary) {
     if (!host || !summary || !App.util) return;
 
@@ -321,10 +324,17 @@ html += '</div>';
     // (기존) 회수 흐름 2x2 요약 채우기 – 추후 필요 시 유지
   }
 
+function ensureRendererRegistered() {
+    if (rendererRegistered) return;
+    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.REPORT)) return;
+    App.renderCoordinator.register(App.ViewKey.REPORT, render);
+    rendererRegistered = true;
+  }
+
 function init() {
-    if (App.renderCoordinator && App.ViewKey && App.ViewKey.REPORT) {
-      App.renderCoordinator.register(App.ViewKey.REPORT, render);
-    }
+    if (initialized) return;
+    initialized = true;
+    ensureRendererRegistered();
     bindEvents();
   }
 

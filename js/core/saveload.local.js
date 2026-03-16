@@ -72,7 +72,7 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       const text = await file.text();
       const obj = JSON.parse(text);
       if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
-        App.stateIO.applySnapshot(obj, { keepUI: true });
+        App.stateIO.applySnapshot(obj, { keepUI: true, reason: 'load:local' });
       } else {
         console.warn('[Local Load] App.stateIO.applySnapshot is not available.');
       }

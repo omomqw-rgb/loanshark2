@@ -15,6 +15,8 @@
   App.debug = App.debug || {};
   if (typeof App.debug.traceCommit !== 'boolean') App.debug.traceCommit = false;
   if (typeof App.debug.traceInvalidate !== 'boolean') App.debug.traceInvalidate = false;
+  if (typeof App.debug.traceFlush !== 'boolean') App.debug.traceFlush = false;
+  if (typeof App.debug.tracePanel !== 'boolean') App.debug.tracePanel = false;
 
   function scheduleMicrotask(fn) {
     if (typeof queueMicrotask === 'function') return queueMicrotask(fn);
@@ -45,23 +47,12 @@
     return out;
   }
 
-  // Stage 3: Navigation boundary helpers
-  // - We keep the existing render implementations untouched.
-  // - We do NOT call render() directly from the navigation API.
-  // - We temporarily enable the coordinator for one scheduled flush so that
-  //   invalidation can drive the registered renderers without changing other flows.
-  function enableCoordinator() {
-    if (!App.renderCoordinator || typeof App.renderCoordinator.enable !== 'function' || typeof App.renderCoordinator.disable !== 'function') {
-      return;
-    }
-    App.renderCoordinator.enable();
-  }
-
-  function disableCoordinatorSoon() {
-    if (!App.renderCoordinator || typeof App.renderCoordinator.disable !== 'function') return;
-    scheduleMicrotask(function () {
-      try { App.renderCoordinator.disable(); } catch (e) {}
-    });
+  function tracePanelState(label) {
+    if (!App.debug || !App.debug.tracePanel) return;
+    try {
+      var panel = ensureDebtorPanelState();
+      console.log('[panel] ' + String(label || ''), 'mode=' + String(panel.mode || ''), 'selected=' + String(panel.selectedDebtorId || ''));
+    } catch (e) {}
   }
 
   // SSOT: renderer ownership belongs to the concrete feature/module files.
@@ -88,9 +79,7 @@
     if (!App.renderCoordinator || typeof App.renderCoordinator.invalidate !== 'function') return;
 
     traceCommit(reason, keys);
-    enableCoordinator();
     App.renderCoordinator.invalidate(keys);
-    disableCoordinatorSoon();
   }
 
   if (typeof App.api.commit !== 'function') {
@@ -149,6 +138,7 @@
     if (preferredId && debtorExistsById(preferredId)) {
       panel.selectedDebtorId = preferredId;
       panel.mode = forcedMode || 'detail';
+      tracePanelState('normalize:preferred');
       return panel.selectedDebtorId;
     }
 
@@ -156,6 +146,7 @@
       panel.selectedDebtorId = selectedId;
       if (forcedMode) panel.mode = forcedMode;
       else if (panel.mode !== 'detail' && panel.mode !== 'list') panel.mode = 'detail';
+      tracePanelState('normalize:selected');
       return panel.selectedDebtorId;
     }
 
@@ -163,11 +154,13 @@
     if (fallbackId) {
       panel.selectedDebtorId = fallbackId;
       panel.mode = forcedMode || 'detail';
+      tracePanelState('normalize:fallback');
       return fallbackId;
     }
 
     panel.selectedDebtorId = null;
     panel.mode = 'list';
+    tracePanelState('normalize:empty');
     return null;
   }
 
@@ -188,6 +181,7 @@
     var panel = ensureDebtorPanelState();
     panel.mode = 'detail';
     panel.selectedDebtorId = id;
+    tracePanelState('view:setDetail');
   }
 
   function findLoanById(loanId) {
@@ -222,6 +216,7 @@
   if (typeof App.api.commitAll !== 'function') {
     App.api.commitAll = function () {
       // Safe fallback: full invalidation (kept intentionally)
+      var reason = arguments.length > 0 && arguments[0] ? String(arguments[0]) : 'commitAll';
       var keys = null;
       if (App.ViewKeySet && App.ViewKeySet.ALL_WITH_DERIVED) {
         keys = App.ViewKeySet.ALL_WITH_DERIVED;
@@ -237,7 +232,7 @@
           App.ViewKey.REPORT
         ];
       }
-      commitInternal({ reason: 'commitAll', invalidate: keys });
+      commitInternal({ reason: reason, invalidate: keys });
     };
   }
   if (typeof App.api.view.invalidate !== 'function') {
@@ -273,6 +268,7 @@
 
       cleanupOrphanModalBackdrop('view.openDebtorDetail');
       normalizeDebtorSelection(id, 'detail');
+      tracePanelState('view.openDebtorDetail');
 
       // Do not call render() directly. Use commit → invalidate.
       if (App.ViewKey) {
@@ -288,6 +284,7 @@
     App.api.view.openDebtorList = function () {
       cleanupOrphanModalBackdrop('view.openDebtorList');
       normalizeDebtorSelection(null, 'list');
+      tracePanelState('view.openDebtorList');
 
       if (App.ViewKey) {
         commitInternal({

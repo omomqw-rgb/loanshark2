@@ -1,0 +1,18 @@
+{
+  "version": "3.2.18",
+  "name": "residual_render_path_purge",
+  "base": "LoanShark_v3.2.17_stable_render_boundary_lock.zip",
+  "summary": [
+    "Removed direct render fallbacks from debtor list UI events and fixed list refresh path to invalidate-only.",
+    "Simplified App.renderAll() to a commitAll alias with an explicit legacy reason.",
+    "Converted refreshOtherViews() to commit/invalidate-only and removed summary direct-render hook.",
+    "Reused debtor-detail-root when possible to avoid rebuilding the panel host each detail render.",
+    "Added explicit commitAll reasons for snapshot apply/reset paths and passed load reasons from cloud/local/auth callers."
+  ],
+  "qa_focus": [
+    "list search / page / filter actions invalidate DEBTOR_LIST without direct render fallback",
+    "detail enter/back/re-enter loops",
+    "debtor update/delete propagation across list/detail/calendar/monitoring/report",
+    "cloud load / local restore / app relaunch reason tracing"
+  ]
+}

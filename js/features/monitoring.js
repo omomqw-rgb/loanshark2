@@ -9,6 +9,8 @@
     var today = null;
     var tomorrow = null;
     var schedulesByDebtorCache = null;
+    var rendererRegistered = false;
+    var initialized = false;
     var sectionSortState = {
       dday: 'name',
       d1: 'name',
@@ -1002,10 +1004,17 @@
       renderSection('risk', riskAlerts, 'risk');
     }
 
+    function ensureRendererRegistered() {
+      if (rendererRegistered) return;
+      if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.MONITORING)) return;
+      App.renderCoordinator.register(App.ViewKey.MONITORING, render);
+      rendererRegistered = true;
+    }
+
     function init() {
-      if (App.renderCoordinator && App.ViewKey && App.ViewKey.MONITORING) {
-        App.renderCoordinator.register(App.ViewKey.MONITORING, render);
-      }
+      if (initialized) return;
+      initialized = true;
+      ensureRendererRegistered();
     }
 
     return {

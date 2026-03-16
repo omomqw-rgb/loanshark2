@@ -269,9 +269,9 @@
     }
   }
 
-  function commitAllOnce() {
+  function commitAllOnce(reason) {
     if (App.api && typeof App.api.commitAll === 'function') {
-      App.api.commitAll();
+      App.api.commitAll(reason || 'stateIO:commitAllOnce');
       return;
     }
     // Minimal fallback: do nothing (Stage 4+ always provides commitAll).
@@ -314,6 +314,7 @@
   App.stateIO.applySnapshot = function (snapshot, opts) {
     opts = opts || {};
     var keepUI = (typeof opts.keepUI === 'undefined') ? true : !!opts.keepUI;
+    var commitReason = opts.reason || 'stateIO:applySnapshot';
 
     ensureState();
 
@@ -385,11 +386,13 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       }
     }
 
-    commitAllOnce();
+    commitAllOnce(commitReason);
   };
 
   // Reset data arrays + schedules while preserving UI state
-  App.stateIO.resetDataKeepUI = function () {
+  App.stateIO.resetDataKeepUI = function (opts) {
+    opts = opts || {};
+    var commitReason = opts.reason || 'stateIO:resetDataKeepUI';
     ensureState();
 
     ensureArray('debtors').length = 0;
@@ -421,7 +424,7 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       App.state.ui.debtorPanel.mode = 'list';
     }
 
-    commitAllOnce();
+    commitAllOnce(commitReason);
   };
 
 

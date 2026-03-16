@@ -5,11 +5,19 @@ App.debtors = App.debtors || {};
 
 (function () {
   var initialized = false;
+  var rendererRegistered = false;
 
   function syncPanel() {
     if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
       App.debtorPanel.syncFromState();
     }
+  }
+
+  function ensureRendererRegistered() {
+    if (rendererRegistered) return;
+    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_DETAIL)) return;
+    App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, renderDebtorDetailFromState);
+    rendererRegistered = true;
   }
 
   App.debtorDetail.renderImpl = function (id) {
@@ -25,13 +33,19 @@ App.debtors = App.debtors || {};
       return;
     }
 
-    while (panelRoot.firstChild) {
-      panelRoot.removeChild(panelRoot.firstChild);
+    var detailRoot = document.getElementById('debtor-detail-root');
+    if (!detailRoot || detailRoot.parentNode !== panelRoot) {
+      while (panelRoot.firstChild) {
+        panelRoot.removeChild(panelRoot.firstChild);
+      }
+      detailRoot = document.createElement('div');
+      detailRoot.id = 'debtor-detail-root';
+      panelRoot.appendChild(detailRoot);
+    } else {
+      while (detailRoot.firstChild) {
+        detailRoot.removeChild(detailRoot.firstChild);
+      }
     }
-
-    var detailRoot = document.createElement('div');
-    detailRoot.id = 'debtor-detail-root';
-    panelRoot.appendChild(detailRoot);
 
     if (App.modules && App.modules.DebtorDetail && typeof App.modules.DebtorDetail.render === 'function') {
       App.modules.DebtorDetail.render(debtorId);
@@ -92,10 +106,7 @@ App.debtors = App.debtors || {};
   App.debtorDetail.init = function () {
     if (initialized) return;
     initialized = true;
-
-    if (App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_DETAIL) {
-      App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, renderDebtorDetailFromState);
-    }
+    ensureRendererRegistered();
   };
 
   App.debtors.openDetail = App.debtors.openDetail || function (id) {

@@ -4,6 +4,8 @@ window.App = window.App || {};
 App.debtors = App.debtors || {};
 
 (function () {
+  var rendererRegistered = false;
+
   App.debtors.state = App.debtors.state || {
     query: '',
     page: 1,
@@ -28,9 +30,11 @@ App.debtors = App.debtors || {};
   function invalidateList() {
     if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
       App.api.view.invalidate(App.ViewKey.DEBTOR_LIST);
-      return true;
+      return;
     }
-    return false;
+    try {
+      console.warn('[DebtorList] invalidate path unavailable for DEBTOR_LIST');
+    } catch (e) {}
   }
 
   function getDerivedDebtors() {
@@ -194,6 +198,23 @@ App.debtors = App.debtors || {};
     }
   };
 
+
+  function ensureRendererRegistered() {
+    if (rendererRegistered) return;
+    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_LIST)) return;
+    var renderListFromState = function () {
+      if (App.debtors && typeof App.debtors.updateFilteredList === 'function') {
+        App.debtors.updateFilteredList();
+      }
+      if (App.debtors && typeof App.debtors.renderList === 'function') {
+        App.debtors.renderList();
+      }
+    };
+    renderListFromState._ls_fromUIState = true;
+    App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, renderListFromState);
+    rendererRegistered = true;
+  }
+
   App.debtors._setActiveOnlyUI = function (isOn) {
     var btn = document.querySelector('[data-role="dlist-active-toggle"]');
     if (!btn) return;
@@ -217,18 +238,7 @@ App.debtors = App.debtors || {};
     }
     App.debtors._initializedDom = true;
 
-    if (App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_LIST && typeof App.debtors.renderList === 'function') {
-      var renderListFromState = function () {
-        if (App.debtors && typeof App.debtors.updateFilteredList === 'function') {
-          App.debtors.updateFilteredList();
-        }
-        if (App.debtors && typeof App.debtors.renderList === 'function') {
-          App.debtors.renderList();
-        }
-      };
-      renderListFromState._ls_fromUIState = true;
-      App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, renderListFromState);
-    }
+    ensureRendererRegistered();
 
     var panel = ensurePanelState();
     App.debtors.state.query = panel.searchQuery || '';
@@ -250,10 +260,7 @@ App.debtors = App.debtors || {};
         ui.page = 1;
         App.debtors.state.query = ui.searchQuery;
         App.debtors.state.page = 1;
-        if (!invalidateList()) {
-          App.debtors.updateFilteredList();
-          App.debtors.renderList();
-        }
+        invalidateList();
       });
     }
 
@@ -280,10 +287,7 @@ App.debtors = App.debtors || {};
             var ui = ensurePanelState();
             ui.page = 1;
             App.debtors.state.page = 1;
-            if (!invalidateList()) {
-              App.debtors.updateFilteredList();
-              App.debtors.renderList();
-            }
+            invalidateList();
           });
         })(viewBtns[vb]);
       }
@@ -301,10 +305,7 @@ App.debtors = App.debtors || {};
         var ui = ensurePanelState();
         ui.page = 1;
         st.page = 1;
-        if (!invalidateList()) {
-          App.debtors.updateFilteredList();
-          App.debtors.renderList();
-        }
+        invalidateList();
       });
     }
 
@@ -337,9 +338,7 @@ App.debtors = App.debtors || {};
         if (ui.page > 1) {
           ui.page -= 1;
           App.debtors.state.page = ui.page;
-          if (!invalidateList()) {
-            App.debtors.renderList();
-          }
+          invalidateList();
         }
       });
     }
@@ -352,9 +351,7 @@ App.debtors = App.debtors || {};
         if (ui.page < totalPages) {
           ui.page += 1;
           App.debtors.state.page = ui.page;
-          if (!invalidateList()) {
-            App.debtors.renderList();
-          }
+          invalidateList();
         }
       });
     }

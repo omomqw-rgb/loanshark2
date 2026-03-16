@@ -313,16 +313,18 @@
               App.ViewKey.DEBTOR_DETAIL,
               App.ViewKey.DEBTOR_LIST,
               App.ViewKey.CALENDAR,
+              App.ViewKey.MONITORING,
               App.ViewKey.REPORT
             ]
           });
-        } else {
-          if (App.features && App.features.debtors && typeof App.features.debtors.refreshOtherViews === 'function') {
-            App.features.debtors.refreshOtherViews();
-          }
-          if (window.App && App.debtorDetail && typeof App.debtorDetail.render === 'function' && debtorId) {
-            App.debtorDetail.render(debtorId);
-          }
+        } else if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+          App.api.view.invalidate([
+            App.ViewKey.DEBTOR_DETAIL,
+            App.ViewKey.DEBTOR_LIST,
+            App.ViewKey.CALENDAR,
+            App.ViewKey.MONITORING,
+            App.ViewKey.REPORT
+          ]);
         }
       }
     });
@@ -438,36 +440,18 @@ function render() {
 
 
   
-  var __refreshOtherViewsWarned = false;
   function refreshOtherViews() {
-    // Stage 6: legacy hook. Keep behavior (other views refreshed) but route through invalidate.
-    if (!__refreshOtherViewsWarned) {
-      __refreshOtherViewsWarned = true;
-      try {
-        console.warn('[DEPRECATED] refreshOtherViews() called. Prefer commit/invalidate.');
-      } catch (e) {}
-    }
-
-    // Summary is not part of ViewKey set; keep legacy call if it exists.
-    if (window.App && App.features && App.features.summary && typeof App.features.summary.render === 'function') {
-      App.features.summary.render();
-    }
-
     if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
       App.api.commit({
         reason: 'refreshOtherViews',
-        invalidate: [App.ViewKey.CALENDAR, App.ViewKey.REPORT]
+        invalidate: [App.ViewKey.CALENDAR, App.ViewKey.MONITORING, App.ViewKey.REPORT]
       });
       return;
     }
 
-    // Fallback (no direct DOM render): best-effort invalidation only.
     if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
-      App.api.view.invalidate([App.ViewKey.CALENDAR, App.ViewKey.REPORT]);
-      return;
+      App.api.view.invalidate([App.ViewKey.CALENDAR, App.ViewKey.MONITORING, App.ViewKey.REPORT]);
     }
-
-    return;
   }
 
 

@@ -28,6 +28,8 @@
 
 
   var eventsBound = false;
+  var rendererRegistered = false;
+  var initialized = false;
 
   function pad2(v) {
     if (util.pad2) return util.pad2(v);
@@ -1028,12 +1030,19 @@ summary.appendChild(chipOverdue);
     root.appendChild(shell);
   }
 
+  function ensureRendererRegistered() {
+    if (rendererRegistered) return;
+    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.CALENDAR)) return;
+    App.renderCoordinator.register(App.ViewKey.CALENDAR, render);
+    rendererRegistered = true;
+  }
+
   function init() {
+    if (initialized) return;
+    initialized = true;
     ensureCalendarState();
     bindEvents();
-    if (App.renderCoordinator && App.ViewKey && App.ViewKey.CALENDAR) {
-      App.renderCoordinator.register(App.ViewKey.CALENDAR, render);
-    }
+    ensureRendererRegistered();
   }
 
   App.features.calendar = {

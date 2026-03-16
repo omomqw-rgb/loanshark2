@@ -505,7 +505,7 @@
 
     // Stage 5: Single pipeline (stateIO → commitAll). No direct state swapping or render calls.
     if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
-      App.stateIO.applySnapshot(snapshot, { keepUI: true });
+      App.stateIO.applySnapshot(snapshot, { keepUI: true, reason: 'load:cloud' });
     } else {
       console.error('[CloudState] App.stateIO.applySnapshot is not available.');
       return false;

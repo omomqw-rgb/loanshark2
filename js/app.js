@@ -44,6 +44,10 @@
     if (initialized) return;
     initialized = true;
 
+    if (App.renderCoordinator && typeof App.renderCoordinator.enable === 'function') {
+      App.renderCoordinator.enable();
+    }
+
     if (App.ui && App.ui.layout && App.ui.layout.init) {
       App.ui.layout.init();
     }
@@ -84,7 +88,7 @@
     bindSaveLoadButtons();
 
     if (App.api && typeof App.api.commitAll === 'function') {
-      App.api.commitAll();
+      App.api.commitAll('app:init');
     }
   }
 

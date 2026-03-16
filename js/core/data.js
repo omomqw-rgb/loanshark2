@@ -481,23 +481,8 @@ function mapLoanRow(row) {
   }
 
 function renderAll() {
-    if (App.features && App.features.debtors && App.features.debtors.render) {
-      App.features.debtors.render();
-    }
-    if (App.features && App.features.calendar && App.features.calendar.render) {
-      App.features.calendar.render();
-    }
-    if (App.features && App.features.monitoring && App.features.monitoring.render) {
-      App.features.monitoring.render();
-    }
-    if (App.features && App.features.report && App.features.report.render) {
-      App.features.report.render();
-    }
-
-    // Stage 2: Compatibility wrapper — also mark all core views as invalidated.
-    // This must not replace existing renderAll behavior.
-    if (App.renderCoordinator && App.ViewKeySet && App.ViewKeySet.ALL) {
-      App.renderCoordinator.invalidate(App.ViewKeySet.ALL);
+    if (App.api && typeof App.api.commitAll === 'function') {
+      App.api.commitAll('legacy:renderAll');
     }
   }
 

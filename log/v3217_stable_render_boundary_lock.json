@@ -1,0 +1,11 @@
+{
+  "version": "LoanShark_v3.2.17_stable_render_boundary_lock",
+  "base": "LoanShark_v3.2.16_ssot_core_unification.zip",
+  "summary": [
+    "renderCoordinator 상시 활성형 전환 및 flush 재진입 안정화",
+    "api commit 경계에서 temporary enable/disable 제거",
+    "app init 시 commitAll('app:init')로 초기 전체 렌더 고정",
+    "debtorList/debtorDetail/calendar/monitoring/report renderer 1회 등록 가드 추가",
+    "commit/flush/panel trace를 위한 debug 플래그 확장"
+  ]
+}
