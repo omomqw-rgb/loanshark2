@@ -145,6 +145,8 @@
       } catch (e) {
         schedules = [];
       }
+    } else if (App.state && Array.isArray(App.state.schedules)) {
+      schedules = App.state.schedules;
     }
 
     var aliveKindByDebtor = Object.create(null);

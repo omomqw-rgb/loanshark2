@@ -55,8 +55,6 @@
     _syncAlias: function () {
       var state = App.state || (App.state = {});
       var data = App.data || (App.data = {});
-      // Legacy compatibility aliases only.
-      // Canonical schedules source of truth is App.schedulesEngine.list.
       state.schedules = this.list || [];
       data.schedules = this.list || [];
     },
@@ -676,21 +674,6 @@
     getAll: function () {
       this._ensureInitialized();
       return this.list || [];
-    },
-
-    findById: function (scheduleId) {
-      this._ensureInitialized();
-
-      var target = scheduleId != null ? String(scheduleId) : null;
-      if (target == null) return null;
-
-      var list = this.list || [];
-      for (var i = 0; i < list.length; i++) {
-        var sc = list[i];
-        if (!sc) continue;
-        if (String(sc.id) === target) return sc;
-      }
-      return null;
     },
 
     getByLoanId: function (loanId) {

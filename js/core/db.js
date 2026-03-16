@@ -215,10 +215,10 @@
 
   function rebuildSchedulesForLoan(loanId) {
     var state = App.state || (App.state = {});
+    var data = App.data || (App.data = {});
     var normalizedLoanId = (loanId != null) ? String(loanId) : loanId;
 
-    // SSOT v3.2.15: loan rebuild reads only from App.state.
-    // App.data is derived/read-model and must not participate in mutation lookup.
+    // 1) loan 찾기 (state 우선, 그다음 data)
     var loan = null;
     var stateLoans = state.loans || [];
     for (var i = 0; i < stateLoans.length; i++) {
@@ -227,6 +227,17 @@
       if (String(candidate.id) === String(normalizedLoanId)) {
         loan = candidate;
         break;
+      }
+    }
+    if (!loan) {
+      var dataLoans = data.loans || [];
+      for (var j = 0; j < dataLoans.length; j++) {
+        var candidate2 = dataLoans[j];
+        if (!candidate2) continue;
+        if (String(candidate2.id) === String(normalizedLoanId)) {
+          loan = candidate2;
+          break;
+        }
       }
     }
 
@@ -243,10 +254,10 @@
 
   function rebuildSchedulesForClaim(claimId) {
     var state = App.state || (App.state = {});
+    var data = App.data || (App.data = {});
     var normalizedClaimId = (claimId != null) ? String(claimId) : claimId;
 
-    // SSOT v3.2.15: claim rebuild reads only from App.state.
-    // App.data is derived/read-model and must not participate in mutation lookup.
+    // 1) claim 찾기 (state 우선, 그다음 data)
     var claim = null;
     var stateClaims = state.claims || [];
     for (var i = 0; i < stateClaims.length; i++) {
@@ -255,6 +266,17 @@
       if (String(candidate.id) === String(normalizedClaimId)) {
         claim = candidate;
         break;
+      }
+    }
+    if (!claim) {
+      var dataClaims = data.claims || [];
+      for (var j = 0; j < dataClaims.length; j++) {
+        var candidate2 = dataClaims[j];
+        if (!candidate2) continue;
+        if (String(candidate2.id) === String(normalizedClaimId)) {
+          claim = candidate2;
+          break;
+        }
       }
     }
 

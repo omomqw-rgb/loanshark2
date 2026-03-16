@@ -308,6 +308,8 @@
       } catch (e) {
         schedules = [];
       }
+    } else {
+      schedules = (App.state && App.state.schedules) || [];
     }
 
     var engineListRef = (App.schedulesEngine && App.schedulesEngine.list) || null;

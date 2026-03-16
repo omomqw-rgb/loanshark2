@@ -205,14 +205,7 @@ function updateRiskSection(root, agg) {
   if (!section || !App.state) return;
 
   var state = App.state;
-  var schedules = [];
-  if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
-    try {
-      schedules = App.schedulesEngine.getAll() || [];
-    } catch (e) {
-      schedules = [];
-    }
-  }
+  var schedules = state.schedules || [];
   var debtors = state.debtors || [];
   var util = App.util || {};
 
