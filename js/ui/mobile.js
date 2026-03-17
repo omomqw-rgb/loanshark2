@@ -146,8 +146,8 @@
 
     var selectors = [
       // Global save buttons (policy: Save ❌)
-      '#local-save-btn',
-      '#cloud-save-btn',
+      '#save-btn',
+      '#json-btn',
 
       // Debtor CRUD
       '[data-action="debtor-add"]',
@@ -242,7 +242,10 @@
   function applyWriteGuards() {
     // Save is blocked on mobile
     if (App.local) wrapFn(App.local, 'save', '모바일(Read-only)에서는 저장할 수 없습니다.');
-    if (App.data) wrapFn(App.data, 'saveToSupabase', '모바일(Read-only)에서는 Cloud Save가 차단됩니다.');
+    if (App.data) wrapFn(App.data, 'saveToSupabase', '모바일(Read-only)에서는 Save가 차단됩니다.');
+    if (App.data) wrapFn(App.data, 'saveSnapshotToSupabase', '모바일(Read-only)에서는 Save가 차단됩니다.');
+    if (App.jsonIO) wrapFn(App.jsonIO, 'exportSnapshot', '모바일(Read-only)에서는 JSON 기능이 차단됩니다.');
+    if (App.jsonIO) wrapFn(App.jsonIO, 'importSnapshot', '모바일(Read-only)에서는 JSON 기능이 차단됩니다.');
 
     // Domain CRUD + schedule save
     if (App.api && App.api.domain) {
@@ -396,10 +399,10 @@
       }
 
       // Block Save buttons explicitly (even if enabled via custom states)
-      if (t && (t.closest('#local-save-btn') || t.closest('#cloud-save-btn'))) {
+      if (t && (t.closest('#save-btn') || t.closest('#json-btn'))) {
         event.preventDefault();
         event.stopPropagation();
-        showToast('모바일(Read-only)에서는 저장할 수 없습니다.');
+        showToast('모바일(Read-only)에서는 저장/JSON 기능이 차단됩니다.');
         return;
       }
 

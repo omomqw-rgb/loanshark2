@@ -22,19 +22,26 @@
 <button class="tab-btn" data-tab="report" type="button">Report</button>
 </nav>
 </div>
+<div class="topbar-center">
+  <div id="snapshot-status-host" class="snapshot-status" aria-live="polite"></div>
+</div>
 <div class="topbar-meta">
   <div class="account-area" id="account-area">
     <span class="auth-status" data-auth-status>오프라인 모드</span>
     <button type="button" class="auth-btn" data-action="auth-open-modal">로그인</button>
   </div>
 
-  <div class="save-load-controls">
-    <button id="local-save-btn" class="nav-btn">Local Save</button>
-    <button id="local-load-trigger" class="nav-btn">Local Load</button>
-    <input id="local-load-file" type="file" style="display:none">
-
-    <button id="cloud-save-btn" class="nav-btn highlight">Cloud Save</button>
-    <button id="cloud-load-btn" class="nav-btn">Cloud Load</button>
+  <div class="snapshot-controls">
+    <button id="save-btn" class="nav-btn highlight" type="button">Save</button>
+    <button id="load-btn" class="nav-btn" type="button">Load</button>
+    <div class="json-menu-root">
+      <button id="json-btn" class="nav-btn" type="button" aria-haspopup="menu" aria-expanded="false">JSON</button>
+      <div id="json-menu" class="json-menu" hidden>
+        <button id="json-export-action" class="json-menu__item" type="button">Export JSON</button>
+        <button id="json-import-action" class="json-menu__item" type="button">Import JSON</button>
+      </div>
+      <input id="json-import-file" type="file" accept="application/json,.json" hidden>
+    </div>
   </div>
 </div>
 </header>
@@ -598,6 +605,7 @@
 <script src="js/infra/stateIO.js"></script>
 <script src="js/infra/api.js"></script>
 <script src="js/core/saveload.local.js"></script>
+<script src="js/core/snapshotStatus.js"></script>
 <script src="js/core/db.js"></script>
     <script src="js/core/schedules.engine.js"></script>
 <script src="js/components/loanCard.js"></script>

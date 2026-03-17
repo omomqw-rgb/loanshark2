@@ -20,6 +20,23 @@
     return stats;
   }
 
+  function cloneDeep(value) {
+    if (value == null || typeof value !== 'object') return value;
+    if (Array.isArray(value)) {
+      var arr = [];
+      for (var i = 0; i < value.length; i++) {
+        arr.push(cloneDeep(value[i]));
+      }
+      return arr;
+    }
+    var out = {};
+    var keys = Object.keys(value);
+    for (var j = 0; j < keys.length; j++) {
+      out[keys[j]] = cloneDeep(value[keys[j]]);
+    }
+    return out;
+  }
+
   function runShadowQA(source) {
     source = source || 'unknown';
 
@@ -119,6 +136,20 @@
     return App.stateIO.buildSnapshotEnvelope({ source: 'cloud' });
   };
 
+  App.cloudState.buildComparablePayload = function (snapshot) {
+    var base = snapshot;
+    if (!base) {
+      base = App.cloudState.build();
+    }
+    if (!base || !isObject(base)) {
+      return { data: {}, meta: {} };
+    }
+    return {
+      data: cloneDeep(isObject(base.data) ? base.data : {}),
+      meta: cloneDeep(isObject(base.meta) ? base.meta : {})
+    };
+  };
+
   App.cloudState.validateSnapshot = function (snapshot, opts) {
     if (App.stateIO && typeof App.stateIO.validateSnapshot === 'function') {
       return App.stateIO.validateSnapshot(snapshot, opts);
@@ -126,7 +157,12 @@
     return { ok: false, reason: 'stateio_unavailable' };
   };
 
+  function shouldPersistPreCloudLoadBackup() {
+    return !!(App.config && App.config.enablePreCloudLoadBackup === true);
+  }
+
   function savePreCloudLoadBackup() {
+    if (!shouldPersistPreCloudLoadBackup()) return;
     try {
       if (!window.localStorage) return;
       if (!App.cloudState || typeof App.cloudState.build !== 'function') return;

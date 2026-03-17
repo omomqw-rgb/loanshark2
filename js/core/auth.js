@@ -42,9 +42,7 @@
     if (els.formEl) {
       var emailInput = els.formEl.querySelector('input[name="email"]');
       if (emailInput) {
-        try {
-          emailInput.focus();
-        } catch (e) {}
+        try { emailInput.focus(); } catch (e) {}
       }
     }
   }
@@ -85,7 +83,6 @@
   }
 
   function clearAppDataState() {
-    // Stage 5+: unify reset path via App.stateIO → App.api.commitAll()
     if (App.stateIO && typeof App.stateIO.resetAll === 'function') {
       App.stateIO.resetAll({ uiPolicy: 'reset', reason: 'auth:clearAppDataState', sourceType: 'auth' });
       return;
@@ -95,7 +92,6 @@
       return;
     }
 
-    // Fallback (should not happen in Stage 5): clear domain arrays without direct render calls.
     if (!App.state) return;
     if (Array.isArray(App.state.debtors)) App.state.debtors.length = 0;
     if (Array.isArray(App.state.loans)) App.state.loans.length = 0;
@@ -146,15 +142,23 @@
     App.user = user || null;
     updateAuthUI();
 
-    if (App.user && App.data && typeof App.data.loadAllFromSupabase === 'function') {
+    if (App.user && App.data && typeof App.data.loadLatestSnapshotFromSupabase === 'function') {
       try {
-        await App.data.loadAllFromSupabase();
+        await App.data.loadLatestSnapshotFromSupabase({
+          reason: 'auth:auto',
+          silentNoData: true,
+          silentSuccess: true,
+          resetOnEmpty: true
+        });
       } catch (err) {
-        console.error('[Auth] Failed to load data after login:', err);
+        console.error('[Auth] Failed to load latest snapshot after login:', err);
       }
     } else if (!App.user) {
       try { document.documentElement.classList.remove('ls-viewer'); } catch (e) {}
       clearAppDataState();
+      if (App.snapshotStatus && typeof App.snapshotStatus.clear === 'function') {
+        App.snapshotStatus.clear();
+      }
     }
   }
 
@@ -216,6 +220,9 @@
     var supa = getSupabase();
     if (!supa) {
       updateAuthUI();
+      if (App.snapshotStatus && typeof App.snapshotStatus.clear === 'function') {
+        App.snapshotStatus.clear();
+      }
       return;
     }
 
@@ -227,31 +234,30 @@
       } else {
         App.user = null;
         updateAuthUI();
+        if (App.snapshotStatus && typeof App.snapshotStatus.clear === 'function') {
+          App.snapshotStatus.clear();
+        }
       }
     } catch (err) {
-      // 세션이 없을 때도 오류가 발생할 수 있으므로 조용히 처리한다.
       console.warn('[Auth] restoreSession failed:', err && err.message ? err.message : err);
       App.user = null;
       updateAuthUI();
+      if (App.snapshotStatus && typeof App.snapshotStatus.clear === 'function') {
+        App.snapshotStatus.clear();
+      }
     }
   }
 
   function init() {
     if (isInitialized) return;
     isInitialized = true;
-
-    if (!App.user) {
-      App.user = null;
-    }
-
     bindEvents();
     updateAuthUI();
-    // 초기 세션 복원
     restoreSession();
   }
 
-  App.auth.init = init;
   App.auth.openModal = openModal;
   App.auth.closeModal = closeModal;
+  App.auth.init = init;
   App.auth.updateAuthUI = updateAuthUI;
 })(window, document);

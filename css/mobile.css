@@ -492,3 +492,78 @@ html.ls-mobile #available-capital-modal-root .ledger-empty-row {
   background: var(--charcoal-bg-elevated);
   padding: 16px 12px;
 }
+
+
+/* v3.2.32 snapshot controls */
+html.ls-mobile .topbar {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+html.ls-mobile .topbar-main,
+html.ls-mobile .topbar-center,
+html.ls-mobile .topbar-meta {
+  width: 100%;
+}
+
+html.ls-mobile .topbar-center {
+  order: 2;
+  justify-content: flex-start;
+}
+
+html.ls-mobile .topbar-meta {
+  order: 3;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html.ls-mobile .snapshot-status {
+  width: 100%;
+  max-width: none;
+}
+
+html.ls-mobile .snapshot-status__label {
+  min-width: 0;
+  max-width: 100%;
+}
+
+html.ls-mobile .snapshot-controls {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html.ls-mobile .snapshot-controls .nav-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+html.ls-mobile .json-menu {
+  right: 0;
+  left: auto;
+  min-width: 152px;
+  max-width: calc(100vw - 24px);
+}
+
+html.ls-mobile .snapshot-modal__dialog {
+  width: calc(100vw - 20px);
+  max-height: calc(100vh - 20px);
+}
+
+html.ls-mobile .snapshot-list-row {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+html.ls-mobile .snapshot-list-row__actions {
+  width: 100%;
+  justify-content: flex-end;
+}

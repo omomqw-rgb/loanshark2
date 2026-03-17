@@ -1,0 +1,11 @@
+{
+  "version": "v3.2.32_cloud_snapshot_history_status_bar",
+  "baseVersion": "LoanShark_v3.2.31_stateio_ui_schema_final_lock",
+  "summary": [
+    "Save/Load/JSON 3-button snapshot UI",
+    "Cloud snapshot history via app_snapshots insert-based storage",
+    "Topbar snapshot label with unsaved changes detection",
+    "JSON import/export downgraded to helper workflow",
+    "Supabase SQL setup file included"
+  ]
+}

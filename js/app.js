@@ -18,71 +18,116 @@
     document.title = 'Loan Shark ' + shortVersion;
   }
 
-  function bindSaveLoadButtons() {
-    var localSaveBtn = document.getElementById('local-save-btn');
-    if (localSaveBtn && App.local && typeof App.local.save === 'function') {
-      localSaveBtn.addEventListener('click', function () {
-        App.local.save();
-      });
-    }
+  function closeJsonMenu() {
+    var btn = document.getElementById('json-btn');
+    var menu = document.getElementById('json-menu');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (menu) menu.hidden = true;
+  }
 
-    var localLoadTrigger = document.getElementById('local-load-trigger');
-    var localLoadInput = document.getElementById('local-load-file');
-    if (localLoadTrigger && localLoadInput && App.local && typeof App.local.load === 'function') {
-      localLoadTrigger.addEventListener('click', function () {
-        localLoadInput.click();
-      });
-      localLoadInput.addEventListener('change', function (e) {
-        var files = e.target && e.target.files ? e.target.files : null;
-        if (files && files.length) {
-          App.local.load(files[0]);
+  function toggleJsonMenu() {
+    var btn = document.getElementById('json-btn');
+    var menu = document.getElementById('json-menu');
+    if (!btn || !menu) return;
+    var nextHidden = !menu.hidden;
+    menu.hidden = nextHidden;
+    btn.setAttribute('aria-expanded', nextHidden ? 'false' : 'true');
+  }
+
+  function bindSnapshotControls() {
+    var saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        if (App.data && typeof App.data.saveSnapshotToSupabase === 'function') {
+          App.data.saveSnapshotToSupabase();
         }
       });
     }
 
-    var cloudSaveBtn = document.getElementById('cloud-save-btn');
-    if (cloudSaveBtn && App.data && typeof App.data.saveToSupabase === 'function') {
-      cloudSaveBtn.addEventListener('click', function () {
-        App.data.saveToSupabase();
+    var loadBtn = document.getElementById('load-btn');
+    if (loadBtn) {
+      loadBtn.addEventListener('click', function () {
+        if (App.snapshots && typeof App.snapshots.openLoadModal === 'function') {
+          App.snapshots.openLoadModal();
+        }
       });
     }
 
-    var cloudLoadBtn = document.getElementById('cloud-load-btn');
-    if (cloudLoadBtn && App.data && typeof App.data.loadAllFromSupabase === 'function') {
-      cloudLoadBtn.addEventListener('click', function () {
-        App.data.loadAllFromSupabase();
+    var jsonBtn = document.getElementById('json-btn');
+    if (jsonBtn) {
+      jsonBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleJsonMenu();
       });
     }
+
+    var exportBtn = document.getElementById('json-export-action');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function () {
+        closeJsonMenu();
+        if (App.jsonIO && typeof App.jsonIO.exportSnapshot === 'function') {
+          App.jsonIO.exportSnapshot();
+        }
+      });
+    }
+
+    var importActionBtn = document.getElementById('json-import-action');
+    var importInput = document.getElementById('json-import-file');
+    if (importActionBtn && importInput) {
+      importActionBtn.addEventListener('click', function () {
+        closeJsonMenu();
+        importInput.value = '';
+        importInput.click();
+      });
+      importInput.addEventListener('change', function (e) {
+        var files = e && e.target && e.target.files ? e.target.files : null;
+        if (files && files.length && App.jsonIO && typeof App.jsonIO.importSnapshot === 'function') {
+          App.jsonIO.importSnapshot(files[0]);
+        }
+        importInput.value = '';
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      var root = event.target && event.target.closest ? event.target.closest('.json-menu-root') : null;
+      if (!root) {
+        closeJsonMenu();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event && event.key === 'Escape') {
+        closeJsonMenu();
+        if (App.snapshots && typeof App.snapshots.closeLoadModal === 'function') {
+          App.snapshots.closeLoadModal();
+        }
+      }
+    });
   }
-
 
   function registerViewRenderers() {
     if (!App || !App.renderCoordinator || typeof App.renderCoordinator.register !== 'function') return;
     if (!App.ViewKey) return;
 
-    // Debtor list
     if (App.debtors && typeof App.debtors._renderListFromState === 'function') {
       App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, App.debtors._renderListFromState);
     } else if (App.debtors && typeof App.debtors.renderList === 'function') {
       App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, function () { App.debtors.renderList(); });
     }
 
-    // Debtor detail
     if (App.debtorDetail && typeof App.debtorDetail._renderFromState === 'function') {
       App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, App.debtorDetail._renderFromState);
     }
 
-    // Calendar
     if (App.features && App.features.calendar && typeof App.features.calendar.renderImpl === 'function') {
       App.renderCoordinator.register(App.ViewKey.CALENDAR, App.features.calendar.renderImpl);
     }
 
-    // Monitoring
     if (App.features && App.features.monitoring && typeof App.features.monitoring.renderImpl === 'function') {
       App.renderCoordinator.register(App.ViewKey.MONITORING, App.features.monitoring.renderImpl);
     }
 
-    // Report
     if (App.features && App.features.report && typeof App.features.report.renderImpl === 'function') {
       App.renderCoordinator.register(App.ViewKey.REPORT, App.features.report.renderImpl);
     }
@@ -135,8 +180,12 @@
       App.auth.init();
     }
 
-    bindSaveLoadButtons();
+    bindSnapshotControls();
     syncAppVersionUi();
+
+    if (App.snapshotStatus && typeof App.snapshotStatus.init === 'function') {
+      App.snapshotStatus.init();
+    }
 
     if (App.api && typeof App.api.commitAll === 'function') {
       App.api.commitAll('app:init');
