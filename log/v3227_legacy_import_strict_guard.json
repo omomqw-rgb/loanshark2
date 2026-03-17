@@ -1,0 +1,19 @@
+{
+  "version": "v3.2.27",
+  "name": "legacy_import_strict_guard",
+  "summary": {
+    "stateIO": [
+      "legacy-state detection now requires debtors/loans/claims/schedules/cashLogs to all exist and all be arrays",
+      "partial or malformed legacy raw-state inputs are rejected before snapshot normalization",
+      "normalizeSnapshotInput() no longer auto-fills missing core legacy collections with empty arrays"
+    ],
+    "local": [
+      "Local Restore now maps legacy_required_collections_missing and legacy_shape_invalid to a specific legacy-backup failure message",
+      "snapshot-v1 and valid full legacy raw-state backups remain supported"
+    ]
+  },
+  "notes": [
+    "snapshot-v1 envelope/build/trace/reset semantics are intentionally unchanged from v3.2.26.",
+    "This patch only tightens the legacy import gate for partial or malformed raw-state backups."
+  ]
+}

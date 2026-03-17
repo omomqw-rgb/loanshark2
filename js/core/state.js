@@ -3,6 +3,9 @@
   if (!window.App) window.App = {};
   var App = window.App;
 
+  App.meta = App.meta || {};
+  App.meta.version = 'v3.2.28_validator_strictness_trace_passthrough';
+
   // Single source of truth: Calendar default view.
   // - Used by init/mount, load (legacy), and invalidate/rerender paths.
   // - Keep the default in ONE place to prevent regressions.

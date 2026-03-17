@@ -1,0 +1,14 @@
+{
+  "version": "v3.2.28_validator_strictness_trace_passthrough",
+  "base": "v3.2.27_legacy_import_strict_guard",
+  "summary": [
+    "snapshot-v1 strict validation now rejects missing or non-array core collections before normalization",
+    "local restore preserves originalInputFormat through validate/apply trace",
+    "legacy strict guard from v3.2.27 remains unchanged"
+  ],
+  "files": [
+    "js/infra/stateIO.js",
+    "js/core/saveload.local.js",
+    "js/core/state.js"
+  ]
+}

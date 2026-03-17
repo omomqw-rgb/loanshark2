@@ -1,0 +1,30 @@
+{
+  "version": "v3.2.26",
+  "name": "snapshot_envelope_guard_trace_finalization",
+  "summary": {
+    "stateIO": [
+      "Snapshot build responsibility moved into stateIO via buildSnapshotEnvelope()",
+      "normalizeSnapshotInput()/validateSnapshot() now unify snapshot-v1 and legacy-state import paths",
+      "lastApplySnapshot trace shape finalized with phase/reason/uiPolicy/sourceType/inputFormat fields",
+      "Reset trace now preserves caller reason instead of overwriting with generic reset reason"
+    ],
+    "cloudState": [
+      "Cloud build reduced to a thin wrapper around App.stateIO.buildSnapshotEnvelope({ source: 'cloud' })",
+      "Cloud validate/apply now reuse the shared stateIO normalize/validate/apply pipeline",
+      "Cloud snapshot now carries top-level meta and current appVersion"
+    ],
+    "local": [
+      "Local save switched from raw App.state export to versioned snapshot envelope export",
+      "Local restore now runs JSON parse -> normalize -> validate -> applySnapshot and rejects empty/invalid backups",
+      "Local restore messaging now matches managed UI restore semantics"
+    ],
+    "auth": [
+      "Logout/reset now passes sourceType='auth' so reset trace preserves caller context end-to-end"
+    ]
+  },
+  "managedUiKeys": ["debtorPanel", "monitoring", "report"],
+  "notes": [
+    "preserve/snapshot/reset UI semantics are intentionally unchanged from v3.2.25.",
+    "calendar/activeTab restore scope was intentionally not expanded in this stage."
+  ]
+}
