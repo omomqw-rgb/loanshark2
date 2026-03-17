@@ -550,6 +550,13 @@
     return 'unknown-version';
   }
 
+  function getUnsupportedSnapshotFormatLabel(raw) {
+    if (isObject(raw) && typeof raw.version !== 'undefined') {
+      return 'unsupported-snapshot-version';
+    }
+    return 'unknown-input';
+  }
+
   function getSchedulesSnapshot() {
     var schedulesSnapshot = [];
     if (App.schedulesEngine && typeof App.schedulesEngine.toSnapshot === 'function') {
@@ -734,9 +741,10 @@
       result.originalInputFormat = 'legacy-state';
       return result;
     } else if (typeof version !== 'undefined') {
+      var unsupportedLabel = getUnsupportedSnapshotFormatLabel(raw);
       result.reason = 'unsupported_version';
-      result.inputFormat = 'snapshot-v1';
-      result.originalInputFormat = 'snapshot-v1';
+      result.inputFormat = unsupportedLabel;
+      result.originalInputFormat = unsupportedLabel;
       return result;
     } else {
       result.reason = 'data_missing';
@@ -842,21 +850,21 @@
     var dataRoot = snapshot && snapshot.data;
     if (!dataRoot || !isObject(dataRoot)) {
       result.reason = 'data_missing';
-      result.inputFormat = normalized.inputFormat || 'snapshot-v1';
-      result.originalInputFormat = opts.originalInputFormat || normalized.originalInputFormat || normalized.inputFormat || 'snapshot-v1';
+      result.inputFormat = normalized.inputFormat || '';
+      result.originalInputFormat = opts.originalInputFormat || normalized.originalInputFormat || normalized.inputFormat || '';
       return result;
     }
 
     if (!isValidArrayField(dataRoot, 'debtors') || !isValidArrayField(dataRoot, 'loans') || !isValidArrayField(dataRoot, 'claims') || !isValidArrayField(dataRoot, 'schedules') || !isValidArrayField(dataRoot, 'cashLogs')) {
       result.reason = 'data_shape_invalid';
-      result.inputFormat = normalized.inputFormat || 'snapshot-v1';
-      result.originalInputFormat = opts.originalInputFormat || normalized.originalInputFormat || normalized.inputFormat || 'snapshot-v1';
+      result.inputFormat = normalized.inputFormat || '';
+      result.originalInputFormat = opts.originalInputFormat || normalized.originalInputFormat || normalized.inputFormat || '';
       return result;
     }
 
     normalizeSnapshotDataInPlace(dataRoot);
 
-    result.inputFormat = normalized.inputFormat || 'snapshot-v1';
+    result.inputFormat = normalized.inputFormat || '';
     result.originalInputFormat = opts.originalInputFormat || normalized.originalInputFormat || result.inputFormat;
     result.counts.debtors = dataRoot.debtors.length;
     result.counts.loans = dataRoot.loans.length;
@@ -930,8 +938,8 @@
       reason: trace.reason || '',
       uiPolicy: trace.uiPolicy || 'preserve',
       sourceType: trace.sourceType || 'manual',
-      inputFormat: trace.inputFormat || null,
-      originalInputFormat: trace.originalInputFormat || trace.inputFormat || null,
+      inputFormat: (typeof trace.inputFormat === 'string' && trace.inputFormat) ? trace.inputFormat : null,
+      originalInputFormat: (typeof trace.originalInputFormat === 'string' && trace.originalInputFormat) ? trace.originalInputFormat : ((typeof trace.inputFormat === 'string' && trace.inputFormat) ? trace.inputFormat : null),
       managedUiSource: trace.managedUiSource || 'current',
       managedUiKeys: getManagedUiKeys(),
       hasSnapshotUI: !!trace.hasSnapshotUI

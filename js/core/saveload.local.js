@@ -121,7 +121,10 @@
 
       var normalized = App.stateIO.normalizeSnapshotInput(obj, { sourceType: 'local' });
       if (!normalized.ok) {
-        console.warn('[Local Load] Normalize failed:', normalized.reason);
+        console.warn('[Local Load] Normalize failed:', normalized.reason, {
+          inputFormat: normalized.inputFormat || '',
+          originalInputFormat: normalized.originalInputFormat || normalized.inputFormat || ''
+        });
         App.showToast(mapRestoreFailureMessage(normalized.reason));
         return;
       }
@@ -131,7 +134,10 @@
         originalInputFormat: normalized.originalInputFormat || normalized.inputFormat || 'snapshot-v1'
       });
       if (!validation.ok) {
-        console.warn('[Local Load] Snapshot rejected:', validation.reason, validation.counts || {}, validation.integrity || {});
+        console.warn('[Local Load] Snapshot rejected:', validation.reason, validation.counts || {}, validation.integrity || {}, {
+          inputFormat: validation.inputFormat || normalized.inputFormat || '',
+          originalInputFormat: validation.originalInputFormat || normalized.originalInputFormat || validation.inputFormat || normalized.inputFormat || ''
+        });
         App.showToast(mapRestoreFailureMessage(validation.reason));
         return;
       }

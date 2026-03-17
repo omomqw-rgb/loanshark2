@@ -3,6 +3,21 @@
   var App = window.App || (window.App = {});
   var initialized = false;
 
+  function getDisplayVersionShort() {
+    var full = (App.meta && typeof App.meta.version === 'string' && App.meta.version) ? App.meta.version : 'unknown-version';
+    var m = /^v\d+(?:\.\d+){0,3}/.exec(full);
+    return m ? m[0] : String(full);
+  }
+
+  function syncAppVersionUi() {
+    var shortVersion = getDisplayVersionShort();
+    var brandEl = document.getElementById('app-brand-version');
+    if (brandEl) {
+      brandEl.textContent = 'Loan Shark ' + shortVersion;
+    }
+    document.title = 'Loan Shark ' + shortVersion;
+  }
+
   function bindSaveLoadButtons() {
     var localSaveBtn = document.getElementById('local-save-btn');
     if (localSaveBtn && App.local && typeof App.local.save === 'function') {
@@ -121,6 +136,7 @@
     }
 
     bindSaveLoadButtons();
+    syncAppVersionUi();
 
     if (App.api && typeof App.api.commitAll === 'function') {
       App.api.commitAll('app:init');

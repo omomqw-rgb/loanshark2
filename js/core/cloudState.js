@@ -155,12 +155,15 @@
 
     savePreCloudLoadBackup();
 
-    console.info('[CloudState] Applying snapshot with uiPolicy=preserve reason=load:cloud');
+    var appliedInputFormat = validation.inputFormat || 'snapshot-v1';
+    var appliedOriginalInputFormat = validation.originalInputFormat || appliedInputFormat;
+    console.info('[CloudState] Applying snapshot with uiPolicy=preserve reason=load:cloud inputFormat=' + appliedInputFormat + ' originalInputFormat=' + appliedOriginalInputFormat);
     var applied = App.stateIO.applySnapshot(validation.snapshot, {
       uiPolicy: 'preserve',
       reason: 'load:cloud',
       sourceType: 'cloud',
-      inputFormat: validation.inputFormat || 'snapshot-v1'
+      inputFormat: appliedInputFormat,
+      originalInputFormat: appliedOriginalInputFormat
     });
 
     if (!applied) {
