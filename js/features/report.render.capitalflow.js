@@ -18,6 +18,30 @@ function formatNumberSafe(util, value) {
 
 
 
+function createTableCell(text, className) {
+  var cell = document.createElement('td');
+  if (className) cell.className = className;
+  cell.textContent = text;
+  return cell;
+}
+
+function createTableRow(values) {
+  var row = document.createElement('tr');
+  values = Array.isArray(values) ? values : [];
+  for (var i = 0; i < values.length; i++) {
+    row.appendChild(createTableCell(values[i]));
+  }
+  return row;
+}
+
+function createEmptyTableRow(colspan, text) {
+  var row = document.createElement('tr');
+  var cell = createTableCell(text);
+  cell.colSpan = colspan;
+  row.appendChild(cell);
+  return row;
+}
+
 function updateTrendSummary(root, velocitySeries) {
   var section = root.querySelector('.report-section-capitalflow');
   if (!section) return;
@@ -434,22 +458,19 @@ function updateRiskSection(root, agg) {
     }
     var topList = highRiskList.slice(0, 5);
     if (!topList.length) {
-      var emptyRow = document.createElement('tr');
-      emptyRow.innerHTML = '<td colspan="4">고위험 채무자가 없습니다.</td>';
-      topTableBody.appendChild(emptyRow);
+      topTableBody.appendChild(createEmptyTableRow(4, '고위험 채무자가 없습니다.'));
     } else {
       topList.forEach(function (d) {
-        var row = document.createElement('tr');
         var name = d.name || d.debtorId || '--';
         var amt = d.overdueAmount || 0;
         var days = d.maxOverdueDays || 0;
         var cnt = d.count || 0;
-        row.innerHTML =
-          '<td>' + name + '</td>' +
-          '<td>' + formatCurrencySafe(util, amt) + '</td>' +
-          '<td>' + (days > 0 ? (days + '일') : '--일') + '</td>' +
-          '<td>' + formatNumberSafe(util, cnt) + '건</td>';
-        topTableBody.appendChild(row);
+        topTableBody.appendChild(createTableRow([
+          name,
+          formatCurrencySafe(util, amt),
+          (days > 0 ? (days + '일') : '--일'),
+          formatNumberSafe(util, cnt) + '건'
+        ]));
       });
     }
   }

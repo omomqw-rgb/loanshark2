@@ -109,6 +109,8 @@
     debtors: defaultDataState.debtors,
     loans: defaultDataState.loans,
     claims: defaultDataState.claims,
+    // Legacy surface only. Schedule SSOT is App.schedulesEngine;
+    // App.state.schedules is kept only for compatibility with older snapshot shapes.
     schedules: defaultDataState.schedules,
     cashLogs: defaultDataState.cashLogs,
     /*

@@ -267,6 +267,97 @@ function ensureReportState() {
     return App.state.ui.report;
   }
 
+  function clearNode(node) {
+    if (!node) return;
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+  }
+
+  function createEl(tag, className, text) {
+    var el = document.createElement(tag);
+    if (className) el.className = className;
+    if (typeof text !== 'undefined' && text !== null) el.textContent = text;
+    return el;
+  }
+
+  function createLegendItem(boxClass, labelText) {
+    var item = createEl('div', 'legend-item');
+    var box = createEl('span', 'legend-box ' + boxClass);
+    item.appendChild(box);
+    item.appendChild(document.createTextNode(' ' + labelText));
+    return item;
+  }
+
+  function createPortfolioRow(label, value) {
+    var row = createEl('div', 'portfolio-card-row');
+    row.appendChild(createEl('span', 'portfolio-card-row-label', label));
+    row.appendChild(createEl('span', 'portfolio-card-row-value', value));
+    return row;
+  }
+
+  function createPortfolioCard(title, rows) {
+    var card = createEl('div', 'portfolio-card');
+    card.appendChild(createEl('div', 'portfolio-card-header', title));
+    rows = Array.isArray(rows) ? rows : [];
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      card.appendChild(createPortfolioRow(row.label, row.value));
+    }
+    return card;
+  }
+
+  function renderPortfolioLegend(host, mode) {
+    if (!host) return;
+    clearNode(host);
+    if (mode === 'claim') {
+      host.appendChild(createLegendItem('claim-collected', '회수금'));
+      host.appendChild(createLegendItem('claim-outstanding', '미회수금'));
+      return;
+    }
+    host.appendChild(createLegendItem('planned', '상환예정금'));
+    host.appendChild(createLegendItem('paid', '상환금'));
+    host.appendChild(createLegendItem('overdue', '미납금'));
+  }
+
+  function renderPortfolioCards(host, loanSummary, claimSummary) {
+    if (!host || !App.util) return;
+    clearNode(host);
+
+    function safeAmount(v) {
+      return Number(v) || 0;
+    }
+
+    function fmt(v) {
+      return App.util.formatCurrency(safeAmount(v));
+    }
+
+    var loanTotal = safeAmount(loanSummary.totalAmount);
+    var loanPlanned = safeAmount(loanSummary.plannedAmount);
+    var loanPaid = safeAmount(loanSummary.paidAmount);
+    var loanPartial = safeAmount(loanSummary.partialAmount);
+    var loanOverdue = safeAmount(loanSummary.overdueAmount);
+
+    var claimTotal = safeAmount(claimSummary.totalAmount);
+    var claimPaid = safeAmount(claimSummary.paidAmount);
+    var claimPartial = safeAmount(claimSummary.partialAmount);
+    var claimCollected = claimPaid + claimPartial;
+    var claimOutstanding = Math.max(claimTotal - claimCollected, 0);
+
+    host.appendChild(createPortfolioCard('대출금', [
+      { label: '대출원리금합계', value: fmt(loanTotal) },
+      { label: '상환금합계', value: fmt(loanPaid + loanPartial) },
+      { label: '상환예정금합계', value: fmt(loanPlanned) },
+      { label: '미납금합계', value: fmt(loanOverdue) }
+    ]));
+
+    host.appendChild(createPortfolioCard('채권금', [
+      { label: '채권금합계', value: fmt(claimTotal) },
+      { label: '회수금합계', value: fmt(claimCollected) },
+      { label: '회수예정금합계', value: fmt(claimOutstanding) }
+    ]));
+  }
+
   function commitReportInvalidate(reason) {
     if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.REPORT) {
       App.api.commit({ reason: reason || 'report:ui', invalidate: [App.ViewKey.REPORT] });
@@ -385,54 +476,13 @@ function ensureReportState() {
     // 범례/라벨 영역 업데이트
     var legendHost = root.querySelector('.portfolio-legend');
     if (legendHost) {
-      if (mode === 'claim') {
-        legendHost.innerHTML = ''
-          + '<div class="legend-item"><span class="legend-box claim-collected"></span> 회수금</div>'
-          + '<div class="legend-item"><span class="legend-box claim-outstanding"></span> 미회수금</div>';
-      } else {
-        legendHost.innerHTML = ''
-          + '<div class="legend-item"><span class="legend-box planned"></span> 상환예정금</div>'
-          + '<div class="legend-item"><span class="legend-box paid"></span> 상환금</div>'
-          + '<div class="legend-item"><span class="legend-box overdue"></span> 미납금</div>';
-      }
+      renderPortfolioLegend(legendHost, mode);
     }
 
     // Info 카드 렌더링 – 대출/채권 요약
     var cardsHost = root.querySelector('.overview-portfolio-cards');
     if (cardsHost) {
-      var loanTotal = safeAmount(loanSummary.totalAmount);
-      var loanPlanned = safeAmount(loanSummary.plannedAmount);
-      var loanPaid = safeAmount(loanSummary.paidAmount);
-      var loanPartial = safeAmount(loanSummary.partialAmount);
-      var loanOverdue = safeAmount(loanSummary.overdueAmount);
-
-      var claimTotal = safeAmount(claimSummary.totalAmount);
-      var claimPaid = safeAmount(claimSummary.paidAmount);
-      var claimPartial = safeAmount(claimSummary.partialAmount);
-      var claimCollected = claimPaid + claimPartial;
-      var claimOutstanding = Math.max(claimTotal - claimCollected, 0);
-
-      function fmt(v) {
-        return App.util.formatCurrency(safeAmount(v));
-      }
-
-      var html = '';
-      html += '<div class="portfolio-card">';
-      html += '  <div class="portfolio-card-header">대출금</div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">대출원리금합계</span><span class="portfolio-card-row-value">' + fmt(loanTotal) + '</span></div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">상환금합계</span><span class="portfolio-card-row-value">' + fmt(loanPaid + loanPartial) + '</span></div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">상환예정금합계</span><span class="portfolio-card-row-value">' + fmt(loanPlanned) + '</span></div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">미납금합계</span><span class="portfolio-card-row-value">' + fmt(loanOverdue) + '</span></div>';
-      html += '</div>';
-      html += '<div class="portfolio-card">';
-      html += '<div class="portfolio-card">';
-      html += '  <div class="portfolio-card-header">채권금</div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">채권금합계</span><span class="portfolio-card-row-value">' + fmt(claimTotal) + '</span></div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">회수금합계</span><span class="portfolio-card-row-value">' + fmt(claimCollected) + '</span></div>';
-      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">회수예정금합계</span><span class="portfolio-card-row-value">' + fmt(claimOutstanding) + '</span></div>';
-      html += '</div>';
-
-      cardsHost.innerHTML = html;
+      renderPortfolioCards(cardsHost, loanSummary, claimSummary);
     }
 
     // (기존) 회수 흐름 2x2 요약 채우기 – 추후 필요 시 유지
@@ -884,6 +934,8 @@ function updateReportView(root) {
           console.warn('[DEPRECATED] direct report.render() called. Use commit/invalidate instead.');
         } catch (e) {}
       }
+      // Legacy bridge only: keep external callers from breaking while routing them
+      // back into the commit/invalidate path instead of direct DOM rendering.
       var wrapper = function () {
         warnOnce();
         if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {

@@ -47,13 +47,23 @@
     return App.state[prop];
   }
 
-  var MANAGED_UI_KEYS = ['debtorPanel', 'monitoring', 'report'];
+  function getUiStateSchema() {
+    return App.uiStateSchema || null;
+  }
 
   function getManagedUiKeys() {
-    return MANAGED_UI_KEYS.slice();
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.getManagedUiKeys === 'function') {
+      return schema.getManagedUiKeys();
+    }
+    return ['debtorPanel', 'monitoring', 'report'];
   }
 
   function cloneDefaultUiState() {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.cloneDefaultUiState === 'function') {
+      return schema.cloneDefaultUiState();
+    }
     if (App && typeof App.getDefaultUiState === 'function') {
       return App.getDefaultUiState();
     }
@@ -64,9 +74,9 @@
         sortMode: 'type',
         currentDate: (App.util && typeof App.util.todayISODate === 'function') ? App.util.todayISODate() : new Date().toISOString().slice(0, 10)
       },
-      debtorPanel: cloneDefaultDebtorPanelState(),
-      monitoring: cloneDefaultMonitoringState(),
-      report: cloneDefaultReportState()
+      debtorPanel: {},
+      monitoring: {},
+      report: {}
     };
   }
 
@@ -101,73 +111,21 @@
   }
 
   function applyUIInPlace(dst, src) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.applyUIInPlace === 'function') {
+      schema.applyUIInPlace(dst, src);
+      return;
+    }
     if (!isObject(dst) || !isObject(src)) return;
-
-    if (isObject(src.calendar)) {
-      dst.calendar = dst.calendar || {};
-      if (typeof src.calendar.view === 'string') dst.calendar.view = src.calendar.view;
-      if (typeof src.calendar.sortMode === 'string') dst.calendar.sortMode = src.calendar.sortMode;
-      if (typeof src.calendar.currentDate === 'string') dst.calendar.currentDate = src.calendar.currentDate;
-    }
-
-    if (typeof src.activeTab === 'string') {
-      dst.activeTab = src.activeTab;
-    }
-
-    applyManagedUIInPlace(dst, src);
   }
 
   function applyManagedUIInPlace(dst, src) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.applyManagedUIInPlace === 'function') {
+      schema.applyManagedUIInPlace(dst, src);
+      return;
+    }
     if (!isObject(dst) || !isObject(src)) return;
-
-    if (isObject(src.debtorPanel)) {
-      dst.debtorPanel = dst.debtorPanel || {};
-      if (typeof src.debtorPanel.mode === 'string') dst.debtorPanel.mode = src.debtorPanel.mode;
-      if (typeof src.debtorPanel.page === 'number') dst.debtorPanel.page = src.debtorPanel.page;
-      if (typeof src.debtorPanel.searchQuery === 'string') dst.debtorPanel.searchQuery = src.debtorPanel.searchQuery;
-      if (typeof src.debtorPanel.selectedDebtorId !== 'undefined') dst.debtorPanel.selectedDebtorId = src.debtorPanel.selectedDebtorId;
-      if (typeof src.debtorPanel.viewMode === 'string') dst.debtorPanel.viewMode = src.debtorPanel.viewMode;
-      if (typeof src.debtorPanel.activeOnly === 'boolean') dst.debtorPanel.activeOnly = src.debtorPanel.activeOnly;
-      if (typeof src.debtorPanel.perPage === 'number') dst.debtorPanel.perPage = src.debtorPanel.perPage;
-    }
-
-    if (isObject(src.monitoring)) {
-      dst.monitoring = dst.monitoring || {};
-      if (isObject(src.monitoring.sectionSort)) {
-        dst.monitoring.sectionSort = dst.monitoring.sectionSort || {};
-        if (typeof src.monitoring.sectionSort.dday === 'string') dst.monitoring.sectionSort.dday = src.monitoring.sectionSort.dday;
-        if (typeof src.monitoring.sectionSort.d1 === 'string') dst.monitoring.sectionSort.d1 = src.monitoring.sectionSort.d1;
-        if (typeof src.monitoring.sectionSort.overdue === 'string') dst.monitoring.sectionSort.overdue = src.monitoring.sectionSort.overdue;
-        if (typeof src.monitoring.sectionSort.risk === 'string') dst.monitoring.sectionSort.risk = src.monitoring.sectionSort.risk;
-      }
-    }
-
-    if (isObject(src.report)) {
-      dst.report = dst.report || {};
-      if (typeof src.report.activeSection === 'string') dst.report.activeSection = src.report.activeSection;
-      if (typeof src.report.portfolioMode === 'string') dst.report.portfolioMode = src.report.portfolioMode;
-      if (isObject(src.report.trend)) {
-        dst.report.trend = dst.report.trend || {};
-        if (typeof src.report.trend.period === 'string') dst.report.trend.period = src.report.trend.period;
-        if (Object.prototype.hasOwnProperty.call(src.report.trend, 'dateFrom')) dst.report.trend.dateFrom = src.report.trend.dateFrom;
-        if (Object.prototype.hasOwnProperty.call(src.report.trend, 'dateTo')) dst.report.trend.dateTo = src.report.trend.dateTo;
-      }
-      if (isObject(src.report.risk)) {
-        dst.report.risk = dst.report.risk || {};
-        if (Object.prototype.hasOwnProperty.call(src.report.risk, 'dateFrom')) dst.report.risk.dateFrom = src.report.risk.dateFrom;
-        if (Object.prototype.hasOwnProperty.call(src.report.risk, 'dateTo')) dst.report.risk.dateTo = src.report.risk.dateTo;
-      }
-      if (isObject(src.report.legendVisibility)) {
-        dst.report.legendVisibility = dst.report.legendVisibility || {};
-        if (isObject(src.report.legendVisibility.capitalflow)) {
-          dst.report.legendVisibility.capitalflow = dst.report.legendVisibility.capitalflow || {};
-          if (typeof src.report.legendVisibility.capitalflow.velocity === 'boolean') dst.report.legendVisibility.capitalflow.velocity = src.report.legendVisibility.capitalflow.velocity;
-          if (typeof src.report.legendVisibility.capitalflow.inflow === 'boolean') dst.report.legendVisibility.capitalflow.inflow = src.report.legendVisibility.capitalflow.inflow;
-          if (typeof src.report.legendVisibility.capitalflow.outflow === 'boolean') dst.report.legendVisibility.capitalflow.outflow = src.report.legendVisibility.capitalflow.outflow;
-          if (typeof src.report.legendVisibility.capitalflow.net === 'boolean') dst.report.legendVisibility.capitalflow.net = src.report.legendVisibility.capitalflow.net;
-        }
-      }
-    }
   }
 
   function cloneCalendarState(calendar) {
@@ -180,8 +138,9 @@
   }
 
   function cloneDefaultDebtorPanelState() {
-    if (App && typeof App.getDefaultDebtorPanelState === 'function') {
-      return App.getDefaultDebtorPanelState();
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.cloneDefaultDebtorPanelState === 'function') {
+      return schema.cloneDefaultDebtorPanelState();
     }
     return {
       mode: 'list',
@@ -203,99 +162,50 @@
   }
 
   function sanitizeDebtorPanelStateInPlace(panel) {
-    var defaults = cloneDefaultDebtorPanelState();
-    panel = isObject(panel) ? panel : {};
-
-    panel.mode = (panel.mode === 'detail') ? 'detail' : 'list';
-    panel.selectedDebtorId = (panel.selectedDebtorId == null || panel.selectedDebtorId === '') ? null : String(panel.selectedDebtorId);
-    panel.searchQuery = (typeof panel.searchQuery === 'string') ? panel.searchQuery : defaults.searchQuery;
-    panel.page = normalizePositiveInt(panel.page, defaults.page);
-    panel.viewMode = (panel.viewMode === 'loan' || panel.viewMode === 'claim' || panel.viewMode === 'risk' || panel.viewMode === 'all') ? panel.viewMode : defaults.viewMode;
-    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
-    panel.perPage = normalizePositiveInt(panel.perPage, defaults.perPage);
-
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.sanitizeDebtorPanelStateInPlace === 'function') {
+      return schema.sanitizeDebtorPanelStateInPlace(panel);
+    }
     return panel;
   }
 
-  function cloneDebtorPanelState(panel) {
-    var out = cloneDefaultDebtorPanelState();
-    if (isObject(panel)) {
-      applyManagedUIInPlace({ debtorPanel: out }, { debtorPanel: panel });
-    }
-    return out;
-  }
-
   function cloneDefaultMonitoringState() {
-    if (App && typeof App.getDefaultMonitoringState === 'function') {
-      return App.getDefaultMonitoringState();
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.cloneDefaultMonitoringState === 'function') {
+      return schema.cloneDefaultMonitoringState();
     }
     return {
-      sectionSort: {
-        dday: 'name',
-        d1: 'name',
-        overdue: 'name',
-        risk: 'name'
-      }
+      sectionSort: { dday: 'name', d1: 'name', overdue: 'name', risk: 'name' }
     };
   }
 
   function sanitizeMonitoringStateInPlace(monitoring) {
-    var defaults = cloneDefaultMonitoringState();
-    monitoring = isObject(monitoring) ? monitoring : {};
-    monitoring.sectionSort = isObject(monitoring.sectionSort) ? monitoring.sectionSort : {};
-
-    monitoring.sectionSort.dday = (monitoring.sectionSort.dday === 'amount') ? 'amount' : defaults.sectionSort.dday;
-    monitoring.sectionSort.d1 = (monitoring.sectionSort.d1 === 'amount') ? 'amount' : defaults.sectionSort.d1;
-    monitoring.sectionSort.overdue = (monitoring.sectionSort.overdue === 'amount') ? 'amount' : defaults.sectionSort.overdue;
-    monitoring.sectionSort.risk = (monitoring.sectionSort.risk === 'amount') ? 'amount' : defaults.sectionSort.risk;
-
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.sanitizeMonitoringStateInPlace === 'function') {
+      return schema.sanitizeMonitoringStateInPlace(monitoring);
+    }
     return monitoring;
   }
 
-  function cloneMonitoringState(monitoring) {
-    var out = cloneDefaultMonitoringState();
-    if (isObject(monitoring)) {
-      applyManagedUIInPlace({ monitoring: out }, { monitoring: monitoring });
-    }
-    return out;
-  }
-
   function cloneDefaultReportState() {
-    if (App && typeof App.getDefaultReportState === 'function') {
-      return App.getDefaultReportState();
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.cloneDefaultReportState === 'function') {
+      return schema.cloneDefaultReportState();
     }
     return {
       activeSection: 'overview',
       portfolioMode: 'loan',
-      trend: {
-        period: 'monthly',
-        dateFrom: null,
-        dateTo: null
-      },
-      risk: {
-        dateFrom: null,
-        dateTo: null
-      },
-      legendVisibility: {
-        capitalflow: {
-          velocity: true,
-          inflow: true,
-          outflow: true,
-          net: true
-        }
-      }
+      trend: { period: 'monthly', dateFrom: null, dateTo: null },
+      risk: { dateFrom: null, dateTo: null },
+      legendVisibility: { capitalflow: { velocity: true, inflow: true, outflow: true, net: true } }
     };
   }
 
-  function cloneReportState(report) {
-    var out = cloneDefaultReportState();
-    if (isObject(report)) {
-      applyManagedUIInPlace({ report: out }, { report: report });
-    }
-    return out;
-  }
-
   function cloneUiState(ui) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.cloneUiState === 'function') {
+      return schema.cloneUiState(ui);
+    }
     ui = isObject(ui) ? ui : {};
     var out = {};
     for (var k in ui) {
@@ -304,10 +214,54 @@
     }
     if (typeof ui.activeTab === 'string') out.activeTab = ui.activeTab;
     out.calendar = cloneCalendarState(ui.calendar);
-    out.debtorPanel = cloneDebtorPanelState(ui.debtorPanel);
-    out.monitoring = cloneMonitoringState(ui.monitoring);
-    out.report = cloneReportState(ui.report);
+    out.debtorPanel = cloneDefaultDebtorPanelState();
+    out.monitoring = cloneDefaultMonitoringState();
+    out.report = cloneDefaultReportState();
     return out;
+  }
+
+  function seedManagedUIDefaults(ui) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.seedManagedUIDefaults === 'function') {
+      return schema.seedManagedUIDefaults(ui);
+    }
+    ui = isObject(ui) ? ui : {};
+    ui.debtorPanel = cloneDefaultDebtorPanelState();
+    ui.monitoring = cloneDefaultMonitoringState();
+    ui.report = cloneDefaultReportState();
+    return ui;
+  }
+
+  function resolveUiPolicy(opts) {
+    opts = opts || {};
+    if (opts.uiPolicy === 'preserve' || opts.uiPolicy === 'snapshot' || opts.uiPolicy === 'reset') {
+      return opts.uiPolicy;
+    }
+    if (typeof opts.keepUI !== 'undefined') {
+      return opts.keepUI ? 'preserve' : 'snapshot';
+    }
+    return 'preserve';
+  }
+
+  function buildNextUiState(currentUi, snapshotUi, uiPolicy) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.buildNextUiState === 'function') {
+      return schema.buildNextUiState(currentUi, snapshotUi, uiPolicy);
+    }
+    var nextUi = cloneDefaultUiState();
+    return { ui: nextUi, source: 'default' };
+  }
+
+  function normalizeNullableDateString(value) {
+    return (typeof value === 'string' && value) ? value : null;
+  }
+
+  function sanitizeReportStateInPlace(report) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.sanitizeReportStateInPlace === 'function') {
+      return schema.sanitizeReportStateInPlace(report);
+    }
+    return report;
   }
 
   function cloneMetaState(meta) {
@@ -942,11 +896,15 @@
       originalInputFormat: (typeof trace.originalInputFormat === 'string' && trace.originalInputFormat) ? trace.originalInputFormat : ((typeof trace.inputFormat === 'string' && trace.inputFormat) ? trace.inputFormat : null),
       managedUiSource: trace.managedUiSource || 'current',
       managedUiKeys: getManagedUiKeys(),
-      hasSnapshotUI: !!trace.hasSnapshotUI
+      hasSnapshotUI: !!trace.hasSnapshotUI,
+      scheduleOwner: trace.scheduleOwner || 'engine',
+      legacySchedulesDetected: !!trace.legacySchedulesDetected
     };
   }
 
   function applySchedulesSnapshot(schedulesSnapshot) {
+    // Schedule SSOT is owned by App.schedulesEngine.
+    // Legacy snapshot data.schedules is accepted as an input surface only.
     if (!App.schedulesEngine) return;
     if (typeof App.schedulesEngine.fromSnapshot === 'function') {
       App.schedulesEngine.fromSnapshot(Array.isArray(schedulesSnapshot) ? schedulesSnapshot : []);
@@ -1005,6 +963,7 @@
     var normalizedSnapshot = normalized.snapshot;
     var uiSrc = (normalizedSnapshot && isObject(normalizedSnapshot.ui)) ? normalizedSnapshot.ui : null;
     var dataRoot = getDataRoot(normalizedSnapshot) || {};
+    var legacySchedulesDetected = Object.prototype.hasOwnProperty.call(dataRoot, 'schedules');
 
     normalizeSnapshotDataInPlace(dataRoot);
 
@@ -1045,7 +1004,9 @@
       inputFormat: appliedInputFormat,
       originalInputFormat: appliedOriginalInputFormat,
       managedUiSource: uiBuild.source,
-      hasSnapshotUI: !!uiSrc
+      hasSnapshotUI: !!uiSrc,
+      scheduleOwner: 'engine',
+      legacySchedulesDetected: legacySchedulesDetected
     });
 
     var panel = App.state && App.state.ui && App.state.ui.debtorPanel;

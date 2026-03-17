@@ -945,7 +945,6 @@ function computeRecoveryFlowSummary(today) {
       };
     }
 
-    // 간단한 일 단위 버킷 생성 (월/년은 후속 버전에서 정교화 가능)
     var start = new Date(from);
     var end = new Date(to);
     if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
@@ -956,27 +955,63 @@ function computeRecoveryFlowSummary(today) {
         actual: actual
       };
     }
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
 
-    var cursor = new Date(start);
-    while (cursor <= end) {
-      var y = cursor.getFullYear();
-      var m = cursor.getMonth() + 1;
-      var d = cursor.getDate();
+    function pad2(n) {
+      n = Number(n) || 0;
+      return n < 10 ? '0' + n : String(n);
+    }
 
-      var key;
+    function bucketKeyForDate(dateObj) {
+      var y = dateObj.getFullYear();
+      if (interval === 'yearly') return String(y);
+      var m = pad2(dateObj.getMonth() + 1);
+      if (interval === 'monthly') return y + '-' + m;
+      return y + '-' + m + '-' + pad2(dateObj.getDate());
+    }
+
+    function normalizeDateOnly(value) {
+      if (typeof value !== 'string' || !value) return null;
+      var dateOnly = value.slice(0, 10);
+      var parsed = new Date(dateOnly);
+      if (isNaN(parsed.getTime())) return null;
+      parsed.setHours(0, 0, 0, 0);
+      return parsed;
+    }
+
+    function buildBuckets() {
+      var list = [];
       if (interval === 'yearly') {
-        key = String(y);
-      } else if (interval === 'monthly') {
-        key = y + '-' + (m < 10 ? '0' + m : m);
-      } else {
-        key = y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
+        var yearCursor = new Date(start.getFullYear(), 0, 1);
+        var yearEnd = new Date(end.getFullYear(), 0, 1);
+        while (yearCursor <= yearEnd) {
+          list.push(bucketKeyForDate(yearCursor));
+          yearCursor.setFullYear(yearCursor.getFullYear() + 1);
+        }
+        return list;
       }
+      if (interval === 'monthly') {
+        var monthCursor = new Date(start.getFullYear(), start.getMonth(), 1);
+        var monthEnd = new Date(end.getFullYear(), end.getMonth(), 1);
+        while (monthCursor <= monthEnd) {
+          list.push(bucketKeyForDate(monthCursor));
+          monthCursor.setMonth(monthCursor.getMonth() + 1);
+        }
+        return list;
+      }
+      var dayCursor = new Date(start);
+      while (dayCursor <= end) {
+        list.push(bucketKeyForDate(dayCursor));
+        dayCursor.setDate(dayCursor.getDate() + 1);
+      }
+      return list;
+    }
 
-      buckets.push(key);
+    buckets = buildBuckets();
+    for (var bi = 0; bi < buckets.length; bi++) {
       planned.push(0);
       actual.push(0);
-
-      cursor.setDate(cursor.getDate() + 1);
     }
 
     var indexByKey = {};
@@ -988,30 +1023,20 @@ function computeRecoveryFlowSummary(today) {
       var sc = schedules[j];
       if (!sc) continue;
       var due = sc.dueDate || sc.due_date || null;
-      if (!due) continue;
-      if (due < from || due > to) continue;
+      var dueDate = normalizeDateOnly(due);
+      if (!dueDate || dueDate < start || dueDate > end) continue;
 
-      var idx = indexByKey[due];
-      if (interval === 'monthly') {
-        var ym = due.slice(0, 7);
-        idx = indexByKey[ym];
-      } else if (interval === 'yearly') {
-        var yOnly = due.slice(0, 4);
-        idx = indexByKey[yOnly];
-      }
+      var key = bucketKeyForDate(dueDate);
+      var idx = indexByKey[key];
       if (typeof idx !== 'number' || idx < 0 || idx >= buckets.length) continue;
 
       var amount = Number(sc.amount) || 0;
       if (!amount) continue;
 
       var paidAmt = Number(sc.paidAmount != null ? sc.paidAmount : sc.partialPaidAmount || 0);
-      var status = (sc.status || '').toUpperCase();
-
-      // 예정 – 해당 날짜에 스케줄된 전체 회차 금액
       if (amount > 0) {
         planned[idx] += amount;
       }
-      // 실제 회수 – 납입 금액
       if (paidAmt > 0) {
         actual[idx] += paidAmt;
       }
@@ -1103,6 +1128,7 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
 
   App.data.computePortfolioSummary = computePortfolioSummary;
   App.data.computeRecoveryFlowSummary = computeRecoveryFlowSummary;
+  // Legacy alias retained for compatibility; render invalidation should flow through App.api.commitAll.
   App.data.computeRecoveryFlowSeries = computeRecoveryFlowSeries;
 
   App.data.buildDebtorsDetailed = buildDebtorsDetailed;

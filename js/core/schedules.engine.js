@@ -64,6 +64,7 @@
     },
 
     fromSnapshot: function (snapshot) {
+      // Accept legacy snapshot schedule payloads here, but ownership remains with the engine list.
       var list = [];
       if (Array.isArray(snapshot)) {
         for (var i = 0; i < snapshot.length; i++) {

@@ -1060,7 +1060,9 @@ summary.appendChild(chipOverdue);
           console.warn('[DEPRECATED] direct calendar.render() called. Use commit/invalidate instead.');
         } catch (e) {}
       }
-      var wrapper = function () {
+      // Legacy bridge only: keep external callers from breaking while routing them
+    // back into invalidate/commit instead of direct DOM rendering.
+    var wrapper = function () {
         warnOnce();
         if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
           App.api.view.invalidate(App.ViewKey.CALENDAR);
