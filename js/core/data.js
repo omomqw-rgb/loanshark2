@@ -480,7 +480,9 @@ function mapLoanRow(row) {
     };
   }
 
-function renderAll(reason) {
+  // Legacy bridge only: App.renderAll() remains as a compatibility alias for old callers.
+  // The real render fan-out now belongs to commit/invalidate orchestration, not direct wrapper chains.
+  function renderAll(reason) {
     if (App.api && typeof App.api.commitAll === 'function') {
       App.api.commitAll(reason || 'legacy:renderAll');
     }

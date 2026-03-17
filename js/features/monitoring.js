@@ -1081,8 +1081,8 @@
             console.warn('[DEPRECATED] direct monitoring.render() called. Use commit/invalidate instead.');
           } catch (e) {}
         }
-        // Legacy bridge only: keep external callers from breaking while routing them
-    // back into invalidate/commit instead of direct DOM rendering.
+        // Legacy bridge only: this wrapper remains for older callers, but it is not a direct-DOM
+        // standard entry anymore. Route back into invalidate/commit so renderer ownership stays centralized.
     var wrapper = function () {
           warnOnce();
           if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {

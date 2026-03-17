@@ -1,0 +1,8 @@
+{
+  "version": "v3.2.31_stateio_ui_schema_final_lock",
+  "summary": [
+    "stateIO UI schema boundary cleanup and duplicate helper removal",
+    "uiStateSchema public surface lock for managed UI state",
+    "legacy bridge comment finalization and version sync"
+  ]
+}

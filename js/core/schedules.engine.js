@@ -53,8 +53,9 @@
     },
 
     _syncAlias: function () {
-      // SSOT: schedules are owned only by App.schedulesEngine.list.
-      // Legacy aliases (App.state.schedules / App.data.schedules) are intentionally not synchronized.
+      // SSOT lock: schedules are owned only by App.schedulesEngine.list.
+      // App.state.schedules / App.data.schedules remain compatibility surfaces for older code and snapshots,
+      // and are intentionally not treated as an authoritative sync target.
     },
 
     initEmpty: function () {
@@ -64,7 +65,8 @@
     },
 
     fromSnapshot: function (snapshot) {
-      // Accept legacy snapshot schedule payloads here, but ownership remains with the engine list.
+      // Accept legacy snapshot schedule payloads here as an input surface only. Ownership remains
+      // with the engine list, so importing legacy schedules does not change where schedule truth lives.
       var list = [];
       if (Array.isArray(snapshot)) {
         for (var i = 0; i < snapshot.length; i++) {

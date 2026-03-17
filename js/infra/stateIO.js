@@ -51,6 +51,9 @@
     return App.uiStateSchema || null;
   }
 
+  // Managed UI state boundary:
+  // - stateIO owns snapshot input interpretation, apply orchestration, and trace output.
+  // - App.uiStateSchema owns managed UI shape/default/sanitize/clone/apply behavior.
   function getManagedUiKeys() {
     var schema = getUiStateSchema();
     if (schema && typeof schema.getManagedUiKeys === 'function') {
@@ -248,51 +251,7 @@
     if (schema && typeof schema.buildNextUiState === 'function') {
       return schema.buildNextUiState(currentUi, snapshotUi, uiPolicy);
     }
-    var nextUi = cloneDefaultUiState();
-    return { ui: nextUi, source: 'default' };
-  }
 
-  function normalizeNullableDateString(value) {
-    return (typeof value === 'string' && value) ? value : null;
-  }
-
-  function sanitizeReportStateInPlace(report) {
-    var schema = getUiStateSchema();
-    if (schema && typeof schema.sanitizeReportStateInPlace === 'function') {
-      return schema.sanitizeReportStateInPlace(report);
-    }
-    return report;
-  }
-
-  function cloneMetaState(meta) {
-    meta = isObject(meta) ? meta : {};
-    return {
-      nextDebtorId: normalizePositiveInt(meta.nextDebtorId, 1),
-      nextLoanId: normalizePositiveInt(meta.nextLoanId, 1),
-      nextClaimId: normalizePositiveInt(meta.nextClaimId, 1)
-    };
-  }
-
-  function seedManagedUIDefaults(ui) {
-    ui = isObject(ui) ? ui : {};
-    ui.debtorPanel = cloneDefaultDebtorPanelState();
-    ui.monitoring = cloneDefaultMonitoringState();
-    ui.report = cloneDefaultReportState();
-    return ui;
-  }
-
-  function resolveUiPolicy(opts) {
-    opts = opts || {};
-    if (opts.uiPolicy === 'preserve' || opts.uiPolicy === 'snapshot' || opts.uiPolicy === 'reset') {
-      return opts.uiPolicy;
-    }
-    if (typeof opts.keepUI !== 'undefined') {
-      return opts.keepUI ? 'preserve' : 'snapshot';
-    }
-    return 'preserve';
-  }
-
-  function buildNextUiState(currentUi, snapshotUi, uiPolicy) {
     var nextUi = cloneDefaultUiState();
     var source = 'current';
 
@@ -322,6 +281,11 @@
   }
 
   function sanitizeReportStateInPlace(report) {
+    var schema = getUiStateSchema();
+    if (schema && typeof schema.sanitizeReportStateInPlace === 'function') {
+      return schema.sanitizeReportStateInPlace(report);
+    }
+
     var defaults = cloneDefaultReportState();
     report = isObject(report) ? report : {};
 
@@ -346,6 +310,15 @@
     report.legendVisibility.capitalflow.net = (typeof report.legendVisibility.capitalflow.net === 'boolean') ? report.legendVisibility.capitalflow.net : defaultLegend.net;
 
     return report;
+  }
+
+  function cloneMetaState(meta) {
+    meta = isObject(meta) ? meta : {};
+    return {
+      nextDebtorId: normalizePositiveInt(meta.nextDebtorId, 1),
+      nextLoanId: normalizePositiveInt(meta.nextLoanId, 1),
+      nextClaimId: normalizePositiveInt(meta.nextClaimId, 1)
+    };
   }
 
   function getDataRoot(snapshot) {
@@ -885,6 +858,9 @@
     return 'manual';
   }
 
+  // Trace contract:
+  // - scheduleOwner stays 'engine' because schedule SSOT never leaves App.schedulesEngine.
+  // - legacySchedulesDetected only reports whether the incoming payload exposed a legacy data.schedules surface.
   function buildTraceState(trace) {
     trace = trace || {};
     return {

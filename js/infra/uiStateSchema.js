@@ -29,6 +29,8 @@
     return (typeof value === 'string' && value) ? value : null;
   }
 
+  // Managed UI SSOT surface. stateIO may orchestrate apply flow, but only this module owns
+  // the managed UI subtree shape/default/sanitize/clone/apply rules.
   var MANAGED_UI_KEYS = ['debtorPanel', 'monitoring', 'report'];
 
   function getManagedUiKeys() {
@@ -305,18 +307,26 @@
     return { ui: nextUi, source: source };
   }
 
+  // Public surface consumed by stateIO. Keep this explicit so the ownership boundary is visible
+  // in one place and does not drift back into duplicate helpers elsewhere.
+  var publicApi = {
+    getManagedUiKeys: getManagedUiKeys,
+    cloneDefaultUiState: cloneDefaultUiState,
+    cloneDefaultDebtorPanelState: cloneDefaultDebtorPanelState,
+    cloneDefaultMonitoringState: cloneDefaultMonitoringState,
+    cloneDefaultReportState: cloneDefaultReportState,
+    applyUIInPlace: applyUIInPlace,
+    applyManagedUIInPlace: applyManagedUIInPlace,
+    sanitizeDebtorPanelStateInPlace: sanitizeDebtorPanelStateInPlace,
+    sanitizeMonitoringStateInPlace: sanitizeMonitoringStateInPlace,
+    sanitizeReportStateInPlace: sanitizeReportStateInPlace,
+    cloneUiState: cloneUiState,
+    seedManagedUIDefaults: seedManagedUIDefaults,
+    buildNextUiState: buildNextUiState
+  };
+
   App.uiStateSchema = App.uiStateSchema || {};
-  App.uiStateSchema.getManagedUiKeys = getManagedUiKeys;
-  App.uiStateSchema.cloneDefaultUiState = cloneDefaultUiState;
-  App.uiStateSchema.cloneDefaultDebtorPanelState = cloneDefaultDebtorPanelState;
-  App.uiStateSchema.cloneDefaultMonitoringState = cloneDefaultMonitoringState;
-  App.uiStateSchema.cloneDefaultReportState = cloneDefaultReportState;
-  App.uiStateSchema.applyUIInPlace = applyUIInPlace;
-  App.uiStateSchema.applyManagedUIInPlace = applyManagedUIInPlace;
-  App.uiStateSchema.sanitizeDebtorPanelStateInPlace = sanitizeDebtorPanelStateInPlace;
-  App.uiStateSchema.sanitizeMonitoringStateInPlace = sanitizeMonitoringStateInPlace;
-  App.uiStateSchema.sanitizeReportStateInPlace = sanitizeReportStateInPlace;
-  App.uiStateSchema.cloneUiState = cloneUiState;
-  App.uiStateSchema.seedManagedUIDefaults = seedManagedUIDefaults;
-  App.uiStateSchema.buildNextUiState = buildNextUiState;
+  Object.keys(publicApi).forEach(function (key) {
+    App.uiStateSchema[key] = publicApi[key];
+  });
 })(window);
