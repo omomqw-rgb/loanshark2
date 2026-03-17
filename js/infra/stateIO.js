@@ -26,6 +26,50 @@
     return App.state[prop];
   }
 
+
+  var MANAGED_UI_KEYS = ['debtorPanel', 'monitoring', 'report'];
+
+  function getManagedUiKeys() {
+    return MANAGED_UI_KEYS.slice();
+  }
+
+  function cloneDefaultUiState() {
+    if (App && typeof App.getDefaultUiState === 'function') {
+      return App.getDefaultUiState();
+    }
+    return {
+      activeTab: 'calendar',
+      calendar: {
+        view: (App.getDefaultCalendarView ? App.getDefaultCalendarView() : 'week'),
+        sortMode: 'type',
+        currentDate: (App.util && typeof App.util.todayISODate === 'function') ? App.util.todayISODate() : new Date().toISOString().slice(0, 10)
+      },
+      debtorPanel: cloneDefaultDebtorPanelState(),
+      monitoring: cloneDefaultMonitoringState(),
+      report: cloneDefaultReportState()
+    };
+  }
+
+  function cloneDefaultDataState() {
+    if (App && typeof App.getDefaultDataState === 'function') {
+      return App.getDefaultDataState();
+    }
+    return {
+      debtors: [],
+      loans: [],
+      claims: [],
+      schedules: [],
+      cashLogs: [],
+      loansCollapsed: false,
+      claimsCollapsed: false,
+      meta: {
+        nextDebtorId: 1,
+        nextLoanId: 1,
+        nextClaimId: 1
+      }
+    };
+  }
+
   function replaceArrayInPlace(target, src) {
     if (!Array.isArray(target)) return;
     if (target === src) return;
@@ -52,6 +96,12 @@
       dst.activeTab = src.activeTab;
     }
 
+    applyManagedUIInPlace(dst, src);
+  }
+
+  function applyManagedUIInPlace(dst, src) {
+    if (!isObject(dst) || !isObject(src)) return;
+
     // debtor panel
     if (isObject(src.debtorPanel)) {
       dst.debtorPanel = dst.debtorPanel || {};
@@ -61,7 +111,277 @@
       if (typeof src.debtorPanel.selectedDebtorId !== 'undefined') {
         dst.debtorPanel.selectedDebtorId = src.debtorPanel.selectedDebtorId;
       }
+      if (typeof src.debtorPanel.viewMode === 'string') dst.debtorPanel.viewMode = src.debtorPanel.viewMode;
+      if (typeof src.debtorPanel.activeOnly === 'boolean') dst.debtorPanel.activeOnly = src.debtorPanel.activeOnly;
+      if (typeof src.debtorPanel.perPage === 'number') dst.debtorPanel.perPage = src.debtorPanel.perPage;
     }
+
+    // monitoring
+    if (isObject(src.monitoring)) {
+      dst.monitoring = dst.monitoring || {};
+      if (isObject(src.monitoring.sectionSort)) {
+        dst.monitoring.sectionSort = dst.monitoring.sectionSort || {};
+        if (typeof src.monitoring.sectionSort.dday === 'string') dst.monitoring.sectionSort.dday = src.monitoring.sectionSort.dday;
+        if (typeof src.monitoring.sectionSort.d1 === 'string') dst.monitoring.sectionSort.d1 = src.monitoring.sectionSort.d1;
+        if (typeof src.monitoring.sectionSort.overdue === 'string') dst.monitoring.sectionSort.overdue = src.monitoring.sectionSort.overdue;
+        if (typeof src.monitoring.sectionSort.risk === 'string') dst.monitoring.sectionSort.risk = src.monitoring.sectionSort.risk;
+      }
+    }
+
+    // report
+    if (isObject(src.report)) {
+      dst.report = dst.report || {};
+      if (typeof src.report.activeSection === 'string') dst.report.activeSection = src.report.activeSection;
+      if (typeof src.report.portfolioMode === 'string') dst.report.portfolioMode = src.report.portfolioMode;
+      if (isObject(src.report.trend)) {
+        dst.report.trend = dst.report.trend || {};
+        if (typeof src.report.trend.period === 'string') dst.report.trend.period = src.report.trend.period;
+        if (Object.prototype.hasOwnProperty.call(src.report.trend, 'dateFrom')) dst.report.trend.dateFrom = src.report.trend.dateFrom;
+        if (Object.prototype.hasOwnProperty.call(src.report.trend, 'dateTo')) dst.report.trend.dateTo = src.report.trend.dateTo;
+      }
+      if (isObject(src.report.risk)) {
+        dst.report.risk = dst.report.risk || {};
+        if (Object.prototype.hasOwnProperty.call(src.report.risk, 'dateFrom')) dst.report.risk.dateFrom = src.report.risk.dateFrom;
+        if (Object.prototype.hasOwnProperty.call(src.report.risk, 'dateTo')) dst.report.risk.dateTo = src.report.risk.dateTo;
+      }
+      if (isObject(src.report.legendVisibility)) {
+        dst.report.legendVisibility = dst.report.legendVisibility || {};
+        if (isObject(src.report.legendVisibility.capitalflow)) {
+          dst.report.legendVisibility.capitalflow = dst.report.legendVisibility.capitalflow || {};
+          if (typeof src.report.legendVisibility.capitalflow.velocity === 'boolean') dst.report.legendVisibility.capitalflow.velocity = src.report.legendVisibility.capitalflow.velocity;
+          if (typeof src.report.legendVisibility.capitalflow.inflow === 'boolean') dst.report.legendVisibility.capitalflow.inflow = src.report.legendVisibility.capitalflow.inflow;
+          if (typeof src.report.legendVisibility.capitalflow.outflow === 'boolean') dst.report.legendVisibility.capitalflow.outflow = src.report.legendVisibility.capitalflow.outflow;
+          if (typeof src.report.legendVisibility.capitalflow.net === 'boolean') dst.report.legendVisibility.capitalflow.net = src.report.legendVisibility.capitalflow.net;
+        }
+      }
+    }
+  }
+
+  function cloneCalendarState(calendar) {
+    calendar = isObject(calendar) ? calendar : {};
+    return {
+      view: (typeof calendar.view === 'string') ? calendar.view : null,
+      sortMode: (typeof calendar.sortMode === 'string') ? calendar.sortMode : null,
+      currentDate: (typeof calendar.currentDate === 'string') ? calendar.currentDate : null
+    };
+  }
+
+  function cloneDefaultDebtorPanelState() {
+    if (App && typeof App.getDefaultDebtorPanelState === 'function') {
+      return App.getDefaultDebtorPanelState();
+    }
+    return {
+      mode: 'list',
+      selectedDebtorId: null,
+      searchQuery: '',
+      page: 1,
+      viewMode: 'all',
+      activeOnly: true,
+      perPage: 15
+    };
+  }
+
+  function normalizePositiveInt(value, fallbackValue) {
+    var n = Number(value);
+    if (!isFinite(n)) return fallbackValue;
+    n = Math.floor(n);
+    if (n < 1) return fallbackValue;
+    return n;
+  }
+
+  function sanitizeDebtorPanelStateInPlace(panel) {
+    var defaults = cloneDefaultDebtorPanelState();
+    panel = isObject(panel) ? panel : {};
+
+    panel.mode = (panel.mode === 'detail') ? 'detail' : 'list';
+    panel.selectedDebtorId = (panel.selectedDebtorId == null || panel.selectedDebtorId === '')
+      ? null
+      : String(panel.selectedDebtorId);
+    panel.searchQuery = (typeof panel.searchQuery === 'string') ? panel.searchQuery : defaults.searchQuery;
+    panel.page = normalizePositiveInt(panel.page, defaults.page);
+    panel.viewMode = (panel.viewMode === 'loan' || panel.viewMode === 'claim' || panel.viewMode === 'risk' || panel.viewMode === 'all')
+      ? panel.viewMode
+      : defaults.viewMode;
+    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
+    panel.perPage = normalizePositiveInt(panel.perPage, defaults.perPage);
+
+    return panel;
+  }
+
+  function cloneDebtorPanelState(panel) {
+    var out = cloneDefaultDebtorPanelState();
+    if (isObject(panel)) {
+      applyManagedUIInPlace({ debtorPanel: out }, { debtorPanel: panel });
+    }
+    return out;
+  }
+
+  function cloneDefaultMonitoringState() {
+    if (App && typeof App.getDefaultMonitoringState === 'function') {
+      return App.getDefaultMonitoringState();
+    }
+    return {
+      sectionSort: {
+        dday: 'name',
+        d1: 'name',
+        overdue: 'name',
+        risk: 'name'
+      }
+    };
+  }
+
+  function sanitizeMonitoringStateInPlace(monitoring) {
+    var defaults = cloneDefaultMonitoringState();
+    monitoring = isObject(monitoring) ? monitoring : {};
+    monitoring.sectionSort = isObject(monitoring.sectionSort) ? monitoring.sectionSort : {};
+
+    monitoring.sectionSort.dday = (monitoring.sectionSort.dday === 'amount') ? 'amount' : defaults.sectionSort.dday;
+    monitoring.sectionSort.d1 = (monitoring.sectionSort.d1 === 'amount') ? 'amount' : defaults.sectionSort.d1;
+    monitoring.sectionSort.overdue = (monitoring.sectionSort.overdue === 'amount') ? 'amount' : defaults.sectionSort.overdue;
+    monitoring.sectionSort.risk = (monitoring.sectionSort.risk === 'amount') ? 'amount' : defaults.sectionSort.risk;
+
+    return monitoring;
+  }
+
+  function cloneMonitoringState(monitoring) {
+    var out = cloneDefaultMonitoringState();
+    if (isObject(monitoring)) {
+      applyManagedUIInPlace({ monitoring: out }, { monitoring: monitoring });
+    }
+    return out;
+  }
+
+  function cloneDefaultReportState() {
+    if (App && typeof App.getDefaultReportState === 'function') {
+      return App.getDefaultReportState();
+    }
+    return {
+      activeSection: 'overview',
+      portfolioMode: 'loan',
+      trend: {
+        period: 'monthly',
+        dateFrom: null,
+        dateTo: null
+      },
+      risk: {
+        dateFrom: null,
+        dateTo: null
+      },
+      legendVisibility: {
+        capitalflow: {
+          velocity: true,
+          inflow: true,
+          outflow: true,
+          net: true
+        }
+      }
+    };
+  }
+
+  function cloneReportState(report) {
+    var out = cloneDefaultReportState();
+    if (isObject(report)) {
+      applyManagedUIInPlace({ report: out }, { report: report });
+    }
+    return out;
+  }
+
+  function cloneUiState(ui) {
+    ui = isObject(ui) ? ui : {};
+    var out = {};
+    for (var k in ui) {
+      if (!Object.prototype.hasOwnProperty.call(ui, k)) continue;
+      out[k] = ui[k];
+    }
+    if (typeof ui.activeTab === 'string') out.activeTab = ui.activeTab;
+    out.calendar = cloneCalendarState(ui.calendar);
+    out.debtorPanel = cloneDebtorPanelState(ui.debtorPanel);
+    out.monitoring = cloneMonitoringState(ui.monitoring);
+    out.report = cloneReportState(ui.report);
+    return out;
+  }
+
+  function seedManagedUIDefaults(ui) {
+    ui = isObject(ui) ? ui : {};
+    ui.debtorPanel = cloneDefaultDebtorPanelState();
+    ui.monitoring = cloneDefaultMonitoringState();
+    ui.report = cloneDefaultReportState();
+    return ui;
+  }
+
+  function resolveUiPolicy(opts) {
+    opts = opts || {};
+    if (opts.uiPolicy === 'preserve' || opts.uiPolicy === 'snapshot' || opts.uiPolicy === 'reset') {
+      return opts.uiPolicy;
+    }
+    if (typeof opts.keepUI !== 'undefined') {
+      return opts.keepUI ? 'preserve' : 'snapshot';
+    }
+    return 'preserve';
+  }
+
+  function buildNextUiState(currentUi, snapshotUi, uiPolicy) {
+    var nextUi = cloneDefaultUiState();
+    var source = 'current';
+
+    if (uiPolicy === 'reset') {
+      return { ui: nextUi, source: 'default' };
+    }
+
+    if (isObject(currentUi)) {
+      applyUIInPlace(nextUi, currentUi);
+    }
+
+    if (uiPolicy === 'snapshot') {
+      seedManagedUIDefaults(nextUi);
+      if (isObject(snapshotUi)) {
+        applyManagedUIInPlace(nextUi, snapshotUi);
+        source = 'snapshot';
+      } else {
+        source = 'default';
+      }
+    }
+
+    return { ui: nextUi, source: source };
+  }
+
+  function normalizeNullableDateString(value) {
+    return (typeof value === 'string' && value) ? value : null;
+  }
+
+  function sanitizeReportStateInPlace(report) {
+    var defaults = cloneDefaultReportState();
+    report = isObject(report) ? report : {};
+
+    report.activeSection = (report.activeSection === 'statistics' || report.activeSection === 'capitalflow' || report.activeSection === 'risk' || report.activeSection === 'overview')
+      ? report.activeSection
+      : defaults.activeSection;
+    report.portfolioMode = (report.portfolioMode === 'claim' || report.portfolioMode === 'loan')
+      ? report.portfolioMode
+      : defaults.portfolioMode;
+
+    report.trend = isObject(report.trend) ? report.trend : {};
+    report.trend.period = (typeof report.trend.period === 'string' && report.trend.period)
+      ? report.trend.period
+      : defaults.trend.period;
+    report.trend.dateFrom = normalizeNullableDateString(report.trend.dateFrom);
+    report.trend.dateTo = normalizeNullableDateString(report.trend.dateTo);
+
+    report.risk = isObject(report.risk) ? report.risk : {};
+    report.risk.dateFrom = normalizeNullableDateString(report.risk.dateFrom);
+    report.risk.dateTo = normalizeNullableDateString(report.risk.dateTo);
+
+    var defaultLegend = (isObject(defaults.legendVisibility) && isObject(defaults.legendVisibility.capitalflow))
+      ? defaults.legendVisibility.capitalflow
+      : { velocity: true, inflow: true, outflow: true, net: true };
+    report.legendVisibility = isObject(report.legendVisibility) ? report.legendVisibility : {};
+    report.legendVisibility.capitalflow = isObject(report.legendVisibility.capitalflow) ? report.legendVisibility.capitalflow : {};
+    report.legendVisibility.capitalflow.velocity = (typeof report.legendVisibility.capitalflow.velocity === 'boolean') ? report.legendVisibility.capitalflow.velocity : defaultLegend.velocity;
+    report.legendVisibility.capitalflow.inflow = (typeof report.legendVisibility.capitalflow.inflow === 'boolean') ? report.legendVisibility.capitalflow.inflow : defaultLegend.inflow;
+    report.legendVisibility.capitalflow.outflow = (typeof report.legendVisibility.capitalflow.outflow === 'boolean') ? report.legendVisibility.capitalflow.outflow : defaultLegend.outflow;
+    report.legendVisibility.capitalflow.net = (typeof report.legendVisibility.capitalflow.net === 'boolean') ? report.legendVisibility.capitalflow.net : defaultLegend.net;
+
+    return report;
   }
 
   // Cloud/Local snapshot interoperability:
@@ -296,16 +616,9 @@
       ui.calendar.currentDate = (App.util && typeof App.util.todayISODate === 'function') ? App.util.todayISODate() : new Date().toISOString().slice(0, 10);
     }
 
-    ui.debtorPanel = ui.debtorPanel || {};
-    if (ui.debtorPanel.mode !== 'list' && ui.debtorPanel.mode !== 'detail') {
-      ui.debtorPanel.mode = 'list';
-    }
-    if (typeof ui.debtorPanel.page !== 'number' || !isFinite(ui.debtorPanel.page) || ui.debtorPanel.page < 1) {
-      ui.debtorPanel.page = 1;
-    }
-    if (typeof ui.debtorPanel.searchQuery !== 'string') {
-      ui.debtorPanel.searchQuery = '';
-    }
+    ui.debtorPanel = sanitizeDebtorPanelStateInPlace(ui.debtorPanel);
+    ui.monitoring = sanitizeMonitoringStateInPlace(ui.monitoring);
+    ui.report = sanitizeReportStateInPlace(ui.report);
   }
 
   App.stateIO = App.stateIO || {};
@@ -313,7 +626,7 @@
   // Apply snapshot into the current App.state without replacing App.state reference.
   App.stateIO.applySnapshot = function (snapshot, opts) {
     opts = opts || {};
-    var keepUI = (typeof opts.keepUI === 'undefined') ? true : !!opts.keepUI;
+    var uiPolicy = resolveUiPolicy(opts);
     var commitReason = opts.reason || 'stateIO:applySnapshot';
 
     ensureState();
@@ -324,10 +637,12 @@
     // Normalize IDs early to avoid strict-equality mapping issues.
     normalizeSnapshotDataInPlace(dataRoot);
 
-    // UI state: keep by default.
-    if (!keepUI && uiSrc) {
-      applyUIInPlace(App.state.ui, uiSrc);
-    }
+    // Managed UI state uses explicit policy semantics.
+    // - preserve: keep current debtorPanel / monitoring / report state
+    // - snapshot: restore those managed UI subtrees from snapshot.ui (with defaults for missing fields)
+    // - reset: reset the managed UI subtree set to defaults
+    var uiBuild = buildNextUiState(App.state.ui, uiSrc, uiPolicy);
+    applyUIInPlace(App.state.ui, uiBuild.ui);
 
     // Domain arrays (in-place)
     // v3.2.8: Debtors in App.state must contain human-info only.
@@ -368,6 +683,14 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
 
     sanitizeUIStateAfterApply();
 
+    App.stateIO.lastApplySnapshot = {
+      reason: commitReason,
+      uiPolicy: uiPolicy,
+      hasSnapshotUI: !!uiSrc,
+      managedUiKeys: getManagedUiKeys(),
+      managedUiSource: uiBuild.source
+    };
+
     // Stage 6.1: keepUI=true can leave a stale selectedDebtorId after Load.
     // If the selected debtor no longer exists, return to list mode to prevent blank/stuck detail panel.
     var panel = App.state && App.state.ui && App.state.ui.debtorPanel;
@@ -389,16 +712,13 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
     commitAllOnce(commitReason);
   };
 
-  // Reset data arrays + schedules while preserving UI state
-  App.stateIO.resetDataKeepUI = function (opts) {
-    opts = opts || {};
-    var commitReason = opts.reason || 'stateIO:resetDataKeepUI';
-    ensureState();
+  function applyDefaultDomainState() {
+    var defaults = cloneDefaultDataState();
 
-    ensureArray('debtors').length = 0;
-    ensureArray('loans').length = 0;
-    ensureArray('claims').length = 0;
-    ensureArray('cashLogs').length = 0;
+    replaceArrayInPlace(ensureArray('debtors'), defaults.debtors);
+    replaceArrayInPlace(ensureArray('loans'), defaults.loans);
+    replaceArrayInPlace(ensureArray('claims'), defaults.claims);
+    replaceArrayInPlace(ensureArray('cashLogs'), defaults.cashLogs);
 
     if (App.schedulesEngine) {
       if (typeof App.schedulesEngine.reset === 'function') {
@@ -406,27 +726,64 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       } else if (typeof App.schedulesEngine.initEmpty === 'function') {
         App.schedulesEngine.initEmpty();
       } else if (typeof App.schedulesEngine.fromSnapshot === 'function') {
-        App.schedulesEngine.fromSnapshot([]);
+        App.schedulesEngine.fromSnapshot(Array.isArray(defaults.schedules) ? defaults.schedules : []);
       }
     }
 
-    
-
-    // Stage 6.1: Reset monotonic ID counters to match legacy "fresh start" behavior.
     if (!isObject(App.state.meta)) App.state.meta = {};
-    App.state.meta.nextDebtorId = 1;
-    App.state.meta.nextLoanId = 1;
-    App.state.meta.nextClaimId = 1;
+    var metaDefaults = isObject(defaults.meta) ? defaults.meta : {};
+    App.state.meta.nextDebtorId = normalizePositiveInt(metaDefaults.nextDebtorId, 1);
+    App.state.meta.nextLoanId = normalizePositiveInt(metaDefaults.nextLoanId, 1);
+    App.state.meta.nextClaimId = normalizePositiveInt(metaDefaults.nextClaimId, 1);
 
-    // Stage 6.1: Avoid blank/stuck detail panel after reset (data cleared but UI selection kept).
-    if (App.state.ui && App.state.ui.debtorPanel) {
+    App.state.loansCollapsed = !!defaults.loansCollapsed;
+    App.state.claimsCollapsed = !!defaults.claimsCollapsed;
+    if (typeof App.riskSettings !== 'undefined') {
+      App.riskSettings = null;
+    }
+  }
+
+  function applyResetUiPolicy(uiPolicy) {
+    var uiBuild = buildNextUiState(App.state.ui, null, uiPolicy);
+    applyUIInPlace(App.state.ui, uiBuild.ui);
+
+    if (uiPolicy === 'preserve' && App.state.ui && App.state.ui.debtorPanel) {
       App.state.ui.debtorPanel.selectedDebtorId = null;
       App.state.ui.debtorPanel.mode = 'list';
+      App.state.ui.debtorPanel.page = 1;
     }
 
+    sanitizeUIStateAfterApply();
+
+    App.stateIO.lastApplySnapshot = {
+      reason: uiPolicy === 'reset' ? 'reset:hard' : 'reset:dataPreserveUI',
+      uiPolicy: uiPolicy,
+      hasSnapshotUI: false,
+      managedUiKeys: getManagedUiKeys(),
+      managedUiSource: uiBuild.source
+    };
+  }
+
+  // Reset data arrays + schedules while preserving UI state
+  App.stateIO.resetDataKeepUI = function (opts) {
+    opts = opts || {};
+    var commitReason = opts.reason || 'stateIO:resetDataKeepUI';
+    applyDefaultDomainState();
+    applyResetUiPolicy('preserve');
     commitAllOnce(commitReason);
   };
 
+  // Full reset: reset domain data and UI semantics to defaults.
+  App.stateIO.resetAll = function (opts) {
+    opts = opts || {};
+    var commitReason = opts.reason || 'reset:hard';
+    var uiPolicy = resolveUiPolicy({ uiPolicy: opts.uiPolicy || 'reset' });
+    applyDefaultDomainState();
+    applyResetUiPolicy(uiPolicy);
+    commitAllOnce(commitReason);
+  };
+
+  App.stateIO.getManagedUiKeys = getManagedUiKeys;
 
   // Stage 6.1: Public helper for Local Save (ensures meta counters exist in snapshot)
   App.stateIO.ensureMeta = ensureMetaFromCurrentState;

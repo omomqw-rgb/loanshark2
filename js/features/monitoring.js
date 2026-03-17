@@ -9,14 +9,7 @@
     var today = null;
     var tomorrow = null;
     var schedulesByDebtorCache = null;
-    var rendererRegistered = false;
     var initialized = false;
-    var sectionSortState = {
-      dday: 'name',
-      d1: 'name',
-      overdue: 'name',
-      risk: 'name'
-    };
 
     function createEl(tag, className, text) {
       var el = document.createElement(tag);
@@ -25,15 +18,62 @@
       return el;
     }
 
+    function cloneDefaultMonitoringState() {
+      if (App && typeof App.getDefaultMonitoringState === 'function') {
+        return App.getDefaultMonitoringState();
+      }
+      return {
+        sectionSort: {
+          dday: 'name',
+          d1: 'name',
+          overdue: 'name',
+          risk: 'name'
+        }
+      };
+    }
+
+    function ensureMonitoringState() {
+      var defaults = cloneDefaultMonitoringState();
+      var state = App.state || (App.state = {});
+      state.ui = state.ui || {};
+      if (!state.ui.monitoring || typeof state.ui.monitoring !== 'object') {
+        state.ui.monitoring = defaults;
+        return state.ui.monitoring;
+      }
+
+      var monitoring = state.ui.monitoring;
+      monitoring.sectionSort = (monitoring.sectionSort && typeof monitoring.sectionSort === 'object')
+        ? monitoring.sectionSort
+        : {};
+      monitoring.sectionSort.dday = (monitoring.sectionSort.dday === 'amount') ? 'amount' : defaults.sectionSort.dday;
+      monitoring.sectionSort.d1 = (monitoring.sectionSort.d1 === 'amount') ? 'amount' : defaults.sectionSort.d1;
+      monitoring.sectionSort.overdue = (monitoring.sectionSort.overdue === 'amount') ? 'amount' : defaults.sectionSort.overdue;
+      monitoring.sectionSort.risk = (monitoring.sectionSort.risk === 'amount') ? 'amount' : defaults.sectionSort.risk;
+      return monitoring;
+    }
+
+    function commitMonitoringInvalidate(reason) {
+      if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.MONITORING) {
+        App.api.commit({ reason: reason || 'monitoring:ui', invalidate: [App.ViewKey.MONITORING] });
+        return;
+      }
+      if (App.renderCoordinator && typeof App.renderCoordinator.invalidate === 'function' && App.ViewKey && App.ViewKey.MONITORING) {
+        App.renderCoordinator.invalidate(App.ViewKey.MONITORING);
+      }
+    }
+
+
     function getSectionSortValue(sectionKey) {
       if (!sectionKey) return 'name';
-      var current = sectionSortState[sectionKey];
+      var monitoring = ensureMonitoringState();
+      var current = monitoring.sectionSort[sectionKey];
       return current === 'amount' ? 'amount' : 'name';
     }
 
     function setSectionSortValue(sectionKey, value) {
       if (!sectionKey) return;
-      sectionSortState[sectionKey] = value === 'amount' ? 'amount' : 'name';
+      var monitoring = ensureMonitoringState();
+      monitoring.sectionSort[sectionKey] = value === 'amount' ? 'amount' : 'name';
     }
 
     function getGroupName(group) {
@@ -86,7 +126,7 @@
       if (!sectionKey) return;
 
       setSectionSortValue(sectionKey, target.value);
-      render();
+      commitMonitoringInvalidate('monitoring:sort:' + sectionKey);
     }
 
 
@@ -833,6 +873,22 @@
       return wrapper;
     }
 
+
+    function syncSortControlValues(root) {
+      root = root || document.getElementById(ROOT_ID);
+      if (!root) return;
+      var selects = root.querySelectorAll('.monitoring-sort-select[data-sort-section]');
+      if (!selects || !selects.length) return;
+      for (var i = 0; i < selects.length; i++) {
+        var select = selects[i];
+        var sectionKey = select.getAttribute('data-sort-section');
+        var nextValue = getSectionSortValue(sectionKey);
+        if (select.value !== nextValue) {
+          select.value = nextValue;
+        }
+      }
+    }
+
     function ensureBaseLayout() {
       var root = document.getElementById(ROOT_ID);
       if (!root) return null;
@@ -849,6 +905,7 @@
         if (watchOld && watchOld.parentNode) {
           watchOld.parentNode.removeChild(watchOld);
         }
+        syncSortControlValues(root);
         return existing;
       }
 
@@ -1004,17 +1061,10 @@
       renderSection('risk', riskAlerts, 'risk');
     }
 
-    function ensureRendererRegistered() {
-      if (rendererRegistered) return;
-      if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.MONITORING)) return;
-      App.renderCoordinator.register(App.ViewKey.MONITORING, render);
-      rendererRegistered = true;
-    }
-
     function init() {
       if (initialized) return;
       initialized = true;
-      ensureRendererRegistered();
+      ensureMonitoringState();
     }
 
     return {

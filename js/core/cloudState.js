@@ -395,6 +395,8 @@
     var uiState = state.ui || {};
     var calendar = uiState.calendar || {};
     var debtorPanel = uiState.debtorPanel || {};
+    var monitoring = uiState.monitoring || {};
+    var report = uiState.report || {};
 
     var stateData = state || {};
 
@@ -460,7 +462,43 @@
           searchQuery: debtorPanel.searchQuery || '',
           selectedDebtorId: (typeof debtorPanel.selectedDebtorId === 'undefined')
             ? null
-            : debtorPanel.selectedDebtorId
+            : debtorPanel.selectedDebtorId,
+          viewMode: (typeof debtorPanel.viewMode === 'string' && debtorPanel.viewMode) ? debtorPanel.viewMode : 'all',
+          activeOnly: (typeof debtorPanel.activeOnly === 'boolean') ? debtorPanel.activeOnly : true,
+          perPage: (typeof debtorPanel.perPage === 'number' && isFinite(debtorPanel.perPage) && debtorPanel.perPage > 0)
+            ? Math.floor(debtorPanel.perPage)
+            : 15
+        },
+        monitoring: {
+          sectionSort: {
+            dday: (monitoring.sectionSort && monitoring.sectionSort.dday === 'amount') ? 'amount' : 'name',
+            d1: (monitoring.sectionSort && monitoring.sectionSort.d1 === 'amount') ? 'amount' : 'name',
+            overdue: (monitoring.sectionSort && monitoring.sectionSort.overdue === 'amount') ? 'amount' : 'name',
+            risk: (monitoring.sectionSort && monitoring.sectionSort.risk === 'amount') ? 'amount' : 'name'
+          }
+        },
+        report: {
+          activeSection: (report.activeSection === 'statistics' || report.activeSection === 'capitalflow' || report.activeSection === 'risk' || report.activeSection === 'overview')
+            ? report.activeSection
+            : 'overview',
+          portfolioMode: (report.portfolioMode === 'claim') ? 'claim' : 'loan',
+          trend: {
+            period: (report.trend && typeof report.trend.period === 'string' && report.trend.period) ? report.trend.period : 'monthly',
+            dateFrom: (report.trend && typeof report.trend.dateFrom === 'string' && report.trend.dateFrom) ? report.trend.dateFrom : null,
+            dateTo: (report.trend && typeof report.trend.dateTo === 'string' && report.trend.dateTo) ? report.trend.dateTo : null
+          },
+          risk: {
+            dateFrom: (report.risk && typeof report.risk.dateFrom === 'string' && report.risk.dateFrom) ? report.risk.dateFrom : null,
+            dateTo: (report.risk && typeof report.risk.dateTo === 'string' && report.risk.dateTo) ? report.risk.dateTo : null
+          },
+          legendVisibility: {
+            capitalflow: {
+              velocity: !(report.legendVisibility && report.legendVisibility.capitalflow && report.legendVisibility.capitalflow.velocity === false),
+              inflow: !(report.legendVisibility && report.legendVisibility.capitalflow && report.legendVisibility.capitalflow.inflow === false),
+              outflow: !(report.legendVisibility && report.legendVisibility.capitalflow && report.legendVisibility.capitalflow.outflow === false),
+              net: !(report.legendVisibility && report.legendVisibility.capitalflow && report.legendVisibility.capitalflow.net === false)
+            }
+          }
         }
       },
 
@@ -503,9 +541,10 @@
 
     savePreCloudLoadBackup();
 
-    // Stage 5: Single pipeline (stateIO → commitAll). No direct state swapping or render calls.
+    // Stage 5+: Single pipeline (stateIO → commitAll). No direct state swapping or render calls.
     if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
-      App.stateIO.applySnapshot(snapshot, { keepUI: true, reason: 'load:cloud' });
+      console.info('[CloudState] Applying snapshot with uiPolicy=preserve reason=load:cloud');
+      App.stateIO.applySnapshot(snapshot, { uiPolicy: 'preserve', reason: 'load:cloud' });
     } else {
       console.error('[CloudState] App.stateIO.applySnapshot is not available.');
       return false;

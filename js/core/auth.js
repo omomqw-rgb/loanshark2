@@ -85,7 +85,11 @@
   }
 
   function clearAppDataState() {
-    // Stage 5: unify reset path via App.stateIO → App.api.commitAll()
+    // Stage 5+: unify reset path via App.stateIO → App.api.commitAll()
+    if (App.stateIO && typeof App.stateIO.resetAll === 'function') {
+      App.stateIO.resetAll({ uiPolicy: 'reset', reason: 'auth:clearAppDataState' });
+      return;
+    }
     if (App.stateIO && typeof App.stateIO.resetDataKeepUI === 'function') {
       App.stateIO.resetDataKeepUI({ reason: 'auth:clearAppDataState' });
       return;

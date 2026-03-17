@@ -1,0 +1,19 @@
+{
+  "version": "v3.2.23_renderer_lifecycle_unification",
+  "base": "LoanShark_v3.2.22_report_legend_state_ssot.zip",
+  "summary": [
+    "renderer register를 feature init에서 제거하고 app bootstrap(app.js) 1회 등록으로 통합",
+    "calendar/monitoring/report/debtorList/debtorDetail의 ensureRendererRegistered 경로 제거",
+    "debtorList/debtorDetail은 state 기반 renderer를 App.*에 노출해 bootstrap에서 등록",
+    "renderCoordinator에 hasRenderer helper를 추가(진단용)"
+  ],
+  "files": [
+    "js/app.js",
+    "js/infra/renderCoordinator.js",
+    "js/features/calendar.js",
+    "js/features/monitoring.js",
+    "js/features/report.js",
+    "js/features/debtors_domlist.js",
+    "js/modules/debtorDetail.dom.js"
+  ]
+}

@@ -5,7 +5,6 @@ App.debtors = App.debtors || {};
 
 (function () {
   var initialized = false;
-  var rendererRegistered = false;
 
   function syncPanel() {
     if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
@@ -13,14 +12,26 @@ App.debtors = App.debtors || {};
     }
   }
 
-  function ensureRendererRegistered() {
-    if (rendererRegistered) return;
-    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_DETAIL)) return;
-    App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, renderDebtorDetailFromState);
-    rendererRegistered = true;
+  function requestDetailInvalidate(reason) {
+    if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.DEBTOR_DETAIL) {
+      App.api.commit({
+        reason: reason || 'debtorDetail:refresh',
+        invalidate: [App.ViewKey.DEBTOR_DETAIL]
+      });
+      return;
+    }
+
+    if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
+      App.api.view.invalidate(App.ViewKey.DEBTOR_DETAIL);
+      return;
+    }
+
+    if (App.renderCoordinator && typeof App.renderCoordinator.invalidate === 'function' && App.ViewKey) {
+      App.renderCoordinator.invalidate(App.ViewKey.DEBTOR_DETAIL);
+    }
   }
 
-  App.debtorDetail.renderImpl = function (id) {
+  function renderDebtorDetailImpl(id) {
     var debtorId = id != null ? String(id) : null;
     if (!debtorId) {
       syncPanel();
@@ -52,9 +63,10 @@ App.debtors = App.debtors || {};
     }
 
     syncPanel();
-  };
+  }
 
-  App.debtorDetail._renderImpl = App.debtorDetail.renderImpl;
+  App.debtorDetail.renderImpl = renderDebtorDetailImpl;
+  App.debtorDetail._renderImpl = renderDebtorDetailImpl;
 
   App.debtorDetail.render = (function () {
     var warned = false;
@@ -73,13 +85,7 @@ App.debtors = App.debtors || {};
         return;
       }
 
-      if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
-        App.api.view.invalidate(App.ViewKey.DEBTOR_DETAIL);
-        return;
-      }
-      if (App.renderCoordinator && typeof App.renderCoordinator.invalidate === 'function' && App.ViewKey) {
-        App.renderCoordinator.invalidate(App.ViewKey.DEBTOR_DETAIL);
-      }
+      requestDetailInvalidate('debtorDetail:deprecated-render');
     };
   })();
   App.debtorDetail.render._deprecatedInvalidateWrapper = true;
@@ -94,25 +100,24 @@ App.debtors = App.debtors || {};
       return;
     }
 
-    if (App.debtorDetail && typeof App.debtorDetail.renderImpl === 'function') {
-      App.debtorDetail.renderImpl(id);
-      return;
-    }
-
-    syncPanel();
+    renderDebtorDetailImpl(id);
   }
   renderDebtorDetailFromState._ls_fromUIState = true;
+
+  App.debtorDetail._renderFromState = renderDebtorDetailFromState;
+  App.debtorDetail.requestRefresh = requestDetailInvalidate;
 
   App.debtorDetail.init = function () {
     if (initialized) return;
     initialized = true;
-    ensureRendererRegistered();
   };
 
   App.debtors.openDetail = App.debtors.openDetail || function (id) {
-    if (App.debtorDetail && typeof App.debtorDetail.render === 'function') {
-      App.debtorDetail.render(id);
+    if (App.api && App.api.view && typeof App.api.view.openDebtorDetail === 'function') {
+      App.api.view.openDebtorDetail(id);
+      return;
     }
+    requestDetailInvalidate('debtorDetail:openDetail');
   };
 
   App.debtorDetail.show = function () {

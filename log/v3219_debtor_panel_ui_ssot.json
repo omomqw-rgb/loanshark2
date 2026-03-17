@@ -1,0 +1,17 @@
+{
+  "version": "v3.2.19_debtor_panel_ui_ssot",
+  "base": "LoanShark_v3.2.18_residual_render_path_purge.zip",
+  "summary": [
+    "Expanded debtorPanel UI schema into the single debtor list/detail UI state store.",
+    "Removed App.debtors.state as the list SSOT and converted debtor list filtering/pagination to selector-based render-time computation.",
+    "Normalized debtorPanel across api/stateIO/ui boundaries to preserve compatibility with older snapshots."
+  ],
+  "files": [
+    "js/core/state.js",
+    "js/infra/api.js",
+    "js/infra/stateIO.js",
+    "js/features/debtors_domlist.js",
+    "js/features/debtors.js",
+    "js/ui/debtorPanel.dom.js"
+  ]
+}

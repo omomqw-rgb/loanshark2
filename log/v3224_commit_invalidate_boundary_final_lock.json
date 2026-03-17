@@ -1,0 +1,20 @@
+{
+  "version": "3.2.24",
+  "name": "commit_invalidate_boundary_final_lock",
+  "base": "LoanShark_v3.2.23_renderer_lifecycle_unification.zip",
+  "focus": [
+    "Remove residual direct render entrypoints from debtor list/detail interactions",
+    "Route external debtor detail openings through view.openDebtorDetail or commit/invalidate",
+    "Make debtor list renderer coordinator-only and deprecate direct renderList()",
+    "Lock legacy App.renderAll() to commitAll alias semantics",
+    "Repair renderCoordinator hasRenderer helper scope"
+  ],
+  "files": [
+    "js/core/data.js",
+    "js/features/debtors.js",
+    "js/features/debtors_domlist.js",
+    "js/modules/debtorDetail.dom.js",
+    "js/ui/operationModal.js",
+    "js/infra/renderCoordinator.js"
+  ]
+}

@@ -3,7 +3,6 @@
   var App = window.App || (window.App = {});
   App.features = App.features || {};
 
-  var rendererRegistered = false;
   var initialized = false;
 
   function renderOverviewDonut(host, summary) {
@@ -244,7 +243,121 @@
   }
 
 
-function renderOverviewMetrics(root) {
+function ensureReportState() {
+    if (App.reportState && typeof App.reportState.ensure === 'function') {
+      return App.reportState.ensure();
+    }
+
+    App.state = App.state || {};
+    App.state.ui = App.state.ui || {};
+    App.state.ui.report = App.state.ui.report || {
+      activeSection: 'overview',
+      portfolioMode: 'loan',
+      trend: { period: 'monthly', dateFrom: null, dateTo: null },
+      risk: { dateFrom: null, dateTo: null },
+      legendVisibility: {
+        capitalflow: {
+          velocity: true,
+          inflow: true,
+          outflow: true,
+          net: true
+        }
+      }
+    };
+    return App.state.ui.report;
+  }
+
+  function commitReportInvalidate(reason) {
+    if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.REPORT) {
+      App.api.commit({ reason: reason || 'report:ui', invalidate: [App.ViewKey.REPORT] });
+      return;
+    }
+    if (App.renderCoordinator && typeof App.renderCoordinator.invalidate === 'function' && App.ViewKey && App.ViewKey.REPORT) {
+      App.renderCoordinator.invalidate(App.ViewKey.REPORT);
+    }
+  }
+
+  function syncReportSectionUI(root, activeSection, isMobile) {
+    var effectiveSection = isMobile ? 'overview' : activeSection;
+    var subtabButtons = root.querySelectorAll('.report-subtab-btn');
+    var sections = root.querySelectorAll('.report-section');
+
+    if (subtabButtons && subtabButtons.forEach) {
+      subtabButtons.forEach(function (btn) {
+        var name = btn.getAttribute('data-report-section') || '';
+        btn.classList.toggle('is-active', name === effectiveSection);
+      });
+    }
+
+    if (sections && sections.forEach) {
+      sections.forEach(function (sec) {
+        var name = sec.getAttribute('data-report-section') || '';
+        sec.classList.toggle('is-active', name === effectiveSection);
+      });
+    }
+  }
+
+  function syncReportUIFromState(root, reportState, isMobile) {
+    if (!root || !reportState) return;
+
+    syncReportSectionUI(root, reportState.activeSection, isMobile);
+
+    var portfolioMode = (reportState.portfolioMode === 'claim') ? 'claim' : 'loan';
+    var typeButtons = root.querySelectorAll('.portfolio-type-chip[data-portfolio-mode]');
+    if (typeButtons && typeButtons.forEach) {
+      typeButtons.forEach(function (btn) {
+        var mode = btn.getAttribute('data-portfolio-mode') || 'loan';
+        btn.classList.toggle('is-active', mode === portfolioMode);
+      });
+    }
+
+    var capitalflowSection = root.querySelector('.report-section-capitalflow');
+    if (capitalflowSection) {
+      var periodGroup = capitalflowSection.querySelector('.capitalflow-period-group');
+      if (periodGroup) {
+        var pButtons = periodGroup.querySelectorAll('.capitalflow-filter-btn[data-filter-value]');
+        if (pButtons && pButtons.forEach) {
+          pButtons.forEach(function (btn) {
+            var value = btn.getAttribute('data-filter-value') || 'monthly';
+            btn.classList.toggle('is-active', value === reportState.trend.period);
+          });
+        }
+      }
+
+      var capitalflowPeriodControls = root.querySelector('.report-period-controls[data-period-target="capitalflow"]');
+      if (capitalflowPeriodControls) {
+        var fromInputT = capitalflowPeriodControls.querySelector('.period-from');
+        var toInputT = capitalflowPeriodControls.querySelector('.period-to');
+        if (fromInputT) fromInputT.value = reportState.trend.dateFrom || '';
+        if (toInputT) toInputT.value = reportState.trend.dateTo || '';
+      }
+
+      var capitalflowLegendItems = capitalflowSection.querySelectorAll('.capitalflow-legend-item[data-series]');
+      if (capitalflowLegendItems && capitalflowLegendItems.forEach) {
+        capitalflowLegendItems.forEach(function (item) {
+          var seriesKey = item.getAttribute('data-series') || '';
+          var isActive = true;
+          if (App.reportState && typeof App.reportState.getLegendVisibility === 'function') {
+            isActive = App.reportState.getLegendVisibility('capitalflow', seriesKey);
+          } else if (reportState.legendVisibility && reportState.legendVisibility.capitalflow && Object.prototype.hasOwnProperty.call(reportState.legendVisibility.capitalflow, seriesKey)) {
+            isActive = reportState.legendVisibility.capitalflow[seriesKey] !== false;
+          }
+          item.classList.toggle('is-active', isActive);
+          item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+      }
+    }
+
+    var riskPeriodControls = root.querySelector('.report-period-controls[data-period-target="risk"]');
+    if (riskPeriodControls) {
+      var fromInputR = riskPeriodControls.querySelector('.period-from');
+      var toInputR = riskPeriodControls.querySelector('.period-to');
+      if (fromInputR) fromInputR.value = reportState.risk.dateFrom || '';
+      if (toInputR) toInputR.value = reportState.risk.dateTo || '';
+    }
+  }
+
+  function renderOverviewMetrics(root) {
     if (!root || !App.state || !App.data || !App.util) return;
 
     var dateRange = { from: null, to: null };
@@ -256,7 +369,8 @@ function renderOverviewMetrics(root) {
       return Number(v) || 0;
     }
 
-    var mode = (App.reportPortfolioState && App.reportPortfolioState.mode) || 'loan';
+    var reportState = ensureReportState();
+    var mode = (reportState.portfolioMode === 'claim') ? 'claim' : 'loan';
 
     // 도넛 렌더링 (대출 / 채권 모드)
     var donutHost = root.querySelector('.overview-portfolio-donut');
@@ -312,11 +426,11 @@ function renderOverviewMetrics(root) {
       html += '</div>';
       html += '<div class="portfolio-card">';
       html += '<div class="portfolio-card">';
-html += '  <div class="portfolio-card-header">채권금</div>';
-html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">채권금합계</span><span class="portfolio-card-row-value">' + fmt(claimTotal) + '</span></div>';
-html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">회수금합계</span><span class="portfolio-card-row-value">' + fmt(claimCollected) + '</span></div>';
-html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">회수예정금합계</span><span class="portfolio-card-row-value">' + fmt(claimOutstanding) + '</span></div>';
-html += '</div>';
+      html += '  <div class="portfolio-card-header">채권금</div>';
+      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">채권금합계</span><span class="portfolio-card-row-value">' + fmt(claimTotal) + '</span></div>';
+      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">회수금합계</span><span class="portfolio-card-row-value">' + fmt(claimCollected) + '</span></div>';
+      html += '  <div class="portfolio-card-row"><span class="portfolio-card-row-label">회수예정금합계</span><span class="portfolio-card-row-value">' + fmt(claimOutstanding) + '</span></div>';
+      html += '</div>';
 
       cardsHost.innerHTML = html;
     }
@@ -324,17 +438,10 @@ html += '</div>';
     // (기존) 회수 흐름 2x2 요약 채우기 – 추후 필요 시 유지
   }
 
-function ensureRendererRegistered() {
-    if (rendererRegistered) return;
-    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.REPORT)) return;
-    App.renderCoordinator.register(App.ViewKey.REPORT, render);
-    rendererRegistered = true;
-  }
-
 function init() {
     if (initialized) return;
     initialized = true;
-    ensureRendererRegistered();
+    ensureReportState();
     bindEvents();
   }
 
@@ -349,24 +456,8 @@ function init() {
       isMobile = false;
     }
 
-    // v3.2.1 (mobile): Report는 Overview(KPI 4개)만 사용하도록 강제
-    if (isMobile) {
-      var subBtns = root.querySelectorAll('.report-subtab-btn');
-      var secList = root.querySelectorAll('.report-section');
-      if (subBtns && subBtns.forEach) {
-        subBtns.forEach(function (b) {
-          var k = b.getAttribute('data-report-section') || '';
-          b.classList.toggle('is-active', k === 'overview');
-        });
-      }
-      if (secList && secList.forEach) {
-        secList.forEach(function (sec) {
-          var n = sec.getAttribute('data-report-section') || '';
-          sec.classList.toggle('is-active', n === 'overview');
-        });
-      }
-    }
-
+    var reportState = ensureReportState();
+    syncReportUIFromState(root, reportState, isMobile);
 
     // V189 – Overview 포트폴리오 / 회수 흐름 요약 렌더링 (모바일 v3.2.1에서는 숨김)
     if (!isMobile && App.data && typeof App.data.computePortfolioSummary === 'function' && root.querySelector('#overview-metrics')) {
@@ -376,7 +467,6 @@ function init() {
         console.warn('[Report] Failed to render overview metrics:', e);
       }
     }
-
 
     // 보호 코드: formatShortCurrency 미정의 시 안전한 기본 구현 등록
     if (!App.util || typeof App.util.formatShortCurrency !== 'function') {
@@ -407,151 +497,120 @@ function init() {
 
   function bindEvents() {
     var root = document.getElementById('report-root');
-    if (!root) return;
+    if (!root || root._reportUiStateBound) return;
+    root._reportUiStateBound = true;
 
+    root.addEventListener('click', function (event) {
+      var target = event.target;
+      if (!target) return;
 
-    // v023: Overview KPI '운영현황' 클릭 -> 운영현황 모달 (Log first)
-    var opsCard = root.querySelector('.report-kpi-card[data-kpi="ops"]');
-    if (opsCard && !opsCard._operationModalBound) {
-      opsCard.addEventListener('click', function () {
+      var opsCard = target.closest('.report-kpi-card[data-kpi="ops"]');
+      if (opsCard && root.contains(opsCard)) {
         if (App.ui && App.ui.operationModal && typeof App.ui.operationModal.open === 'function') {
           App.ui.operationModal.open();
         }
-      });
-      opsCard._operationModalBound = true;
-    }
+        return;
+      }
 
-    // v024: Overview KPI '가용자산' 클릭 -> 가용자산 Ledger 모달
-    var availCard = root.querySelector('.report-kpi-card[data-kpi="avail"]');
-    if (availCard && !availCard._availableCapitalModalBound) {
-      availCard.addEventListener('click', function () {
+      var availCard = target.closest('.report-kpi-card[data-kpi="avail"]');
+      if (availCard && root.contains(availCard)) {
         if (App.ui && App.ui.availableCapitalModal && typeof App.ui.availableCapitalModal.open === 'function') {
           App.ui.availableCapitalModal.open();
         }
-      });
-      availCard._availableCapitalModalBound = true;
-    }
-
-    // Overview 포트폴리오 타입 토글 (대출 / 채권)
-    var portfolioToggleRoot = root.querySelector('.overview-portfolio-types');
-    if (portfolioToggleRoot) {
-      var typeButtons = portfolioToggleRoot.querySelectorAll('.portfolio-type-chip');
-      if (typeButtons.length) {
-        typeButtons.forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            var mode = btn.getAttribute('data-portfolio-mode') || 'loan';
-            App.reportPortfolioState = App.reportPortfolioState || { mode: 'loan' };
-            App.reportPortfolioState.mode = mode;
-            typeButtons.forEach(function (b) {
-              b.classList.toggle('is-active', b === btn);
-            });
-            renderOverviewMetrics(root);
-          });
-        });
+        return;
       }
-    }
 
-    
-    // Report 서브탭(Overview / Statistics / Capital Flow / Risk) 전환
-    var subtabButtons = root.querySelectorAll('.report-subtab-btn');
-    var sections = root.querySelectorAll('.report-section');
-    if (subtabButtons.length && sections.length) {
-      subtabButtons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var name = btn.getAttribute('data-report-section') || '';
-          subtabButtons.forEach(function (b) {
-            b.classList.toggle('is-active', b === btn);
-          });
-          sections.forEach(function (sec) {
-            var secName = sec.getAttribute('data-report-section') || '';
-            sec.classList.toggle('is-active', secName === name);
-          });
+      var portfolioBtn = target.closest('.portfolio-type-chip[data-portfolio-mode]');
+      if (portfolioBtn && root.contains(portfolioBtn)) {
+        var portfolioMode = portfolioBtn.getAttribute('data-portfolio-mode') || 'loan';
+        if (App.reportState && typeof App.reportState.setPortfolioMode === 'function') {
+          App.reportState.setPortfolioMode(portfolioMode);
+        } else {
+          ensureReportState().portfolioMode = (portfolioMode === 'claim') ? 'claim' : 'loan';
+        }
+        commitReportInvalidate('report:portfolioMode:' + portfolioMode);
+        return;
+      }
 
-          // 섹션별 후크 (추후 구현용)
-          if (name === 'capitalflow') {
-            // TODO: Capital Flow 렌더링 훅
-          } else if (name === 'risk') {
-            // TODO: Risk 렌더링 훅
+      var subtabBtn = target.closest('.report-subtab-btn[data-report-section]');
+      if (subtabBtn && root.contains(subtabBtn)) {
+        var activeSection = subtabBtn.getAttribute('data-report-section') || 'overview';
+        if (App.reportState && typeof App.reportState.setActiveSection === 'function') {
+          App.reportState.setActiveSection(activeSection);
+        } else {
+          ensureReportState().activeSection = activeSection;
+        }
+        commitReportInvalidate('report:section:' + activeSection);
+        return;
+      }
+
+      var trendBtn = target.closest('.capitalflow-filter-btn[data-filter-value]');
+      if (trendBtn && root.contains(trendBtn)) {
+        var periodValue = trendBtn.getAttribute('data-filter-value') || 'monthly';
+        if (App.reportState && typeof App.reportState.setTrendPeriod === 'function') {
+          App.reportState.setTrendPeriod(periodValue);
+        } else {
+          ensureReportState().trend.period = periodValue;
+        }
+        commitReportInvalidate('report:trendPeriod:' + periodValue);
+        return;
+      }
+
+      var legendItem = target.closest('.capitalflow-legend-item[data-series]');
+      if (legendItem && root.contains(legendItem)) {
+        var legendSeriesKey = legendItem.getAttribute('data-series') || 'unknown';
+        if (App.reportState && typeof App.reportState.toggleLegendVisibility === 'function') {
+          App.reportState.toggleLegendVisibility('capitalflow', legendSeriesKey);
+        } else {
+          var reportStateLegend = ensureReportState();
+          reportStateLegend.legendVisibility = reportStateLegend.legendVisibility || {};
+          reportStateLegend.legendVisibility.capitalflow = reportStateLegend.legendVisibility.capitalflow || {};
+          reportStateLegend.legendVisibility.capitalflow[legendSeriesKey] = !(reportStateLegend.legendVisibility.capitalflow[legendSeriesKey] !== false);
+        }
+        commitReportInvalidate('report:legend:' + legendSeriesKey);
+        return;
+      }
+
+      var applyCapitalflow = target.closest('[data-action="apply-capitalflow-period"]');
+      if (applyCapitalflow && root.contains(applyCapitalflow)) {
+        var capitalflowPeriodControls = root.querySelector('.report-period-controls[data-period-target="capitalflow"]');
+        if (capitalflowPeriodControls) {
+          var fromInputT = capitalflowPeriodControls.querySelector('.period-from');
+          var toInputT = capitalflowPeriodControls.querySelector('.period-to');
+          var fromValue = (fromInputT && fromInputT.value) ? fromInputT.value : null;
+          var toValue = (toInputT && toInputT.value) ? toInputT.value : null;
+          if (App.reportState && typeof App.reportState.setTrendRange === 'function') {
+            App.reportState.setTrendRange(fromValue, toValue);
+          } else {
+            var reportState1 = ensureReportState();
+            reportState1.trend.dateFrom = fromValue;
+            reportState1.trend.dateTo = toValue;
           }
-        });
-      });
-    }
+          commitReportInvalidate('report:trendRange');
+        }
+        return;
+      }
 
-    // Trend – 자본 흐름/회전률 필터 및 범례 토글
-var capitalflowSection = root.querySelector('.report-section-capitalflow');
-if (capitalflowSection) {
-  var periodGroup = capitalflowSection.querySelector('.capitalflow-period-group');
-  if (periodGroup) {
-    var pButtons = periodGroup.querySelectorAll('.capitalflow-filter-btn');
-    pButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var value = btn.getAttribute('data-filter-value') || 'monthly';
-        App.reportTrendState = App.reportTrendState || { period: 'monthly' };
-        App.reportTrendState.period = value;
-        pButtons.forEach(function (b) {
-          b.classList.toggle('is-active', b === btn);
-        });
-        updateReportView(root);
-      });
+      var applyRisk = target.closest('[data-action="apply-risk-period"]');
+      if (applyRisk && root.contains(applyRisk)) {
+        var riskPeriodControls = root.querySelector('.report-period-controls[data-period-target="risk"]');
+        if (riskPeriodControls) {
+          var fromInputR = riskPeriodControls.querySelector('.period-from');
+          var toInputR = riskPeriodControls.querySelector('.period-to');
+          var fromValueR = (fromInputR && fromInputR.value) ? fromInputR.value : null;
+          var toValueR = (toInputR && toInputR.value) ? toInputR.value : null;
+          if (App.reportState && typeof App.reportState.setRiskRange === 'function') {
+            App.reportState.setRiskRange(fromValueR, toValueR);
+          } else {
+            var reportState2 = ensureReportState();
+            reportState2.risk.dateFrom = fromValueR;
+            reportState2.risk.dateTo = toValueR;
+          }
+          commitReportInvalidate('report:riskRange');
+        }
+      }
     });
   }
-
-  var legendRoot = capitalflowSection.querySelector('[data-capitalflow-legend]');
-  if (legendRoot) {
-    var legendItems = legendRoot.querySelectorAll('.capitalflow-legend-item');
-    legendItems.forEach(function (item) {
-      item.addEventListener('click', function () {
-        item.classList.toggle('is-active');
-        updateReportView(root);
-      });
-    });
-  }
-}
-
-
-
-
-    // Capital Flow 기간 적용
-    var capitalflowPeriodControls = root.querySelector('.report-period-controls[data-period-target="capitalflow"]');
-    if (capitalflowPeriodControls) {
-      var fromInputT = capitalflowPeriodControls.querySelector('.period-from');
-      var toInputT = capitalflowPeriodControls.querySelector('.period-to');
-      var applyBtnT = capitalflowPeriodControls.querySelector('[data-action="apply-capitalflow-period"]');
-      if (applyBtnT) {
-        applyBtnT.addEventListener('click', function () {
-          App.reportTrendState = App.reportTrendState || { period: 'monthly', dateFrom: null, dateTo: null };
-          App.reportTrendState.dateFrom = (fromInputT && fromInputT.value) ? fromInputT.value : null;
-          App.reportTrendState.dateTo = (toInputT && toInputT.value) ? toInputT.value : null;
-          updateReportView(root);
-        });
-      }
-    }
-
-    // Risk 기간 적용
-    var riskPeriodControls = root.querySelector('.report-period-controls[data-period-target="risk"]');
-    if (riskPeriodControls) {
-      var fromInputR = riskPeriodControls.querySelector('.period-from');
-      var toInputR = riskPeriodControls.querySelector('.period-to');
-      var applyBtnR = riskPeriodControls.querySelector('[data-action="apply-risk-period"]');
-      if (applyBtnR) {
-        applyBtnR.addEventListener('click', function () {
-          App.reportRiskState = App.reportRiskState || { dateFrom: null, dateTo: null };
-          App.reportRiskState.dateFrom = (fromInputR && fromInputR.value) ? fromInputR.value : null;
-          App.reportRiskState.dateTo = (toInputR && toInputR.value) ? toInputR.value : null;
-          // updateRiskSection은 agg가 필요하므로, 전체 Report를 다시 렌더링
-          try {
-            var rootNode = document.getElementById('report-root');
-            if (rootNode) {
-              updateReportView(rootNode);
-            }
-          } catch (e) {
-            console.error('[Report] risk period apply error', e);
-          }
-        });
-      }
-    }
-  }
-
 
 
 

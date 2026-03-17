@@ -40,6 +40,39 @@
     }
   }
 
+
+  function registerViewRenderers() {
+    if (!App || !App.renderCoordinator || typeof App.renderCoordinator.register !== 'function') return;
+    if (!App.ViewKey) return;
+
+    // Debtor list
+    if (App.debtors && typeof App.debtors._renderListFromState === 'function') {
+      App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, App.debtors._renderListFromState);
+    } else if (App.debtors && typeof App.debtors.renderList === 'function') {
+      App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, function () { App.debtors.renderList(); });
+    }
+
+    // Debtor detail
+    if (App.debtorDetail && typeof App.debtorDetail._renderFromState === 'function') {
+      App.renderCoordinator.register(App.ViewKey.DEBTOR_DETAIL, App.debtorDetail._renderFromState);
+    }
+
+    // Calendar
+    if (App.features && App.features.calendar && typeof App.features.calendar.renderImpl === 'function') {
+      App.renderCoordinator.register(App.ViewKey.CALENDAR, App.features.calendar.renderImpl);
+    }
+
+    // Monitoring
+    if (App.features && App.features.monitoring && typeof App.features.monitoring.renderImpl === 'function') {
+      App.renderCoordinator.register(App.ViewKey.MONITORING, App.features.monitoring.renderImpl);
+    }
+
+    // Report
+    if (App.features && App.features.report && typeof App.features.report.renderImpl === 'function') {
+      App.renderCoordinator.register(App.ViewKey.REPORT, App.features.report.renderImpl);
+    }
+  }
+
   function init() {
     if (initialized) return;
     initialized = true;
@@ -47,6 +80,8 @@
     if (App.renderCoordinator && typeof App.renderCoordinator.enable === 'function') {
       App.renderCoordinator.enable();
     }
+
+    registerViewRenderers();
 
     if (App.ui && App.ui.layout && App.ui.layout.init) {
       App.ui.layout.init();

@@ -10,6 +10,87 @@
     return 'week';
   };
 
+  // Single source of truth: Debtor panel UI state.
+  // - Used by init/mount, load/reset normalization, and list/detail render paths.
+  // - Always return a fresh object so callers can safely mutate their local copy.
+  App.getDefaultDebtorPanelState = function () {
+    return {
+      mode: 'list',           // 'list' | 'detail'
+      selectedDebtorId: null,
+      searchQuery: '',
+      page: 1,
+      viewMode: 'all',        // 'all' | 'loan' | 'claim' | 'risk'
+      activeOnly: true,
+      perPage: 15
+    };
+  };
+
+  App.getDefaultMonitoringState = function () {
+    return {
+      sectionSort: {
+        dday: 'name',
+        d1: 'name',
+        overdue: 'name',
+        risk: 'name'
+      }
+    };
+  };
+
+  App.getDefaultReportState = function () {
+    return {
+      activeSection: 'overview',
+      portfolioMode: 'loan',
+      trend: {
+        period: 'monthly',
+        dateFrom: null,
+        dateTo: null
+      },
+      risk: {
+        dateFrom: null,
+        dateTo: null
+      },
+      legendVisibility: {
+        capitalflow: {
+          velocity: true,
+          inflow: true,
+          outflow: true,
+          net: true
+        }
+      }
+    };
+  };
+
+  App.getDefaultUiState = function () {
+    return {
+      activeTab: 'calendar',
+      calendar: {
+        view: App.getDefaultCalendarView(),
+        sortMode: 'type',
+        currentDate: getTodayISODateLocal()
+      },
+      debtorPanel: App.getDefaultDebtorPanelState(),
+      monitoring: App.getDefaultMonitoringState(),
+      report: App.getDefaultReportState()
+    };
+  };
+
+  App.getDefaultDataState = function () {
+    return {
+      debtors: [],
+      loans: [],
+      claims: [],
+      schedules: [],
+      cashLogs: [],
+      loansCollapsed: false,
+      claimsCollapsed: false,
+      meta: {
+        nextDebtorId: 1,
+        nextLoanId: 1,
+        nextClaimId: 1
+      }
+    };
+  };
+
   function pad2(v) {
     v = Number(v) || 0;
     return v < 10 ? '0' + v : String(v);
@@ -20,12 +101,13 @@
     return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   }
 
+  var defaultDataState = App.getDefaultDataState();
   App.state = {
-    debtors: [],
-    loans: [],
-    claims: [],
-    schedules: [],
-    cashLogs: [],
+    debtors: defaultDataState.debtors,
+    loans: defaultDataState.loans,
+    claims: defaultDataState.claims,
+    schedules: defaultDataState.schedules,
+    cashLogs: defaultDataState.cashLogs,
     /*
      * UI related state.  In addition to the existing debtorPanel configuration we
      * also track whether the loan and claim card sections on the debtor detail
@@ -33,27 +115,15 @@
      * buttons and persist while the app is running.  See features/debtors.js
      * for the event handlers and render logic.
      */
-    ui: {
-      activeTab: 'calendar',
-      calendar: {
-        view: App.getDefaultCalendarView(),
-        sortMode: 'type',
-        currentDate: getTodayISODateLocal()
-      },
-      debtorPanel: {
-        mode: 'list',           // 'list' | 'detail'
-        selectedDebtorId: null,
-        searchQuery: '',
-        page: 1
-      }
-    },
+    ui: App.getDefaultUiState(),
 
     /**
      * Flags for collapsed states of the loan and claim sections.  When true
      * the corresponding section is collapsed and its card list is hidden.
      */
-    loansCollapsed: false,
-    claimsCollapsed: false
+    loansCollapsed: !!defaultDataState.loansCollapsed,
+    claimsCollapsed: !!defaultDataState.claimsCollapsed,
+    meta: defaultDataState.meta
   };
   App.config = {
     locale: 'ko-KR',

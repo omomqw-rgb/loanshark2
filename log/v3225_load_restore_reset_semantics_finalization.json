@@ -1,0 +1,26 @@
+{
+  "version": "v3.2.25",
+  "name": "load_restore_reset_semantics_finalization",
+  "summary": {
+    "stateIO": [
+      "Locked applySnapshot UI semantics around preserve/snapshot/reset",
+      "Declared managed UI subtree set: debtorPanel, monitoring, report",
+      "Finalized reset helpers for preserve-ui reset and full reset"
+    ],
+    "cloudState": [
+      "Cloud apply now uses explicit uiPolicy=preserve and load:cloud reason"
+    ],
+    "local": [
+      "Local restore now uses explicit uiPolicy=snapshot and restore:localBackup reason",
+      "Local save messaging clarifies save semantics without changing file format"
+    ],
+    "auth": [
+      "Logout/reset entry now prefers full reset semantics through stateIO.resetAll"
+    ]
+  },
+  "managedUiKeys": ["debtorPanel", "monitoring", "report"],
+  "notes": [
+    "Backup format and validator policy intentionally unchanged.",
+    "Renderer lifecycle and direct-render boundaries intentionally unchanged in this stage."
+  ]
+}

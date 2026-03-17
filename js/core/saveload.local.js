@@ -52,8 +52,8 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       a.href = url;
       a.download = 'app_state_backup.json';
       a.click();
-      console.log('[Local Save] Success');
-      App.showToast("Local Save 완료 — JSON 파일이 다운로드됩니다.");
+      console.log('[Local Save] Success (reason=save:local, format=legacy-state)');
+      App.showToast("Local Save 완료 — 현재 data/UI 스냅샷이 JSON으로 저장됩니다.");
     } catch (err) {
       console.error('[Local Save] Failed:', err);
       App.showToast("오류 발생 — 다시 시도해주세요.");
@@ -72,12 +72,13 @@ if (App.util && typeof App.util.repairLoanClaimDisplayIds === 'function') {
       const text = await file.text();
       const obj = JSON.parse(text);
       if (App.stateIO && typeof App.stateIO.applySnapshot === 'function') {
-        App.stateIO.applySnapshot(obj, { keepUI: true, reason: 'load:local' });
+        console.info('[Local Restore] Applying snapshot with uiPolicy=snapshot reason=restore:localBackup');
+        App.stateIO.applySnapshot(obj, { uiPolicy: 'snapshot', reason: 'restore:localBackup' });
       } else {
         console.warn('[Local Load] App.stateIO.applySnapshot is not available.');
       }
-      console.log('[Local Load] Success');
-      App.showToast("Local Load 완료 — 로컬 데이터를 적용했습니다.");
+      console.log('[Local Restore] Success');
+      App.showToast("Local Restore 완료 — 저장 당시 data/UI 스냅샷을 복원했습니다.");
     } catch (err) {
       console.error('[Local Load] Failed:', err);
       App.showToast("오류 발생 — 다시 시도해주세요.");

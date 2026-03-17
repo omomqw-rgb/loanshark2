@@ -1,33 +1,72 @@
-
 // DebtorList DOM Render Integration (SSOT-owned list renderer)
 window.App = window.App || {};
 App.debtors = App.debtors || {};
 
 (function () {
-  var rendererRegistered = false;
+  'use strict';
 
-  App.debtors.state = App.debtors.state || {
-    query: '',
-    page: 1,
-    perPage: 15,
-    viewMode: 'all',
-    activeOnly: true,
-    filteredList: []
-  };
+  var domInitialized = false;
 
-  function ensurePanelState() {
-    App.state = App.state || {};
-    App.state.ui = App.state.ui || {};
-    App.state.ui.debtorPanel = App.state.ui.debtorPanel || {
+  function cloneDefaultPanelState() {
+    if (App && typeof App.getDefaultDebtorPanelState === 'function') {
+      return App.getDefaultDebtorPanelState();
+    }
+    return {
       mode: 'list',
       selectedDebtorId: null,
+      searchQuery: '',
       page: 1,
-      searchQuery: ''
+      viewMode: 'all',
+      activeOnly: true,
+      perPage: 15
     };
-    return App.state.ui.debtorPanel;
   }
 
-  function invalidateList() {
+  function normalizePositiveInt(value, fallbackValue) {
+    var n = Number(value);
+    if (!isFinite(n)) return fallbackValue;
+    n = Math.floor(n);
+    if (n < 1) return fallbackValue;
+    return n;
+  }
+
+  function normalizeViewMode(value, fallbackValue) {
+    return (value === 'loan' || value === 'claim' || value === 'risk' || value === 'all')
+      ? value
+      : fallbackValue;
+  }
+
+  function ensurePanelState() {
+    var defaults = cloneDefaultPanelState();
+
+    App.state = App.state || {};
+    App.state.ui = App.state.ui || {};
+    if (!App.state.ui.debtorPanel || typeof App.state.ui.debtorPanel !== 'object') {
+      App.state.ui.debtorPanel = defaults;
+      return App.state.ui.debtorPanel;
+    }
+
+    var panel = App.state.ui.debtorPanel;
+    panel.mode = (panel.mode === 'detail') ? 'detail' : 'list';
+    panel.selectedDebtorId = (panel.selectedDebtorId == null || panel.selectedDebtorId === '')
+      ? null
+      : String(panel.selectedDebtorId);
+    panel.searchQuery = (typeof panel.searchQuery === 'string') ? panel.searchQuery : defaults.searchQuery;
+    panel.page = normalizePositiveInt(panel.page, defaults.page);
+    panel.viewMode = normalizeViewMode(panel.viewMode, defaults.viewMode);
+    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
+    panel.perPage = normalizePositiveInt(panel.perPage, defaults.perPage);
+    return panel;
+  }
+
+  function requestDebtorListRefresh(reason) {
+    if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.DEBTOR_LIST) {
+      App.api.commit({
+        reason: reason || 'debtorList:refresh',
+        invalidate: [App.ViewKey.DEBTOR_LIST]
+      });
+      return;
+    }
     if (App.api && App.api.view && typeof App.api.view.invalidate === 'function' && App.ViewKey) {
       App.api.view.invalidate(App.ViewKey.DEBTOR_LIST);
       return;
@@ -35,6 +74,23 @@ App.debtors = App.debtors || {};
     try {
       console.warn('[DebtorList] invalidate path unavailable for DEBTOR_LIST');
     } catch (e) {}
+  }
+
+  function syncPanelVisibility() {
+    if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
+      App.debtorPanel.syncFromState();
+    }
+  }
+
+  function clearLegacyDebtorState() {
+    if (!App.debtors) return;
+    if (Object.prototype.hasOwnProperty.call(App.debtors, 'state')) {
+      try {
+        delete App.debtors.state;
+      } catch (e) {
+        App.debtors.state = undefined;
+      }
+    }
   }
 
   function getDerivedDebtors() {
@@ -47,75 +103,204 @@ App.debtors = App.debtors || {};
     return [];
   }
 
-  App.debtors.updateFilteredList = function () {
-    var st = App.debtors.state || {};
-    var panel = ensurePanelState();
-    var q = String(panel.searchQuery || st.query || '').toLowerCase();
-    st.query = panel.searchQuery || '';
+  function matchesViewMode(d, viewMode) {
+    if (!d) return false;
+    if (viewMode === 'loan') {
+      return ((d.loanCount != null) ? d.loanCount : 0) > 0;
+    }
+    if (viewMode === 'claim') {
+      return ((d.claimCount != null) ? d.claimCount : 0) > 0;
+    }
+    if (viewMode === 'risk') {
+      return !!d.hasOverdueSchedule;
+    }
+    return true;
+  }
 
-    var full = getDerivedDebtors();
-    var viewMode = st.viewMode || 'all';
-    var activeOnly = (st.activeOnly !== false);
+  function matchesSearchQuery(d, lowerQuery) {
+    if (!lowerQuery) return true;
+    if (!d || !d.name) return false;
+    return String(d.name).toLowerCase().indexOf(lowerQuery) !== -1;
+  }
 
-    var out = full.filter(function (d) {
-      if (!d) return false;
+  function selectFilteredDebtors(panel, fullList) {
+    panel = panel || ensurePanelState();
+    fullList = Array.isArray(fullList) ? fullList : getDerivedDebtors();
+    var lowerQuery = String(panel.searchQuery || '').trim().toLowerCase();
+    var activeOnly = (panel.activeOnly !== false);
+    var viewMode = normalizeViewMode(panel.viewMode, 'all');
+    var out = [];
 
-      if (activeOnly && !d.hasAliveSchedule) return false;
+    for (var i = 0; i < fullList.length; i++) {
+      var d = fullList[i];
+      if (!d) continue;
+      if (activeOnly && !d.hasAliveSchedule) continue;
+      if (!matchesViewMode(d, viewMode)) continue;
+      if (!matchesSearchQuery(d, lowerQuery)) continue;
+      out.push(d);
+    }
 
-      if (viewMode === 'loan') {
-        var loanCnt = (d.loanCount != null) ? d.loanCount : 0;
-        if (!(loanCnt > 0)) return false;
-      } else if (viewMode === 'claim') {
-        var claimCnt = (d.claimCount != null) ? d.claimCount : 0;
-        if (!(claimCnt > 0)) return false;
-      } else if (viewMode === 'risk') {
-        if (!d.hasOverdueSchedule) return false;
+    return out;
+  }
+
+  function getPaginationMeta(panel, filteredCount) {
+    panel = panel || ensurePanelState();
+    filteredCount = Number(filteredCount || 0);
+    var perPage = normalizePositiveInt(panel.perPage, 15);
+    var totalPages = Math.max(1, Math.ceil(filteredCount / perPage));
+    var page = normalizePositiveInt(panel.page, 1);
+    if (page > totalPages) {
+      page = totalPages;
+      panel.page = page;
+    }
+    return {
+      perPage: perPage,
+      totalPages: totalPages,
+      page: page,
+      filteredCount: filteredCount
+    };
+  }
+
+  function selectPaginatedDebtors(panel, filteredList) {
+    var meta = getPaginationMeta(panel, Array.isArray(filteredList) ? filteredList.length : 0);
+    var start = (meta.page - 1) * meta.perPage;
+    var end = start + meta.perPage;
+    return {
+      meta: meta,
+      items: (Array.isArray(filteredList) ? filteredList : []).slice(start, end)
+    };
+  }
+
+  function getDomRefs() {
+    return {
+      root: document.getElementById('debtor-list-root'),
+      searchInput: document.querySelector('.dlist-search-input'),
+      addBtn: document.querySelector('.dlist-add-btn'),
+      prevBtn: document.querySelector('.dlist-page-prev'),
+      nextBtn: document.querySelector('.dlist-page-next'),
+      pageLabel: document.querySelector('.dlist-page-label'),
+      viewBtns: document.querySelectorAll('.dlist-view-btn[data-view]'),
+      activeToggleBtn: document.querySelector('[data-role="dlist-active-toggle"]')
+    };
+  }
+
+  function syncSearchInputUI(panel, refs) {
+    refs = refs || getDomRefs();
+    if (!refs.searchInput) return;
+    var nextValue = String(panel.searchQuery || '');
+    if (refs.searchInput.value !== nextValue) {
+      refs.searchInput.value = nextValue;
+    }
+  }
+
+  App.debtors._setViewModeUI = function (mode) {
+    var btns = document.querySelectorAll('.dlist-view-btn[data-view]');
+    if (!btns || !btns.length) return;
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      var v = b.getAttribute('data-view') || 'all';
+      if (v === mode) {
+        b.classList.add('active');
+        b.classList.add('is-active');
+        b.setAttribute('aria-selected', 'true');
+      } else {
+        b.classList.remove('active');
+        b.classList.remove('is-active');
+        b.setAttribute('aria-selected', 'false');
       }
-
-      if (q) {
-        if (!d.name) return false;
-        return String(d.name).toLowerCase().indexOf(q) !== -1;
-      }
-      return true;
-    });
-
-    st.filteredList = out;
+    }
   };
 
-  App.debtors.renderList = function () {
-    var root = document.getElementById('debtor-list-root');
+  App.debtors._setActiveOnlyUI = function (isOn) {
+    var btn = document.querySelector('[data-role="dlist-active-toggle"]');
+    if (!btn) return;
+    if (isOn) {
+      btn.classList.add('is-on');
+      btn.classList.remove('is-off');
+      btn.setAttribute('aria-pressed', 'true');
+    } else {
+      btn.classList.remove('is-on');
+      btn.classList.add('is-off');
+      btn.setAttribute('aria-pressed', 'false');
+    }
+  };
+
+  function syncFilterControls(panel, refs) {
+    refs = refs || getDomRefs();
+    syncSearchInputUI(panel, refs);
+    if (typeof App.debtors._setViewModeUI === 'function') {
+      App.debtors._setViewModeUI(panel.viewMode);
+    }
+    if (typeof App.debtors._setActiveOnlyUI === 'function') {
+      App.debtors._setActiveOnlyUI(!!panel.activeOnly);
+    }
+  }
+
+  function updatePaginationUI(meta, refs) {
+    refs = refs || getDomRefs();
+    if (!refs.pageLabel) return;
+    refs.pageLabel.textContent = String(meta.page) + ' / ' + String(meta.totalPages);
+    if (refs.prevBtn) refs.prevBtn.disabled = (meta.page <= 1);
+    if (refs.nextBtn) refs.nextBtn.disabled = (meta.page >= meta.totalPages);
+  }
+
+  App.debtors._updatePaginationUI = function (meta) {
+    var panel = ensurePanelState();
+    if (!meta) {
+      var filtered = selectFilteredDebtors(panel, getDerivedDebtors());
+      meta = getPaginationMeta(panel, filtered.length);
+    }
+    updatePaginationUI(meta, getDomRefs());
+  };
+
+  App.debtors.updateFilteredList = function () {
+    return selectFilteredDebtors(ensurePanelState(), getDerivedDebtors());
+  };
+
+  function renderListFromState() {
+    clearLegacyDebtorState();
+
+    var refs = getDomRefs();
+    var root = refs.root;
     if (!root) {
-      if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
-        App.debtorPanel.syncFromState();
-      }
+      syncPanelVisibility();
       return;
     }
 
-    var st = App.debtors.state || {};
     var panel = ensurePanelState();
-    var perPage = st.perPage || 15;
-    var page = (typeof panel.page === 'number' && isFinite(panel.page) && panel.page > 0) ? panel.page : 1;
-    st.page = page;
-    panel.page = page;
+    var filtered = selectFilteredDebtors(panel, getDerivedDebtors());
+    var paginated = selectPaginatedDebtors(panel, filtered);
 
     root.innerHTML = '';
-
-    var start = (page - 1) * perPage;
-    var end = start + perPage;
-    var list = (st.filteredList || []).slice(start, end);
-
-    for (var i = 0; i < list.length; i++) {
-      root.appendChild(App.debtors.renderItem(list[i]));
+    for (var i = 0; i < paginated.items.length; i++) {
+      root.appendChild(App.debtors.renderItem(paginated.items[i]));
     }
 
-    if (typeof App.debtors._updatePaginationUI === 'function') {
-      App.debtors._updatePaginationUI();
-    }
+    syncFilterControls(panel, refs);
+    updatePaginationUI(paginated.meta, refs);
+    syncPanelVisibility();
+  }
+  renderListFromState._ls_fromUIState = true;
 
-    if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
-      App.debtorPanel.syncFromState();
+  App.debtors.renderListImpl = renderListFromState;
+  App.debtors._renderListFromState = renderListFromState;
+
+  App.debtors.renderList = (function () {
+    var warned = false;
+    function warnOnce() {
+      if (warned) return;
+      warned = true;
+      try {
+        console.warn('[DEPRECATED] direct debtorList.renderList() called. Use commit/invalidate instead.');
+      } catch (e) {}
     }
-  };
+    var wrapper = function () {
+      warnOnce();
+      requestDebtorListRefresh('debtorList:deprecated-renderList');
+    };
+    wrapper._deprecatedInvalidateWrapper = true;
+    return wrapper;
+  })();
 
   App.debtors.renderItem = function (d) {
     var wrap = document.createElement('div');
@@ -180,194 +365,92 @@ App.debtors = App.debtors || {};
     return wrap;
   };
 
-  App.debtors._setViewModeUI = function (mode) {
-    var btns = document.querySelectorAll('.dlist-view-btn[data-view]');
-    if (!btns || !btns.length) return;
-    for (var i = 0; i < btns.length; i++) {
-      var b = btns[i];
-      var v = b.getAttribute('data-view') || 'all';
-      if (v === mode) {
-        b.classList.add('active');
-        b.classList.add('is-active');
-        b.setAttribute('aria-selected', 'true');
-      } else {
-        b.classList.remove('active');
-        b.classList.remove('is-active');
-        b.setAttribute('aria-selected', 'false');
-      }
-    }
-  };
-
-
-  function ensureRendererRegistered() {
-    if (rendererRegistered) return;
-    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.DEBTOR_LIST)) return;
-    var renderListFromState = function () {
-      if (App.debtors && typeof App.debtors.updateFilteredList === 'function') {
-        App.debtors.updateFilteredList();
-      }
-      if (App.debtors && typeof App.debtors.renderList === 'function') {
-        App.debtors.renderList();
-      }
-    };
-    renderListFromState._ls_fromUIState = true;
-    App.renderCoordinator.register(App.ViewKey.DEBTOR_LIST, renderListFromState);
-    rendererRegistered = true;
+  function bindSearchInput(refs) {
+    if (!refs.searchInput) return;
+    refs.searchInput.addEventListener('input', function () {
+      var panel = ensurePanelState();
+      panel.searchQuery = String(refs.searchInput.value || '').trim();
+      panel.page = 1;
+      requestDebtorListRefresh('debtorList:search');
+    });
   }
 
-  App.debtors._setActiveOnlyUI = function (isOn) {
-    var btn = document.querySelector('[data-role="dlist-active-toggle"]');
-    if (!btn) return;
-    if (isOn) {
-      btn.classList.add('is-on');
-      btn.classList.remove('is-off');
-      btn.setAttribute('aria-pressed', 'true');
-    } else {
-      btn.classList.remove('is-on');
-      btn.classList.add('is-off');
-      btn.setAttribute('aria-pressed', 'false');
+  function bindAddButton(refs) {
+    if (!refs.addBtn) return;
+    refs.addBtn.addEventListener('click', function () {
+      if (App.features && App.features.debtors && typeof App.features.debtors.openDebtorModal === 'function') {
+        App.features.debtors.openDebtorModal('create', null);
+      }
+    });
+  }
+
+  function bindViewButtons(refs) {
+    var viewBtns = refs.viewBtns;
+    if (!viewBtns || !viewBtns.length) return;
+    for (var i = 0; i < viewBtns.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var panel = ensurePanelState();
+          panel.viewMode = normalizeViewMode(btn.getAttribute('data-view') || 'all', 'all');
+          panel.page = 1;
+          requestDebtorListRefresh('debtorList:viewMode:' + panel.viewMode);
+        });
+      })(viewBtns[i]);
     }
-  };
+  }
+
+  function bindActiveToggle(refs) {
+    if (!refs.activeToggleBtn) return;
+    refs.activeToggleBtn.addEventListener('click', function () {
+      var panel = ensurePanelState();
+      panel.activeOnly = !panel.activeOnly;
+      panel.page = 1;
+      requestDebtorListRefresh('debtorList:activeOnly:' + String(panel.activeOnly));
+    });
+  }
+
+  function bindPagination(refs) {
+    if (refs.prevBtn) {
+      refs.prevBtn.addEventListener('click', function () {
+        var panel = ensurePanelState();
+        if (panel.page > 1) {
+          panel.page -= 1;
+          requestDebtorListRefresh('debtorList:page:' + String(panel.page));
+        }
+      });
+    }
+
+    if (refs.nextBtn) {
+      refs.nextBtn.addEventListener('click', function () {
+        var panel = ensurePanelState();
+        var filtered = selectFilteredDebtors(panel, getDerivedDebtors());
+        var meta = getPaginationMeta(panel, filtered.length);
+        if (meta.page < meta.totalPages) {
+          panel.page = meta.page + 1;
+          requestDebtorListRefresh('debtorList:page:' + String(panel.page));
+        }
+      });
+    }
+  }
+
+  App.debtors.requestListRefresh = requestDebtorListRefresh;
 
   App.debtors.initDom = function () {
-    if (App.debtors._initializedDom) {
-      if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
-        App.debtorPanel.syncFromState();
-      }
-      return;
-    }
-    App.debtors._initializedDom = true;
-
-    ensureRendererRegistered();
-
+    clearLegacyDebtorState();
     var panel = ensurePanelState();
-    App.debtors.state.query = panel.searchQuery || '';
-    App.debtors.state.page = panel.page || 1;
+    var refs = getDomRefs();
 
-    var searchInput = document.querySelector('.dlist-search-input');
-    var addBtn = document.querySelector('.dlist-add-btn');
-    var prevBtn = document.querySelector('.dlist-page-prev');
-    var nextBtn = document.querySelector('.dlist-page-next');
-    var pageLabel = document.querySelector('.dlist-page-label');
-    var viewBtns = document.querySelectorAll('.dlist-view-btn[data-view]');
-    var activeToggleBtn = document.querySelector('[data-role="dlist-active-toggle"]');
-
-    if (searchInput) {
-      searchInput.value = panel.searchQuery || '';
-      searchInput.addEventListener('input', function () {
-        var ui = ensurePanelState();
-        ui.searchQuery = searchInput.value.trim();
-        ui.page = 1;
-        App.debtors.state.query = ui.searchQuery;
-        App.debtors.state.page = 1;
-        invalidateList();
-      });
+    if (!domInitialized) {
+      domInitialized = true;
+      bindSearchInput(refs);
+      bindAddButton(refs);
+      bindViewButtons(refs);
+      bindActiveToggle(refs);
+      bindPagination(refs);
     }
 
-    if (addBtn) {
-      addBtn.addEventListener('click', function () {
-        if (App.features && App.features.debtors &&
-            typeof App.features.debtors.openDebtorModal === 'function') {
-          App.features.debtors.openDebtorModal('create', null);
-        }
-      });
-    }
-
-    if (viewBtns && viewBtns.length) {
-      for (var vb = 0; vb < viewBtns.length; vb++) {
-        (function (btn) {
-          btn.addEventListener('click', function () {
-            var mode = btn.getAttribute('data-view') || 'all';
-            App.debtors.state.viewMode = mode;
-
-            if (typeof App.debtors._setViewModeUI === 'function') {
-              App.debtors._setViewModeUI(mode);
-            }
-
-            var ui = ensurePanelState();
-            ui.page = 1;
-            App.debtors.state.page = 1;
-            invalidateList();
-          });
-        })(viewBtns[vb]);
-      }
-    }
-
-    if (activeToggleBtn) {
-      activeToggleBtn.addEventListener('click', function () {
-        var st = App.debtors.state || {};
-        st.activeOnly = !st.activeOnly;
-
-        if (typeof App.debtors._setActiveOnlyUI === 'function') {
-          App.debtors._setActiveOnlyUI(!!st.activeOnly);
-        }
-
-        var ui = ensurePanelState();
-        ui.page = 1;
-        st.page = 1;
-        invalidateList();
-      });
-    }
-
-    var updatePaginationUI = function () {
-      if (!pageLabel) return;
-      var st = App.debtors.state || {};
-      var ui = ensurePanelState();
-      var totalPages = Math.max(1, Math.ceil((st.filteredList || []).length / (st.perPage || 15)));
-      var page = (typeof ui.page === 'number' && isFinite(ui.page) && ui.page > 0) ? ui.page : 1;
-      if (page > totalPages) {
-        page = totalPages;
-        ui.page = page;
-      }
-      st.page = page;
-
-      pageLabel.textContent = page + ' / ' + totalPages;
-      if (prevBtn) {
-        prevBtn.disabled = (page <= 1);
-      }
-      if (nextBtn) {
-        nextBtn.disabled = (page >= totalPages);
-      }
-    };
-
-    App.debtors._updatePaginationUI = updatePaginationUI;
-
-    if (prevBtn) {
-      prevBtn.addEventListener('click', function () {
-        var ui = ensurePanelState();
-        if (ui.page > 1) {
-          ui.page -= 1;
-          App.debtors.state.page = ui.page;
-          invalidateList();
-        }
-      });
-    }
-
-    if (nextBtn) {
-      nextBtn.addEventListener('click', function () {
-        var ui = ensurePanelState();
-        var st = App.debtors.state || {};
-        var totalPages = Math.max(1, Math.ceil((st.filteredList || []).length / (st.perPage || 15)));
-        if (ui.page < totalPages) {
-          ui.page += 1;
-          App.debtors.state.page = ui.page;
-          invalidateList();
-        }
-      });
-    }
-
-    if (!App.debtors.state.viewMode) App.debtors.state.viewMode = 'all';
-    if (typeof App.debtors.state.activeOnly !== 'boolean') App.debtors.state.activeOnly = true;
-
-    if (typeof App.debtors._setViewModeUI === 'function') {
-      App.debtors._setViewModeUI(App.debtors.state.viewMode);
-    }
-    if (typeof App.debtors._setActiveOnlyUI === 'function') {
-      App.debtors._setActiveOnlyUI(!!App.debtors.state.activeOnly);
-    }
-
-    if (App.debtorPanel && typeof App.debtorPanel.syncFromState === 'function') {
-      App.debtorPanel.syncFromState();
-    }
+    syncFilterControls(panel, refs);
+    App.debtors._updatePaginationUI();
+    syncPanelVisibility();
   };
 })();

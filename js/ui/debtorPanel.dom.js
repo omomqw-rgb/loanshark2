@@ -3,18 +3,50 @@ window.App = window.App || {};
 App.debtorPanel = App.debtorPanel || {};
 
 (function () {
+  'use strict';
+
   var initialized = false;
 
-  function ensurePanelState() {
-    App.state = App.state || {};
-    App.state.ui = App.state.ui || {};
-    App.state.ui.debtorPanel = App.state.ui.debtorPanel || {
+  function cloneDefaultPanelState() {
+    if (App && typeof App.getDefaultDebtorPanelState === 'function') {
+      return App.getDefaultDebtorPanelState();
+    }
+    return {
       mode: 'list',
       selectedDebtorId: null,
       searchQuery: '',
-      page: 1
+      page: 1,
+      viewMode: 'all',
+      activeOnly: true,
+      perPage: 15
     };
-    return App.state.ui.debtorPanel;
+  }
+
+  function ensurePanelState() {
+    var defaults = cloneDefaultPanelState();
+
+    App.state = App.state || {};
+    App.state.ui = App.state.ui || {};
+    if (!App.state.ui.debtorPanel || typeof App.state.ui.debtorPanel !== 'object') {
+      App.state.ui.debtorPanel = defaults;
+      return App.state.ui.debtorPanel;
+    }
+
+    var panel = App.state.ui.debtorPanel;
+    panel.mode = (panel.mode === 'detail') ? 'detail' : 'list';
+    panel.selectedDebtorId = (panel.selectedDebtorId == null || panel.selectedDebtorId === '')
+      ? null
+      : String(panel.selectedDebtorId);
+    panel.searchQuery = (typeof panel.searchQuery === 'string') ? panel.searchQuery : defaults.searchQuery;
+    panel.page = (typeof panel.page === 'number' && isFinite(panel.page) && panel.page > 0) ? Math.floor(panel.page) : defaults.page;
+    panel.viewMode = (panel.viewMode === 'loan' || panel.viewMode === 'claim' || panel.viewMode === 'risk' || panel.viewMode === 'all')
+      ? panel.viewMode
+      : defaults.viewMode;
+    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
+    panel.perPage = (typeof panel.perPage === 'number' && isFinite(panel.perPage) && panel.perPage > 0)
+      ? Math.floor(panel.perPage)
+      : defaults.perPage;
+    return panel;
   }
 
   function getElements() {
@@ -29,10 +61,10 @@ App.debtorPanel = App.debtorPanel || {};
   }
 
   App.debtorPanel.syncFromState = function () {
-    var ui = ensurePanelState();
+    var panelState = ensurePanelState();
     var els = getElements();
 
-    var mode = (ui && ui.mode === 'detail') ? 'detail' : 'list';
+    var mode = (panelState.mode === 'detail') ? 'detail' : 'list';
     var showList = (mode === 'list');
 
     if (els.search) els.search.style.display = showList ? '' : 'none';
@@ -77,14 +109,14 @@ App.debtorPanel = App.debtorPanel || {};
   };
 
   App.debtorPanel.showList = function () {
-    var ui = ensurePanelState();
-    ui.mode = 'list';
+    var panelState = ensurePanelState();
+    panelState.mode = 'list';
     App.debtorPanel.syncFromState();
   };
 
   App.debtorPanel.showDetail = function () {
-    var ui = ensurePanelState();
-    ui.mode = 'detail';
+    var panelState = ensurePanelState();
+    panelState.mode = 'detail';
     App.debtorPanel.syncFromState();
   };
 })();

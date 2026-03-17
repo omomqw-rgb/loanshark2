@@ -480,9 +480,9 @@ function mapLoanRow(row) {
     };
   }
 
-function renderAll() {
+function renderAll(reason) {
     if (App.api && typeof App.api.commitAll === 'function') {
-      App.api.commitAll('legacy:renderAll');
+      App.api.commitAll(reason || 'legacy:renderAll');
     }
   }
 

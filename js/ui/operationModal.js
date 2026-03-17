@@ -926,8 +926,16 @@
           App.api.view.openDebtorDetail(debtorId);
           return;
         }
-        if (App.debtorDetail && typeof App.debtorDetail.render === 'function') {
-          App.debtorDetail.render(debtorId);
+        if (App.api && typeof App.api.commit === 'function' && App.ViewKey) {
+          App.state = App.state || {};
+          App.state.ui = App.state.ui || {};
+          App.state.ui.debtorPanel = App.state.ui.debtorPanel || {};
+          App.state.ui.debtorPanel.mode = 'detail';
+          App.state.ui.debtorPanel.selectedDebtorId = String(debtorId);
+          App.api.commit({
+            reason: 'operationModal:openDebtorDetail',
+            invalidate: [App.ViewKey.DEBTOR_DETAIL, App.ViewKey.DEBTOR_LIST]
+          });
         }
       }
     });

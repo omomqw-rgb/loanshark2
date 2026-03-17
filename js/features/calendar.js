@@ -28,7 +28,6 @@
 
 
   var eventsBound = false;
-  var rendererRegistered = false;
   var initialized = false;
 
   function pad2(v) {
@@ -93,6 +92,16 @@
       }
     }
     return state.ui.calendar;
+  }
+
+  function commitCalendarInvalidate(reason) {
+    if (App.api && typeof App.api.commit === 'function' && App.ViewKey && App.ViewKey.CALENDAR) {
+      App.api.commit({ reason: reason || 'calendar:ui', invalidate: [App.ViewKey.CALENDAR] });
+      return;
+    }
+    if (App.renderCoordinator && typeof App.renderCoordinator.invalidate === 'function' && App.ViewKey && App.ViewKey.CALENDAR) {
+      App.renderCoordinator.invalidate(App.ViewKey.CALENDAR);
+    }
   }
 
   function buildIndex(list, key) {
@@ -814,7 +823,7 @@ summary.appendChild(chipOverdue);
       calState.currentDate = toISODate(next);
     }
 
-    render();
+    commitCalendarInvalidate('calendar:nav:' + String(action || 'unknown'));
   }
 
   function handleViewToggle(view) {
@@ -822,14 +831,14 @@ summary.appendChild(chipOverdue);
     if (view !== 'month' && view !== 'week') return;
     if (calState.view === view) return;
     calState.view = view;
-    render();
+    commitCalendarInvalidate('calendar:view:' + view);
   }
 
   function handleSelectDate(dateStr) {
     if (!dateStr) return;
     var calState = ensureCalendarState();
     calState.currentDate = dateStr;
-    render();
+    commitCalendarInvalidate('calendar:selectDate:' + dateStr);
   }
 
   // 정렬 토글 처리: 상태 모드와 타입 모드 사이를 전환한다.
@@ -837,7 +846,7 @@ summary.appendChild(chipOverdue);
     var calState = ensureCalendarState();
     var mode = calState.sortMode || 'type';
     calState.sortMode = (mode === 'type') ? 'status' : 'type';
-    render();
+    commitCalendarInvalidate('calendar:sortMode:' + calState.sortMode);
   }
 
   // 일정 행 클릭 처리: 해당 스케줄에 맞는 모달을 열고 해당 회차로 스크롤 및 하이라이트 한다.
@@ -1030,19 +1039,11 @@ summary.appendChild(chipOverdue);
     root.appendChild(shell);
   }
 
-  function ensureRendererRegistered() {
-    if (rendererRegistered) return;
-    if (!(App.renderCoordinator && App.ViewKey && App.ViewKey.CALENDAR)) return;
-    App.renderCoordinator.register(App.ViewKey.CALENDAR, render);
-    rendererRegistered = true;
-  }
-
   function init() {
     if (initialized) return;
     initialized = true;
     ensureCalendarState();
     bindEvents();
-    ensureRendererRegistered();
   }
 
   App.features.calendar = {

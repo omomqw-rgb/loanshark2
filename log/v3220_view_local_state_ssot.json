@@ -1,0 +1,18 @@
+{
+  "version": "v3.2.20_view_local_state_ssot",
+  "base": "LoanShark_v3.2.19_debtor_panel_ui_ssot.zip",
+  "summary": [
+    "Promoted monitoring/report view-local UI state into App.state.ui and normalized snapshot/cloud schema coverage.",
+    "Removed monitoring/calendar/report direct rerender paths from UI handlers and routed them through commit/invalidate boundaries.",
+    "Extended cloud snapshot UI payload to include debtorPanel view filters plus monitoring/report UI state while preserving existing backup/restore core behavior."
+  ],
+  "files": [
+    "js/core/state.js",
+    "js/core/cloudState.js",
+    "js/infra/stateIO.js",
+    "js/features/monitoring.js",
+    "js/features/report.state.js",
+    "js/features/report.js",
+    "js/features/calendar.js"
+  ]
+}

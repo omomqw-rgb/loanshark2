@@ -87,6 +87,10 @@
     renderMap[key] = renderFn;
   }
 
+  function hasRenderer(key) {
+    return !!(key && typeof renderMap[key] === 'function');
+  }
+
   function isDerivedKey(key) {
     try {
       if (App.ViewKey && typeof App.ViewKey.DERIVED === 'string' && key === App.ViewKey.DERIVED) return true;
@@ -220,6 +224,7 @@
 
   App.renderCoordinator = {
     register: register,
+    hasRenderer: hasRenderer,
     invalidate: invalidate,
     flushSoon: flushSoon,
     flushNow: flush,

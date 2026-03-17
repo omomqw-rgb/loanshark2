@@ -1,0 +1,23 @@
+{
+  "version": "v3.2.21",
+  "patch": "ui_restore_policy_lock",
+  "base": "LoanShark_v3.2.20_view_local_state_ssot.zip",
+  "changedFiles": [
+    "js/core/state.js",
+    "js/core/cloudState.js",
+    "js/core/saveload.local.js",
+    "js/infra/stateIO.js"
+  ],
+  "uiPolicy": {
+    "default": "preserve",
+    "cloudLoad": "preserve",
+    "localLoad": "snapshot",
+    "supportedPolicies": ["preserve", "snapshot", "reset"],
+    "managedSubtrees": ["debtorPanel", "monitoring", "report"]
+  },
+  "notes": [
+    "keepUI is retained for backward compatibility and mapped to uiPolicy when uiPolicy is omitted.",
+    "This patch does not change backup envelope, validator semantics, or empty backup handling.",
+    "Calendar and activeTab remain preserved in this stage; managed UI restore is limited to debtorPanel, monitoring, and report."
+  ]
+}

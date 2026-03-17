@@ -43,23 +43,43 @@ function updateTrendSummary(root, velocitySeries) {
 function updateCapitalFlowSection(root, agg) {
   var section = root.querySelector('.report-section-capitalflow');
   if (!section) return;
-  App.reportTrendState = App.reportTrendState || { period: 'monthly' };
-  var period = App.reportTrendState.period || 'monthly';
+
+  var reportState = (App.reportState && typeof App.reportState.ensure === 'function')
+    ? App.reportState.ensure()
+    : null;
+  var trendState = reportState && reportState.trend ? reportState.trend : (App.reportTrendState || { period: 'monthly' });
+  var period = trendState.period || 'monthly';
 
   var series = (App.reportCompute && App.reportCompute.computeTrendSeries)
     ? App.reportCompute.computeTrendSeries(period)
     : { labels: [], inflow: [], outflow: [], net: [], velocity: [] };
   var labels = series.labels || [];
-  var legendRoot = section.querySelector('[data-capitalflow-legend]');
   var active = { velocity: true, inflow: true, outflow: true, net: true };
+  if (App.reportState && typeof App.reportState.getLegendGroup === 'function') {
+    var legendGroup = App.reportState.getLegendGroup('capitalflow');
+    if (legendGroup) {
+      active.velocity = legendGroup.velocity !== false;
+      active.inflow = legendGroup.inflow !== false;
+      active.outflow = legendGroup.outflow !== false;
+      active.net = legendGroup.net !== false;
+    }
+  } else if (reportState && reportState.legendVisibility && reportState.legendVisibility.capitalflow) {
+    var fallbackLegendGroup = reportState.legendVisibility.capitalflow;
+    active.velocity = fallbackLegendGroup.velocity !== false;
+    active.inflow = fallbackLegendGroup.inflow !== false;
+    active.outflow = fallbackLegendGroup.outflow !== false;
+    active.net = fallbackLegendGroup.net !== false;
+  }
+
+  var legendRoot = section.querySelector('[data-capitalflow-legend]');
   if (legendRoot) {
-    var legendItems = legendRoot.querySelectorAll('.capitalflow-legend-item');
+    var legendItems = legendRoot.querySelectorAll('.capitalflow-legend-item[data-series]');
     legendItems.forEach(function (item) {
       var key = item.getAttribute('data-series');
-      if (!key) return;
-      if (!item.classList.contains('is-active')) {
-        active[key] = false;
-      }
+      if (!key || !Object.prototype.hasOwnProperty.call(active, key)) return;
+      var isActive = active[key] !== false;
+      item.classList.toggle('is-active', isActive);
+      item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
   }
 

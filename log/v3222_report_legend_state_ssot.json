@@ -1,0 +1,18 @@
+{
+  "version": "v3.2.22_report_legend_state_ssot",
+  "base": "LoanShark_v3.2.21_ui_restore_policy_lock.zip",
+  "summary": [
+    "report legend visibility를 App.state.ui.report.legendVisibility.capitalflow로 승격",
+    "report legend 클릭은 state 토글 + invalidate(REPORT)만 수행",
+    "capitalflow renderer가 DOM class 대신 state 기준으로 series visibility를 계산",
+    "cloud snapshot/stateIO normalize 경로에 report legend visibility 저장/복원 지원 추가"
+  ],
+  "files": [
+    "js/core/state.js",
+    "js/features/report.state.js",
+    "js/features/report.js",
+    "js/features/report.render.capitalflow.js",
+    "js/core/cloudState.js",
+    "js/infra/stateIO.js"
+  ]
+}
