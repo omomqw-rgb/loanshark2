@@ -137,6 +137,15 @@
   };
 
   App.cloudState.buildComparablePayload = function (snapshot) {
+    if (App.stateIO) {
+      if (snapshot && typeof App.stateIO.buildComparablePayloadFromSnapshot === 'function') {
+        return App.stateIO.buildComparablePayloadFromSnapshot(snapshot);
+      }
+      if (!snapshot && typeof App.stateIO.buildComparablePayloadFromCurrentState === 'function') {
+        return App.stateIO.buildComparablePayloadFromCurrentState();
+      }
+    }
+
     var base = snapshot;
     if (!base) {
       base = App.cloudState.build();

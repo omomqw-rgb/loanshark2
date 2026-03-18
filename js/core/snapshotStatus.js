@@ -80,8 +80,8 @@
   }
 
   function buildComparableFromSnapshot(snapshot) {
-    if (App.cloudState && typeof App.cloudState.buildComparablePayload === 'function') {
-      return App.cloudState.buildComparablePayload(snapshot);
+    if (App.stateIO && typeof App.stateIO.buildComparablePayloadFromSnapshot === 'function') {
+      return App.stateIO.buildComparablePayloadFromSnapshot(snapshot);
     }
     return {
       data: isObject(snapshot) && isObject(snapshot.data) ? snapshot.data : {},
@@ -90,8 +90,8 @@
   }
 
   function buildComparableFromCurrentState() {
-    if (App.cloudState && typeof App.cloudState.buildComparablePayload === 'function') {
-      return App.cloudState.buildComparablePayload();
+    if (App.stateIO && typeof App.stateIO.buildComparablePayloadFromCurrentState === 'function') {
+      return App.stateIO.buildComparablePayloadFromCurrentState();
     }
     return { data: {}, meta: {} };
   }
@@ -343,7 +343,10 @@
       return { ok: false, reason: 'cloudstate_unavailable' };
     }
 
-    var validation = App.cloudState.validateSnapshot(snapshot, { rejectEmptyData: true });
+    var validation = App.cloudState.validateSnapshot(snapshot, {
+      rejectEmptyData: true,
+      originalInputFormat: opts.originalInputFormat || null
+    });
     if (!validation.ok) {
       console.warn('[Snapshots] Snapshot rejected before apply:', validation.reason, validation.counts || {});
       if (!opts.silentError && typeof App.showToast === 'function') {
@@ -352,7 +355,13 @@
       return { ok: false, reason: validation.reason };
     }
 
-    var applied = App.cloudState.apply(snapshot, { rejectEmptyData: true });
+    var normalizedSnapshot = validation.snapshot;
+    var appliedInputFormat = validation.inputFormat || 'snapshot-v1';
+    var appliedOriginalInputFormat = validation.originalInputFormat || appliedInputFormat;
+    var applied = App.cloudState.apply(normalizedSnapshot, {
+      rejectEmptyData: true,
+      originalInputFormat: appliedOriginalInputFormat
+    });
     if (!applied) {
       if (!opts.silentError && typeof App.showToast === 'function') {
         App.showToast('Snapshot Load 차단 — 비정상 스냅샷입니다.');
@@ -360,7 +369,12 @@
       return { ok: false, reason: 'apply_failed' };
     }
 
-    return { ok: true, snapshot: snapshot };
+    return {
+      ok: true,
+      normalizedSnapshot: normalizedSnapshot,
+      inputFormat: appliedInputFormat,
+      originalInputFormat: appliedOriginalInputFormat
+    };
   }
 
   function applyEmptyStateBaseline(opts) {
@@ -411,7 +425,7 @@
       return applyResult;
     }
 
-    markCleanFromSnapshot(buildSnapshotMetaFromRow(rows[0], 'legacy'), rows[0].state_json);
+    markCleanFromCurrent(buildSnapshotMetaFromRow(rows[0], 'legacy'));
     return { ok: true, source: 'legacy', row: rows[0] };
   }
 
@@ -444,7 +458,7 @@
       if (rows.length && rows[0] && rows[0].state_json) {
         var applyResult = validateAndApplySnapshot(rows[0].state_json, { silentError: !!opts.silentError });
         if (!applyResult.ok) return false;
-        markCleanFromSnapshot(buildSnapshotMetaFromRow(rows[0], 'cloud'), rows[0].state_json);
+        markCleanFromCurrent(buildSnapshotMetaFromRow(rows[0], 'cloud'));
         if (!opts.silentSuccess && typeof App.showToast === 'function') {
           App.showToast('Snapshot Load 완료 — 최신 저장본을 반영했습니다.');
         }
@@ -682,7 +696,7 @@
 
       var applyResult = validateAndApplySnapshot(row.state_json, { silentError: !!opts.silentError });
       if (!applyResult.ok) return false;
-      markCleanFromSnapshot(buildSnapshotMetaFromRow(row, 'cloud'), row.state_json);
+      markCleanFromCurrent(buildSnapshotMetaFromRow(row, 'cloud'));
       if (!opts.silentSuccess && typeof App.showToast === 'function') {
         App.showToast('Snapshot Load 완료 — 선택한 저장본을 반영했습니다.');
       }

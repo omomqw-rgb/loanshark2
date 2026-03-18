@@ -431,24 +431,27 @@
     return max;
   }
 
+  function computeMetaStateForCollections(metaSrc, debtors, loans, claims) {
+    var meta = cloneMetaState(metaSrc);
+    var computedD = computeMaxId(debtors) + 1;
+    var computedL = computeMaxId(loans) + 1;
+    var computedC = computeMaxId(claims) + 1;
+
+    meta.nextDebtorId = Math.max(toPositiveInt(meta.nextDebtorId) || 0, computedD || 1) || 1;
+    meta.nextLoanId = Math.max(toPositiveInt(meta.nextLoanId) || 0, computedL || 1) || 1;
+    meta.nextClaimId = Math.max(toPositiveInt(meta.nextClaimId) || 0, computedC || 1) || 1;
+    return meta;
+  }
+
   function ensureMetaFromCurrentState() {
     ensureState();
-    if (!isObject(App.state.meta)) App.state.meta = {};
-    var meta = App.state.meta;
-
-    var d = toPositiveInt(meta.nextDebtorId);
-    var l = toPositiveInt(meta.nextLoanId);
-    var c = toPositiveInt(meta.nextClaimId);
-
-    var computedD = computeMaxId(App.state.debtors) + 1;
-    var computedL = computeMaxId(App.state.loans) + 1;
-    var computedC = computeMaxId(App.state.claims) + 1;
-
-    meta.nextDebtorId = Math.max(d || 0, computedD || 1) || 1;
-    meta.nextLoanId = Math.max(l || 0, computedL || 1) || 1;
-    meta.nextClaimId = Math.max(c || 0, computedC || 1) || 1;
-
-    return meta;
+    App.state.meta = computeMetaStateForCollections(
+      App.state.meta,
+      Array.isArray(App.state.debtors) ? App.state.debtors : [],
+      Array.isArray(App.state.loans) ? App.state.loans : [],
+      Array.isArray(App.state.claims) ? App.state.claims : []
+    );
+    return App.state.meta;
   }
 
   function applyMetaFromSnapshot(snapshot, dataRoot) {
@@ -849,6 +852,40 @@
     return snapshot;
   }
 
+
+  function buildComparablePayloadFromDataRoot(dataRoot, metaSrc) {
+    var comparableData = createSnapshotDataState(dataRoot);
+    return {
+      data: comparableData,
+      meta: computeMetaStateForCollections(
+        metaSrc,
+        comparableData.debtors,
+        comparableData.loans,
+        comparableData.claims
+      )
+    };
+  }
+
+  function buildComparablePayloadFromSnapshot(snapshot) {
+    var normalized = normalizeSnapshotInput(snapshot, {});
+    if (!normalized.ok || !normalized.snapshot || !isObject(normalized.snapshot.data)) {
+      return { data: {}, meta: {} };
+    }
+    return buildComparablePayloadFromDataRoot(normalized.snapshot.data, normalized.snapshot.meta);
+  }
+
+  function buildComparablePayloadFromCurrentState() {
+    ensureState();
+    return buildComparablePayloadFromDataRoot({
+      debtors: Array.isArray(App.state.debtors) ? App.state.debtors : [],
+      loans: Array.isArray(App.state.loans) ? App.state.loans : [],
+      claims: Array.isArray(App.state.claims) ? App.state.claims : [],
+      schedules: getSchedulesSnapshot(),
+      cashLogs: Array.isArray(App.state.cashLogs) ? App.state.cashLogs : [],
+      riskSettings: (typeof App.riskSettings !== 'undefined') ? App.riskSettings : null
+    }, App.state.meta);
+  }
+
   function resolveSourceType(opts, reason) {
     if (opts && typeof opts.sourceType === 'string' && opts.sourceType) return opts.sourceType;
     var r = String(reason || '');
@@ -1095,6 +1132,9 @@
   App.stateIO.ensureMeta = ensureMetaFromCurrentState;
   App.stateIO.getCurrentAppVersion = getCurrentAppVersion;
   App.stateIO.buildSnapshotEnvelope = function (opts) { return buildSnapshotEnvelope(opts); };
+  App.stateIO.buildComparablePayloadFromSnapshot = function (snapshot) { return buildComparablePayloadFromSnapshot(snapshot); };
+  App.stateIO.buildComparablePayloadFromCurrentState = function () { return buildComparablePayloadFromCurrentState(); };
+  App.stateIO.computeComparableMetaState = function (metaSrc, debtors, loans, claims) { return computeMetaStateForCollections(metaSrc, debtors, loans, claims); };
   App.stateIO.normalizeSnapshotInput = function (snapshot, opts) { return normalizeSnapshotInput(snapshot, opts); };
   App.stateIO.validateSnapshot = function (snapshot, opts) { return validateSnapshot(snapshot, opts); };
 })(window);

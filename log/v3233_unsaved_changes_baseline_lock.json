@@ -1,0 +1,10 @@
+{
+  "version": "v3.2.33_unsaved_changes_baseline_lock",
+  "base": "LoanShark_v3.2.32_cloud_snapshot_history_status_bar.zip",
+  "summary": [
+    "load/import clean baseline switched to current applied state",
+    "dirty compare moved to stateIO pure comparable helpers",
+    "JSON import clean mark switched to current baseline",
+    "cloud comparable path aligned to canonical compare helpers"
+  ]
+}

@@ -4,7 +4,7 @@
   var App = window.App;
 
   App.meta = App.meta || {};
-  App.meta.version = 'v3.2.32_cloud_snapshot_history_status_bar';
+  App.meta.version = 'v3.2.33_unsaved_changes_baseline_lock';
 
   // Single source of truth: Calendar default view.
   // - Used by init/mount, load (legacy), and invalidate/rerender paths.

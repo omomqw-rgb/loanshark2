@@ -161,14 +161,14 @@
         return;
       }
 
-      if (App.snapshotStatus && typeof App.snapshotStatus.markCleanFromSnapshot === 'function') {
-        App.snapshotStatus.markCleanFromSnapshot({
+      if (App.snapshotStatus && typeof App.snapshotStatus.markCleanFromCurrent === 'function') {
+        App.snapshotStatus.markCleanFromCurrent({
           label: 'Imported JSON',
           sourceType: 'json',
           createdAt: validation.snapshot && validation.snapshot.savedAt ? validation.snapshot.savedAt : null,
           snapshotId: null,
           isImported: true
-        }, validation.snapshot);
+        });
       }
 
       console.log('[Import JSON] Success');
