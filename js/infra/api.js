@@ -104,7 +104,7 @@
       searchQuery: '',
       page: 1,
       viewMode: 'all',
-      activeOnly: true,
+      activeOnly: false,
       perPage: 15
     };
   }
@@ -130,7 +130,7 @@
     panel.viewMode = (panel.viewMode === 'loan' || panel.viewMode === 'claim' || panel.viewMode === 'risk' || panel.viewMode === 'all')
       ? panel.viewMode
       : defaults.viewMode;
-    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
+    panel.activeOnly = (panel.activeOnly === true);
     panel.perPage = normalizePositiveInt(panel.perPage, defaults.perPage);
 
     return panel;

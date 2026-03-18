@@ -1,0 +1,10 @@
+{
+  "version": "v3.2.34_active_only_default_off_lock",
+  "base": "LoanShark_v3.2.32_cloud_snapshot_history_status_bar.zip",
+  "summary": [
+    "Changed debtorPanel.activeOnly default from true to false across default, fallback, and normalize paths.",
+    "Locked debtor list filtering so active-only applies only when panel.activeOnly === true.",
+    "Preserved explicitly saved activeOnly values while defaulting missing legacy values to false."
+  ],
+  "title": "active_only_default_off_lock"
+}

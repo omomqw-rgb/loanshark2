@@ -14,7 +14,7 @@
       searchQuery: '',
       page: 1,
       viewMode: 'all',
-      activeOnly: true,
+      activeOnly: false,
       perPage: 15
     };
   }

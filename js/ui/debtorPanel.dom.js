@@ -17,7 +17,7 @@ App.debtorPanel = App.debtorPanel || {};
       searchQuery: '',
       page: 1,
       viewMode: 'all',
-      activeOnly: true,
+      activeOnly: false,
       perPage: 15
     };
   }
@@ -42,7 +42,7 @@ App.debtorPanel = App.debtorPanel || {};
     panel.viewMode = (panel.viewMode === 'loan' || panel.viewMode === 'claim' || panel.viewMode === 'risk' || panel.viewMode === 'all')
       ? panel.viewMode
       : defaults.viewMode;
-    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
+    panel.activeOnly = (panel.activeOnly === true);
     panel.perPage = (typeof panel.perPage === 'number' && isFinite(panel.perPage) && panel.perPage > 0)
       ? Math.floor(panel.perPage)
       : defaults.perPage;

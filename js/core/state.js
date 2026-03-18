@@ -4,7 +4,7 @@
   var App = window.App;
 
   App.meta = App.meta || {};
-  App.meta.version = 'v3.2.33_unsaved_changes_baseline_lock';
+  App.meta.version = 'v3.2.34_active_only_default_off_lock';
 
   // Single source of truth: Calendar default view.
   // - Used by init/mount, load (legacy), and invalidate/rerender paths.
@@ -23,7 +23,7 @@
       searchQuery: '',
       page: 1,
       viewMode: 'all',        // 'all' | 'loan' | 'claim' | 'risk'
-      activeOnly: true,
+      activeOnly: false,
       perPage: 15
     };
   };

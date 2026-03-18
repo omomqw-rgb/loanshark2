@@ -17,7 +17,7 @@ App.debtors = App.debtors || {};
       searchQuery: '',
       page: 1,
       viewMode: 'all',
-      activeOnly: true,
+      activeOnly: false,
       perPage: 15
     };
   }
@@ -54,7 +54,7 @@ App.debtors = App.debtors || {};
     panel.searchQuery = (typeof panel.searchQuery === 'string') ? panel.searchQuery : defaults.searchQuery;
     panel.page = normalizePositiveInt(panel.page, defaults.page);
     panel.viewMode = normalizeViewMode(panel.viewMode, defaults.viewMode);
-    panel.activeOnly = (typeof panel.activeOnly === 'boolean') ? panel.activeOnly : defaults.activeOnly;
+    panel.activeOnly = (panel.activeOnly === true);
     panel.perPage = normalizePositiveInt(panel.perPage, defaults.perPage);
     return panel;
   }
@@ -123,11 +123,15 @@ App.debtors = App.debtors || {};
     return String(d.name).toLowerCase().indexOf(lowerQuery) !== -1;
   }
 
+  function isActiveOnlyEnabled(panel) {
+    return !!(panel && panel.activeOnly === true);
+  }
+
   function selectFilteredDebtors(panel, fullList) {
     panel = panel || ensurePanelState();
     fullList = Array.isArray(fullList) ? fullList : getDerivedDebtors();
     var lowerQuery = String(panel.searchQuery || '').trim().toLowerCase();
-    var activeOnly = (panel.activeOnly !== false);
+    var activeOnly = isActiveOnlyEnabled(panel);
     var viewMode = normalizeViewMode(panel.viewMode, 'all');
     var out = [];
 
@@ -232,7 +236,7 @@ App.debtors = App.debtors || {};
       App.debtors._setViewModeUI(panel.viewMode);
     }
     if (typeof App.debtors._setActiveOnlyUI === 'function') {
-      App.debtors._setActiveOnlyUI(!!panel.activeOnly);
+      App.debtors._setActiveOnlyUI(isActiveOnlyEnabled(panel));
     }
   }
 
@@ -405,7 +409,7 @@ App.debtors = App.debtors || {};
     if (!refs.activeToggleBtn) return;
     refs.activeToggleBtn.addEventListener('click', function () {
       var panel = ensurePanelState();
-      panel.activeOnly = !panel.activeOnly;
+      panel.activeOnly = !isActiveOnlyEnabled(panel);
       panel.page = 1;
       requestDebtorListRefresh('debtorList:activeOnly:' + String(panel.activeOnly));
     });
