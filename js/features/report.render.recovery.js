@@ -14,53 +14,111 @@
     };
 
     function resolveRootBundle(root) {
+      var section = root ? (root.querySelector('.overview-panel-recovery-new') || root) : null;
       return {
         root: root,
-        summaryRoot: root ? (root.querySelector('.recovery-kpi-grid') || root) : null,
-        trendsRoot: root ? (root.querySelector('.recovery-flow-chart-box') || root) : null
+        section: section,
+        summaryRoot: section ? (section.querySelector('.recovery-kpi-grid') || section) : null,
+        trendsRoot: section ? (section.querySelector('.recovery-flow-chart-box') || section) : null
       };
     }
 
     function getRecoverySemantics(context) {
-      var overview = context && context.overview ? context.overview : {};
+      var recovery = context && context.recovery ? context.recovery : {};
+      var metaWeek = context && context.meta ? context.meta.weekSemantics : null;
       return {
-        label: overview.recoveryLabel || '회수 흐름',
-        description: overview.recoveryDescription || '스케줄 기준 예정액과 실제 회수액의 회수 흐름/추세입니다. 실제 현금성 자본 이동을 보여주는 Capital Flow와는 다른 의미 계약입니다.',
-        basis: overview.recoveryBasis || 'scheduled-recovery-trend',
-        basisText: overview.recoveryBasisText || '스케줄 기준 예정액·실회수 추세',
-        flowType: overview.recoveryFlowType || 'recovery-trend',
-        weekSemantics: overview.weekSemantics || (context && context.meta ? context.meta.weekSemantics : null)
+        label: recovery.label || '회수 흐름',
+        description: recovery.description || '스케줄 기준 예정액과 실제 회수액의 회수 흐름/추세입니다. 실제 현금성 자본 이동을 보여주는 Capital Flow와는 다른 의미 계약입니다.',
+        basis: recovery.basis || 'scheduled-recovery-trend',
+        basisText: recovery.basisText || '스케줄 기준 예정액·실회수 추세',
+        flowType: recovery.flowType || 'recovery-trend',
+        weekSemantics: recovery.weekSemantics || metaWeek || null
+      };
+    }
+
+    function ensureTextHost(parent, selector, tagName, className, dataRole) {
+      if (!parent) return null;
+      var node = parent.querySelector(selector);
+      if (node) return node;
+      node = document.createElement(tagName || 'div');
+      if (className) node.className = className;
+      if (dataRole) node.setAttribute('data-role', dataRole);
+      parent.appendChild(node);
+      return node;
+    }
+
+    function ensureHeaderCopy(section) {
+      if (!section) return null;
+      var header = ensureTextHost(section, '[data-role="recovery-header"]', 'div', 'overview-panel-header recovery-section-header', 'recovery-header');
+      var main = ensureTextHost(header, '[data-role="recovery-header-main"]', 'div', 'recovery-header-main', 'recovery-header-main');
+      var copy = ensureTextHost(main, '[data-role="recovery-header-copy"]', 'div', 'recovery-header-copy', 'recovery-header-copy');
+      var title = ensureTextHost(copy, '[data-role="recovery-title"]', 'h3', 'overview-panel-title recovery-section-title', 'recovery-title');
+      var meta = ensureTextHost(copy, '[data-role="recovery-header-meta"]', 'div', 'recovery-header-meta', 'recovery-header-meta');
+      var desc = ensureTextHost(meta, '[data-role="recovery-description"]', 'p', 'report-section-desc recovery-section-desc', 'recovery-description');
+      var basis = ensureTextHost(meta, '[data-role="recovery-basis"]', 'p', 'report-section-desc report-section-meta-note recovery-section-basis', 'recovery-basis');
+      if (desc.parentNode !== meta) meta.appendChild(desc);
+      if (basis.parentNode !== meta) meta.appendChild(basis);
+      return {
+        header: header,
+        main: main,
+        copy: copy,
+        meta: meta,
+        title: title,
+        desc: desc,
+        basis: basis
       };
     }
 
     function syncRecoverySemantics(root, context) {
       if (!root) return;
-      var section = root.querySelector('.overview-panel-recovery-new');
+      var bundle = resolveRootBundle(root);
+      var section = bundle.section;
       if (!section) return;
 
-      var semantics = getRecoverySemantics(context);
-      var header = section.querySelector('.overview-panel-header');
-      var title = section.querySelector('.overview-panel-title');
-      if (title) {
-        title.textContent = semantics.label || '회수 흐름';
+      var semantics = getRecoverySemantics(context || lastContext || {});
+      var hosts = ensureHeaderCopy(section);
+      if (!hosts) return;
+
+      hosts.title.textContent = semantics.label || '회수 흐름';
+      hosts.desc.textContent = semantics.description || '';
+      hosts.basis.textContent = semantics.basisText || '';
+
+      if (hosts.desc.textContent) {
+        hosts.desc.removeAttribute('hidden');
+      } else {
+        hosts.desc.setAttribute('hidden', 'hidden');
       }
-      if (header) {
-        var desc = header.querySelector('.report-section-desc[data-role="overview-recovery-desc"]');
-        if (!desc) {
-          desc = document.createElement('p');
-          desc.className = 'report-section-desc';
-          desc.setAttribute('data-role', 'overview-recovery-desc');
-          header.appendChild(desc);
+      if (hosts.basis.textContent) {
+        hosts.basis.removeAttribute('hidden');
+      } else {
+        hosts.basis.setAttribute('hidden', 'hidden');
+      }
+      if (hosts.meta) {
+        if (hosts.desc.textContent || hosts.basis.textContent) {
+          hosts.meta.removeAttribute('hidden');
+        } else {
+          hosts.meta.setAttribute('hidden', 'hidden');
         }
-        desc.textContent = semantics.description || semantics.basisText || '';
+      }
+      if (hosts.copy) {
+        hosts.copy.setAttribute('data-recovery-flow-type', semantics.flowType || 'recovery-trend');
+        hosts.copy.setAttribute('data-recovery-basis', semantics.basis || 'scheduled-recovery-trend');
       }
 
       section.setAttribute('data-recovery-basis', semantics.basis || 'scheduled-recovery-trend');
       section.setAttribute('data-recovery-flow-type', semantics.flowType || 'recovery-trend');
+      if (hosts.header) {
+        hosts.header.setAttribute('data-recovery-basis', semantics.basis || 'scheduled-recovery-trend');
+        hosts.header.setAttribute('data-recovery-flow-type', semantics.flowType || 'recovery-trend');
+      }
 
+      var weekAnchor = semantics.weekSemantics && semantics.weekSemantics.weekAnchor
+        ? semantics.weekSemantics.weekAnchor
+        : 'monday';
+      section.setAttribute('data-week-anchor', weekAnchor);
       var chartBox = section.querySelector('.recovery-flow-chart-box');
       if (chartBox) {
-        chartBox.setAttribute('data-week-anchor', semantics.weekSemantics && semantics.weekSemantics.weekAnchor ? semantics.weekSemantics.weekAnchor : 'monday');
+        chartBox.setAttribute('data-week-anchor', weekAnchor);
       }
     }
 
@@ -81,14 +139,13 @@
       lastContext = {
         meta: context.meta || null,
         ui: context.ui || null,
-        overview: context.overview ? {
-          tiles: context.overview.tiles || null,
-          recoveryBasis: context.overview.recoveryBasis || null,
-          recoveryLabel: context.overview.recoveryLabel || null,
-          recoveryDescription: context.overview.recoveryDescription || null,
-          recoveryBasisText: context.overview.recoveryBasisText || null,
-          recoveryFlowType: context.overview.recoveryFlowType || null,
-          weekSemantics: context.overview.weekSemantics || null
+        recovery: context.recovery ? {
+          basis: context.recovery.basis || null,
+          label: context.recovery.label || null,
+          description: context.recovery.description || null,
+          basisText: context.recovery.basisText || null,
+          flowType: context.recovery.flowType || null,
+          weekSemantics: context.recovery.weekSemantics || null
         } : null
       };
       return lastContext;

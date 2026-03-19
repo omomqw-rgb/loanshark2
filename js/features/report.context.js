@@ -235,7 +235,6 @@
       claim: { total: 0, paid: 0, outstanding: 0, duePassedOutstanding: 0 },
       debt: { total: 0, paid: 0, planned: 0, overdue: 0 }
     };
-    var recoverySemantics = buildRecoverySemantics();
     var loans = (App.state && Array.isArray(App.state.loans)) ? App.state.loans : [];
     var claims = (App.state && Array.isArray(App.state.claims)) ? App.state.claims : [];
     var newLoan = computeNewOriginSummary(loans, aggregates && aggregates.monthStart, aggregates && aggregates.today, function (loan) {
@@ -250,12 +249,6 @@
       mode: ui.portfolioMode,
       monthStart: aggregates ? aggregates.monthStart : null,
       today: aggregates ? aggregates.today : null,
-      weekSemantics: clonePlain(recoverySemantics.weekSemantics),
-      recoveryBasis: recoverySemantics.basis,
-      recoveryLabel: recoverySemantics.label,
-      recoveryDescription: recoverySemantics.description,
-      recoveryBasisText: recoverySemantics.basisText,
-      recoveryFlowType: recoverySemantics.flowType,
       loanMetrics: {
         total: Number(finance.loan && finance.loan.total) || 0,
         paid: Number(finance.loan && finance.loan.paid) || 0,
@@ -283,6 +276,19 @@
         newClaimCount: newClaim.count
       },
       availableCapital: getCurrentBalance()
+    };
+  }
+
+
+  function buildRecoveryContext() {
+    var semantics = buildRecoverySemantics();
+    return {
+      basis: semantics.basis,
+      label: semantics.label,
+      description: semantics.description,
+      basisText: semantics.basisText,
+      flowType: semantics.flowType,
+      weekSemantics: clonePlain(semantics.weekSemantics)
     };
   }
 
@@ -447,6 +453,7 @@
         source: counts
       },
       overview: buildOverviewContext(aggregates, metrics, ui),
+      recovery: buildRecoveryContext(),
       statistics: statistics,
       capitalflow: buildCapitalFlowContext(ui),
       risk: buildRiskContext(ui, metrics)

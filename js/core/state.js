@@ -4,7 +4,7 @@
   var App = window.App;
 
   App.meta = App.meta || {};
-  App.meta.version = 'v3.2.44_statistics_ui_semantics_polish';
+  App.meta.version = 'v3.2.46_report_header_consistency_final_polish';
 
   // Single source of truth: Calendar default view.
   // - Used by init/mount, load (legacy), and invalidate/rerender paths.

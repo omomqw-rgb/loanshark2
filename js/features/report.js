@@ -364,18 +364,33 @@
     if (!root || !context) return;
     var meta = context.meta || {};
     var week = meta.weekSemantics || {};
-    root.setAttribute('data-report-week-anchor', week.weekAnchor || meta.weekAnchor || 'monday');
-    root.setAttribute('data-report-week-starts-on', String(week.weekStartsOn != null ? week.weekStartsOn : (meta.weekStartsOn != null ? meta.weekStartsOn : 1)));
+    var weekAnchor = week.weekAnchor || meta.weekAnchor || 'monday';
+    var weekStartsOn = String(week.weekStartsOn != null ? week.weekStartsOn : (meta.weekStartsOn != null ? meta.weekStartsOn : 1));
 
+    root.setAttribute('data-report-week-anchor', weekAnchor);
+    root.setAttribute('data-report-week-starts-on', weekStartsOn);
+    root.removeAttribute('data-recovery-flow-type');
+    root.removeAttribute('data-recovery-basis');
+
+    var sectionNodes = root.querySelectorAll('.report-section[data-report-section]');
+    sectionNodes.forEach(function (section) {
+      section.setAttribute('data-report-week-anchor', weekAnchor);
+      section.setAttribute('data-report-week-starts-on', weekStartsOn);
+    });
+
+    var recovery = context.recovery || {};
     var overviewSection = root.querySelector('.report-section-overview');
-    if (overviewSection && context.overview) {
-      overviewSection.setAttribute('data-recovery-flow-type', context.overview.recoveryFlowType || 'recovery-trend');
-      overviewSection.setAttribute('data-recovery-basis', context.overview.recoveryBasis || 'scheduled-recovery-trend');
+    if (overviewSection) {
+      overviewSection.removeAttribute('data-recovery-flow-type');
+      overviewSection.removeAttribute('data-recovery-basis');
     }
 
-    var statisticsSection = root.querySelector('.report-section-statistics');
-    if (statisticsSection) {
-      statisticsSection.setAttribute('data-report-week-anchor', week.weekAnchor || meta.weekAnchor || 'monday');
+    var recoverySection = root.querySelector('.overview-panel-recovery-new');
+    if (recoverySection) {
+      recoverySection.setAttribute('data-recovery-flow-type', recovery.flowType || 'recovery-trend');
+      recoverySection.setAttribute('data-recovery-basis', recovery.basis || 'scheduled-recovery-trend');
+      recoverySection.setAttribute('data-week-anchor', weekAnchor);
+      recoverySection.setAttribute('data-report-week-starts-on', weekStartsOn);
     }
 
     var capitalflowSection = root.querySelector('.report-section-capitalflow');

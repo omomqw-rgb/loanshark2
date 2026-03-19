@@ -225,9 +225,17 @@
             
 
 </section>
-<section class="overview-panel overview-panel-recovery-new">
-  <div class="overview-panel-header">
-    <h3 class="overview-panel-title">회수 흐름</h3>
+<section class="overview-panel overview-panel-recovery-new" data-role="recovery-section">
+  <div class="overview-panel-header recovery-section-header" data-role="recovery-header">
+    <div class="recovery-header-main" data-role="recovery-header-main">
+      <div class="recovery-header-copy" data-role="recovery-header-copy">
+        <h3 class="overview-panel-title recovery-section-title" data-role="recovery-title">회수 흐름</h3>
+        <div class="recovery-header-meta" data-role="recovery-header-meta">
+          <p class="report-section-desc recovery-section-desc" data-role="recovery-description"></p>
+          <p class="report-section-desc report-section-meta-note recovery-section-basis" data-role="recovery-basis"></p>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="overview-panel-body">
     <div class="recovery-kpi-grid">
@@ -386,10 +394,11 @@
 
 <section class="report-section report-section-capitalflow" data-report-section="capitalflow">
 
-  <div class="report-section-header">
-    <div class="report-section-header-main">
-      <h3 class="report-section-title">Capital Flow Timeline</h3>
-      <p class="report-section-desc">실제 자금 이동 로그 기준 대출 실행·회수 흐름</p>
+  <div class="report-section-header" data-role="capitalflow-header">
+    <div class="report-section-header-main" data-role="capitalflow-header-main">
+      <h3 class="report-section-title" data-role="capitalflow-title">Capital Flow Timeline</h3>
+      <p class="report-section-desc" data-role="capitalflow-description">실제 자금 이동 로그 기준 대출 실행·회수 흐름</p>
+      <p class="report-section-desc report-section-meta-note capitalflow-header-meta" data-role="capitalflow-header-meta"></p>
     </div>
     <div class="capitalflow-filter-bar" data-role="capitalflow-controls">
       <div class="capitalflow-filter-group" role="group" aria-label="Capital Flow period" data-role="capitalflow-period-group">

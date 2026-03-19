@@ -70,19 +70,42 @@
     };
   }
 
+  function ensureCapitalFlowHeaderMeta(section) {
+    if (!section) return null;
+    var headerMain = section.querySelector('[data-role="capitalflow-header-main"]') || section.querySelector('.report-section-header-main');
+    if (!headerMain) return null;
+    var meta = headerMain.querySelector('[data-role="capitalflow-header-meta"]');
+    if (meta) return meta;
+    meta = document.createElement('p');
+    meta.className = 'report-section-desc report-section-meta-note capitalflow-header-meta';
+    meta.setAttribute('data-role', 'capitalflow-header-meta');
+    headerMain.appendChild(meta);
+    return meta;
+  }
+
   function syncCapitalFlowHeader(section, context) {
     if (!section) return;
     var semantics = getCapitalFlowSemantics(context);
 
-    var title = section.querySelector('.report-section-title');
-    var desc = section.querySelector('.report-section-desc');
+    var title = section.querySelector('[data-role="capitalflow-title"]') || section.querySelector('.report-section-title');
+    var desc = section.querySelector('[data-role="capitalflow-description"]') || section.querySelector('.report-section-desc');
+    var meta = ensureCapitalFlowHeaderMeta(section);
     var chartTitle = section.querySelector('.capitalflow-chart-title');
 
     if (title) title.textContent = semantics.label || '실제 자금 유입·유출 흐름';
     if (desc) desc.textContent = semantics.description || '';
+    if (meta) {
+      meta.textContent = semantics.basisText || '';
+      if (meta.textContent) {
+        meta.removeAttribute('hidden');
+      } else {
+        meta.setAttribute('hidden', 'hidden');
+      }
+    }
     if (chartTitle) chartTitle.textContent = semantics.label || '실제 자금 유입·유출 흐름';
 
     section.setAttribute('data-capitalflow-flow-type', semantics.flowType || 'cash-movement');
+    section.setAttribute('data-capitalflow-basis', context && context.capitalflow && context.capitalflow.basis ? context.capitalflow.basis : 'cash-ledger-effective-logs');
   }
 
   function toggleCapitalFlowEmptyState(section, isEmpty, message) {

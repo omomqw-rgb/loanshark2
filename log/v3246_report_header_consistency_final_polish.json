@@ -1,0 +1,27 @@
+{
+  "version": "v3.2.46_report_header_consistency_final_polish",
+  "baseVersion": "v3.2.45_recovery_semantics_ownership_cleanup",
+  "summary": [
+    "Updated App.meta.version to v3.2.46_report_header_consistency_final_polish.",
+    "Reduced root-level recovery semantics duplication in report.js and synchronized section-level week metadata.",
+    "Polished recovery header copy structure with a dedicated meta wrapper while preserving recovery renderer ownership.",
+    "Added capital flow header meta note support so header semantics spacing matches other report sections.",
+    "Applied final report header consistency CSS polish for recovery, statistics, and capital flow sections."
+  ],
+  "changedFiles": [
+    "js/core/state.js",
+    "js/features/report.js",
+    "js/features/report.render.recovery.js",
+    "js/features/report.render.capitalflow.js",
+    "js/features/statistics.engine.js",
+    "css/report.css",
+    "index.html"
+  ],
+  "qa": {
+    "focus": [
+      "Header spacing consistency across recovery/statistics/capitalflow",
+      "Recovery section ownership remains context.recovery + report.render.recovery.js",
+      "No changes to recovery engine, capital flow calculation, or statistics numeric structure"
+    ]
+  }
+}

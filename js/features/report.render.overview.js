@@ -68,38 +68,6 @@
     };
   }
 
-  function getRecoverySemantics(context) {
-    var overview = context && context.overview ? context.overview : {};
-    return {
-      label: overview.recoveryLabel || '회수 흐름',
-      description: overview.recoveryDescription || '스케줄 기준 예정액과 실제 회수액의 회수 흐름/추세입니다. 실제 현금성 자본 이동을 보여주는 Capital Flow와는 다른 의미 계약입니다.',
-      basisText: overview.recoveryBasisText || '스케줄 기준 예정액·실회수 추세',
-      flowType: overview.recoveryFlowType || 'recovery-trend'
-    };
-  }
-
-  function syncRecoveryPanelHeader(root, context) {
-    if (!root) return;
-    var panel = root.querySelector('.overview-panel-recovery-new');
-    if (!panel) return;
-
-    var semantics = getRecoverySemantics(context);
-    var header = panel.querySelector('.overview-panel-header');
-    var title = panel.querySelector('.overview-panel-title');
-    if (title) {
-      title.textContent = semantics.label || '회수 흐름';
-    }
-    if (header) {
-      var desc = header.querySelector('.report-section-desc[data-role="overview-recovery-desc"]');
-      if (!desc) {
-        desc = createEl('p', 'report-section-desc');
-        desc.setAttribute('data-role', 'overview-recovery-desc');
-        header.appendChild(desc);
-      }
-      desc.textContent = semantics.description || semantics.basisText || '';
-    }
-    panel.setAttribute('data-recovery-flow-type', semantics.flowType || 'recovery-trend');
-  }
 
 
   function renderOverviewDonut(host, metrics) {
@@ -436,7 +404,6 @@
   function render(root, context, options) {
     options = options || {};
     var activeContext = getContext(context);
-    syncRecoveryPanelHeader(root, activeContext);
     updateOverviewKPI(root, activeContext);
     if (options.isMobile) return;
     renderOverviewMetrics(root, activeContext);

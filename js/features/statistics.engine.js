@@ -42,19 +42,19 @@
 
     function buildWeekSemanticsNote(weekSemantics) {
       var resolved = resolveWeekSemantics(weekSemantics);
-      return '주간 해석은 ' + (resolved.label || '월요일 시작 주간 기준') + '을 따릅니다.';
+      return '주간 기준 안내는 Report 전체와 동일하게 ' + (resolved.label || '월요일 시작 주간 기준') + '을 따릅니다.';
     }
 
     function buildSectionCopy(weekSemantics) {
       return {
         header: {
           title: 'Statistics',
-          description: '전체 포트폴리오 구조 및 누적 통계를 한눈에 정리한 섹션입니다.',
+          description: '전체 포트폴리오 구조 및 누적 통계를 한눈에 정리합니다.',
           note: buildWeekSemanticsNote(weekSemantics)
         },
         snapshot: {
           title: '오늘 기준 스냅샷',
-          description: '현재 시점 기준 누적 포트폴리오 요약입니다.'
+          description: '현재 시점 기준 누적 포트폴리오 스냅샷입니다.'
         },
         portfolio: {
           title: 'Loan / Claim 구조',

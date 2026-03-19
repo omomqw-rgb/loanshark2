@@ -1,0 +1,20 @@
+{
+  "version": "v3.2.45_recovery_semantics_ownership_cleanup",
+  "baseVersion": "v3.2.44_statistics_ui_semantics_polish",
+  "scope": "recovery semantics ownership cleanup",
+  "changedFiles": [
+    "index.html",
+    "css/report.css",
+    "js/core/state.js",
+    "js/features/report.context.js",
+    "js/features/report.js",
+    "js/features/report.render.overview.js",
+    "js/features/report.render.recovery.js"
+  ],
+  "notes": [
+    "Moved recovery semantics from context.overview to context.recovery",
+    "Removed overview renderer ownership over recovery header semantics",
+    "Made recovery renderer the single owner of title/description/basis synchronization",
+    "Added recovery header hosts and CSS to prevent awkward Korean character-level wrapping"
+  ]
+}
