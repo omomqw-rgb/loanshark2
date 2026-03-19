@@ -642,14 +642,16 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
+  align-items: start;
 }
 
 #report-root .report-section-statistics .statistics-section {
   background: var(--surface-100);
   border: 1px solid var(--border-200);
   border-radius: 12px;
-  padding: 18px 20px;
+  padding: 18px 20px 20px;
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
+  align-self: start;
 }
 
 #report-root .report-section-statistics .statistics-section-row {
@@ -661,13 +663,14 @@
   background: transparent;
   border: none;
   box-shadow: none;
+  align-items: start;
 }
 
 #report-root .report-section-statistics .statistics-section-row .statistics-section {
   background: var(--surface-100);
   border: 1px solid var(--border-200);
   border-radius: 12px;
-  padding: 18px 20px;
+  padding: 18px 20px 20px;
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
 }
 
@@ -675,15 +678,41 @@
   grid-column: span 1;
 }
 
+#report-root .report-section-statistics .statistics-section-shell-header {
+  margin-bottom: 0.35rem;
+}
+
+#report-root .report-section-statistics .report-section-title {
+  margin: 0;
+}
+
+#report-root .report-section-statistics .report-section-desc {
+  margin: 0;
+  line-height: 1.45;
+}
+
+#report-root .report-section-statistics .report-section-meta-note {
+  margin-top: 0.18rem;
+}
+
 #report-root .report-section-statistics .statistics-header {
-  margin-bottom: 10px;
-  padding-bottom: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border-200);
 }
 
 #report-root .report-section-statistics .statistics-title {
+  margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
+  color: #0f172a;
+}
+
+#report-root .report-section-statistics .statistics-copy {
+  margin: 6px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #6b7280;
 }
 
 #report-root .report-section-statistics .statistics-kpi-grid {
@@ -699,17 +728,27 @@
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 104px;
 }
 
 #report-root .report-section-statistics .statistics-kpi-label {
   font-size: 0.8rem;
-  opacity: 0.7;
+  line-height: 1.4;
+  color: #6b7280;
+  min-height: 2.25em;
+  display: flex;
+  align-items: flex-start;
 }
 
 #report-root .report-section-statistics .statistics-kpi-value {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 #report-root .report-section-statistics .statistics-kpi-desc {
@@ -722,6 +761,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  align-items: start;
 }
 
 #report-root .report-section-statistics .statistics-section-schedule .statistics-header {
@@ -735,7 +775,7 @@
 
 #report-root .report-section-statistics .statistics-table th,
 #report-root .report-section-statistics .statistics-table td {
-  padding: 8px;
+  padding: 9px 10px;
   text-align: left;
 }
 
@@ -743,11 +783,33 @@
   background: var(--surface-75);
   border-bottom: 1px solid var(--border-200);
   font-weight: 600;
+  font-size: 0.78rem;
+  color: #475569;
 }
 
 #report-root .report-section-statistics .statistics-table td {
   border-bottom: 1px solid var(--border-100);
   font-size: 0.82rem;
+  color: #111827;
+}
+
+#report-root .report-section-statistics .statistics-table th[data-col-role="count"],
+#report-root .report-section-statistics .statistics-table th[data-col-role="value"],
+#report-root .report-section-statistics .statistics-table td[data-cell-role="count"],
+#report-root .report-section-statistics .statistics-table td[data-cell-role="value"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#report-root .report-section-statistics .statistics-table td[data-cell-role="label"] {
+  color: #0f172a;
+}
+
+#report-root .report-section-statistics .statistics-empty-row td {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  padding: 14px 10px;
 }
 
 #report-root .report-section-statistics .statistics-section-debtors .statistics-table td:last-child {

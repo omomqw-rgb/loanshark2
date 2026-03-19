@@ -278,93 +278,107 @@
 
 </section>
 <section class="report-section report-section-statistics" data-report-section="statistics">
-  <div class="statistics-layout">
+  <div class="report-section-header statistics-section-shell-header">
+    <div class="report-section-header-main">
+      <h3 class="report-section-title">Statistics</h3>
+      <p class="report-section-desc" data-role="statistics-section-description">전체 포트폴리오 구조 및 누적 통계</p>
+      <p class="report-section-desc report-section-meta-note" data-role="statistics-section-meta-note"></p>
+    </div>
+  </div>
 
-    <!-- SECTION 1 — Debt Snapshot -->
-    <section class="statistics-section statistics-section-snapshot">
-      <div class="statistics-header">
-        <h3 class="statistics-title">오늘 기준 스냅샷</h3>
-      </div>
-      <div class="statistics-kpi-grid statistics-kpi-row">
-        <div class="statistics-kpi-card" data-kpi="debttotal"></div>
-        <div class="statistics-kpi-card" data-kpi="debtpaid"></div>
-        <div class="statistics-kpi-card" data-kpi="debtplanned"></div>
-        <div class="statistics-kpi-card" data-kpi="debtoverdue"></div>
-      </div>
-    </section>
+  <div class="report-section-body">
+    <div class="statistics-layout">
 
-    <!-- SECTION 2 — Loan / Claim 구조 -->
-    <section class="statistics-section statistics-section-portfolio">
-      <div class="statistics-header">
-        <h3 class="statistics-title">Loan / Claim 구조</h3>
-      </div>
-      <table class="statistics-table" data-table="portfolio">
-        <thead>
-          <tr>
-            <th>구분</th>
-            <th>건수</th>
-            <th>채무금합계</th>
-            <th>상환금합계</th>
-            <th>예정금합계</th>
-            <th>미납금합계</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+      <!-- SECTION 1 — Debt Snapshot -->
+      <section class="statistics-section statistics-section-snapshot">
+        <div class="statistics-header">
+          <h3 class="statistics-title">오늘 기준 스냅샷</h3>
+          <p class="statistics-copy" data-role="statistics-snapshot-description"></p>
+        </div>
+        <div class="statistics-kpi-grid statistics-kpi-row">
+          <div class="statistics-kpi-card" data-kpi="debttotal"></div>
+          <div class="statistics-kpi-card" data-kpi="debtpaid"></div>
+          <div class="statistics-kpi-card" data-kpi="debtplanned"></div>
+          <div class="statistics-kpi-card" data-kpi="debtoverdue"></div>
+        </div>
+      </section>
 
-    <!-- SECTION 3 & 4 — Loan / Claim 구조 (병렬) -->
-    <section class="statistics-section statistics-section-row">
-      <section class="statistics-section statistics-section-loan statistics-span-half">
-      <div class="statistics-header">
-        <h3 class="statistics-title">대출 구조</h3>
-      </div>
-      <table class="statistics-table" data-table="loan-structure">
-        <thead><tr><th>항목</th><th>값</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-      <section class="statistics-section statistics-section-claim statistics-span-half">
-      <div class="statistics-header">
-        <h3 class="statistics-title">채권 구조</h3>
-      </div>
-      <table class="statistics-table" data-table="claim-structure">
-        <thead><tr><th>항목</th><th>값</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-    </section>
+      <!-- SECTION 2 — Loan / Claim 구조 -->
+      <section class="statistics-section statistics-section-portfolio">
+        <div class="statistics-header">
+          <h3 class="statistics-title">Loan / Claim 구조</h3>
+          <p class="statistics-copy" data-role="statistics-portfolio-description"></p>
+        </div>
+        <table class="statistics-table" data-table="portfolio">
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th data-col-role="count">건수</th>
+              <th data-col-role="value">총액</th>
+              <th data-col-role="value">완료액</th>
+              <th data-col-role="value">예정잔액</th>
+              <th data-col-role="value">기한경과잔액</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
 
-    <!-- SECTION 5 — 스케줄 상태 요약 -->
-    <section class="statistics-section statistics-section-schedule">
-      <div class="statistics-header">
-        <h3 class="statistics-title">스케줄 상태</h3>
-      </div>
+      <!-- SECTION 3 & 4 — Loan / Claim 구조 (병렬) -->
+      <section class="statistics-section statistics-section-row">
+        <section class="statistics-section statistics-section-loan statistics-span-half">
+          <div class="statistics-header">
+            <h3 class="statistics-title">대출 구조</h3>
+          </div>
+          <table class="statistics-table" data-table="loan-structure">
+            <thead><tr><th>항목</th><th data-col-role="value">값</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+        <section class="statistics-section statistics-section-claim statistics-span-half">
+          <div class="statistics-header">
+            <h3 class="statistics-title">채권 구조</h3>
+          </div>
+          <table class="statistics-table" data-table="claim-structure">
+            <thead><tr><th>항목</th><th data-col-role="value">값</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </section>
 
-      <table class="statistics-table" data-table="schedule-counts">
-        <thead><tr><th>상태</th><th>회차수</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <!-- SECTION 5 — 스케줄 상태 요약 -->
+      <section class="statistics-section statistics-section-schedule">
+        <div class="statistics-header">
+          <h3 class="statistics-title">스케줄 상태</h3>
+          <p class="statistics-copy" data-role="statistics-schedule-description"></p>
+        </div>
 
-      <table class="statistics-table" data-table="schedule-amounts">
-        <thead><tr><th>상태</th><th>금액합계</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
+        <table class="statistics-table" data-table="schedule-counts">
+          <thead><tr><th>상태</th><th data-col-role="count">회차수</th></tr></thead>
+          <tbody></tbody>
+        </table>
 
-    <!-- SECTION 6 — 채무자 통계 -->
-    <section class="statistics-section statistics-section-debtors">
-      <div class="statistics-header">
-        <h3 class="statistics-title">채무자 통계</h3>
-      </div>
-      <table class="statistics-table" data-table="debtors">
-        <thead><tr><th>항목</th><th>값</th></tr></thead>
-        <tbody>
-          <!-- JS에서 채움 -->
-        </tbody>
-      </table>
-    </section>
+        <table class="statistics-table" data-table="schedule-amounts">
+          <thead><tr><th>상태</th><th data-col-role="value">금액합계</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
 
+      <!-- SECTION 6 — 채무자 통계 -->
+      <section class="statistics-section statistics-section-debtors">
+        <div class="statistics-header">
+          <h3 class="statistics-title">채무자 통계</h3>
+          <p class="statistics-copy" data-role="statistics-debtors-description"></p>
+        </div>
+        <table class="statistics-table" data-table="debtors">
+          <thead><tr><th>항목</th><th data-col-role="count">값</th></tr></thead>
+          <tbody>
+            <!-- JS에서 채움 -->
+          </tbody>
+        </table>
+      </section>
+
+    </div>
   </div>
 </section>
 

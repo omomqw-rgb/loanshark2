@@ -1,0 +1,23 @@
+{
+  "version": "v3.2.44_statistics_ui_semantics_polish",
+  "base": "LoanShark_v3.2.43_report_semantics_alignment_lock.zip",
+  "scope": [
+    "statistics section header structure",
+    "statistics semantics/basis copy",
+    "statistics table alignment hooks",
+    "statistics empty-state fallback",
+    "statistics KPI alignment polish"
+  ],
+  "files_changed": [
+    "index.html",
+    "css/report.css",
+    "js/core/state.js",
+    "js/features/statistics.engine.js"
+  ],
+  "qa": {
+    "js_syntax_check": true,
+    "week_note_moved_to_section_header_host": true,
+    "numeric_column_alignment_hooks_added": true,
+    "empty_state_rows_added": true
+  }
+}

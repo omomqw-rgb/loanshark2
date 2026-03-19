@@ -45,6 +45,31 @@
       return '주간 해석은 ' + (resolved.label || '월요일 시작 주간 기준') + '을 따릅니다.';
     }
 
+    function buildSectionCopy(weekSemantics) {
+      return {
+        header: {
+          title: 'Statistics',
+          description: '전체 포트폴리오 구조 및 누적 통계를 한눈에 정리한 섹션입니다.',
+          note: buildWeekSemanticsNote(weekSemantics)
+        },
+        snapshot: {
+          title: '오늘 기준 스냅샷',
+          description: '현재 시점 기준 누적 포트폴리오 요약입니다.'
+        },
+        portfolio: {
+          title: 'Loan / Claim 구조',
+          description: '대출/채권 포트폴리오를 중립 기준으로 압축한 summary입니다.'
+        },
+        schedule: {
+          title: '스케줄 상태',
+          description: '전체 스케줄 기준 회차/잔액 집계입니다. 부분납 금액은 잔여금 기준으로 표시되며, 대출/채권 total과 직접 1:1 대응하지 않을 수 있습니다.'
+        },
+        debtors: {
+          title: '채무자 통계',
+          description: '현재 등록된 전체 채무자 수와 활성 채무자 수 기준입니다.'
+        }
+      };
+    }
 
     function buildContext(agg, options) {
       var metrics = getMetrics(agg) || {
@@ -64,6 +89,7 @@
       var counts = metrics.counts || {};
       var scheduleStatus = metrics.scheduleStatus || {};
       var weekSemantics = resolveWeekSemantics(options && options.weekSemantics);
+      var copy = buildSectionCopy(weekSemantics);
 
       return {
         summary: {
@@ -108,7 +134,12 @@
         scheduleCounts: scheduleStatus.counts || {},
         scheduleAmounts: scheduleStatus.amounts || {},
         weekSemantics: clonePlain(weekSemantics),
-        periodDescription: buildWeekSemanticsNote(weekSemantics),
+        periodDescription: copy.header.note,
+        header: clonePlain(copy.header),
+        snapshot: clonePlain(copy.snapshot),
+        portfolioMeta: clonePlain(copy.portfolio),
+        scheduleMeta: clonePlain(copy.schedule),
+        debtorsMeta: clonePlain(copy.debtors),
         debtors: {
           '전체 채무자 수': counts.totalDebtors || 0,
           '활성 채무자 수': counts.activeDebtors || 0
@@ -153,6 +184,103 @@
       return map[code] || code;
     }
 
+    function getValueCellRole(label) {
+      if (label == null) return 'value';
+      return label.indexOf('건수') !== -1 || label.indexOf('회차수') !== -1 || label.indexOf('채무자 수') !== -1 ? 'count' : 'value';
+    }
+
+    function ensureTextNode(root, selector, className, tagName) {
+      var node = root ? root.querySelector(selector) : null;
+      if (node) return node;
+      if (!root) return null;
+      node = document.createElement(tagName || 'p');
+      if (className) node.className = className;
+      return node;
+    }
+
+    function setTextContent(root, selector, text, options) {
+      if (!root) return;
+      var node = root.querySelector(selector);
+      if (!node && options && options.parentSelector) {
+        var parent = root.querySelector(options.parentSelector);
+        if (parent) {
+          node = document.createElement(options.tagName || 'p');
+          if (options.className) node.className = options.className;
+          if (options.attributes) {
+            Object.keys(options.attributes).forEach(function (key) {
+              node.setAttribute(key, options.attributes[key]);
+            });
+          }
+          parent.appendChild(node);
+        }
+      }
+      if (!node) return;
+      node.textContent = text || '';
+      if (!text) {
+        node.setAttribute('hidden', 'hidden');
+      } else {
+        node.removeAttribute('hidden');
+      }
+    }
+
+    function appendEmptyRow(tbody, colSpan, text) {
+      var tr = document.createElement('tr');
+      tr.className = 'statistics-empty-row';
+      var td = document.createElement('td');
+      td.colSpan = colSpan;
+      td.textContent = text || '표시할 데이터 없음';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+
+    function appendTextCell(tr, text, role) {
+      var td = document.createElement('td');
+      td.textContent = text;
+      td.setAttribute('data-cell-role', role || 'label');
+      tr.appendChild(td);
+      return td;
+    }
+
+    function syncSectionCopy(root, ctx) {
+      if (!root) return;
+      var header = ctx.header || {};
+      var snapshot = ctx.snapshot || {};
+      var portfolioMeta = ctx.portfolioMeta || {};
+      var scheduleMeta = ctx.scheduleMeta || {};
+      var debtorsMeta = ctx.debtorsMeta || {};
+
+      setTextContent(root, '[data-role="statistics-section-description"]', header.description || '전체 포트폴리오 구조 및 누적 통계', {
+        parentSelector: '.statistics-section-shell-header .report-section-header-main',
+        className: 'report-section-desc',
+        attributes: { 'data-role': 'statistics-section-description' }
+      });
+      setTextContent(root, '[data-role="statistics-section-meta-note"]', header.note || '', {
+        parentSelector: '.statistics-section-shell-header .report-section-header-main',
+        className: 'report-section-desc report-section-meta-note',
+        attributes: { 'data-role': 'statistics-section-meta-note' }
+      });
+      setTextContent(root, '[data-role="statistics-snapshot-description"]', snapshot.description || '', {
+        parentSelector: '.statistics-section-snapshot .statistics-header',
+        className: 'statistics-copy',
+        attributes: { 'data-role': 'statistics-snapshot-description' }
+      });
+      setTextContent(root, '[data-role="statistics-portfolio-description"]', portfolioMeta.description || '', {
+        parentSelector: '.statistics-section-portfolio .statistics-header',
+        className: 'statistics-copy',
+        attributes: { 'data-role': 'statistics-portfolio-description' }
+      });
+      setTextContent(root, '[data-role="statistics-schedule-description"]', scheduleMeta.description || '', {
+        parentSelector: '.statistics-section-schedule .statistics-header',
+        className: 'statistics-copy',
+        attributes: { 'data-role': 'statistics-schedule-description' }
+      });
+      setTextContent(root, '[data-role="statistics-debtors-description"]', debtorsMeta.description || '', {
+        parentSelector: '.statistics-section-debtors .statistics-header',
+        className: 'statistics-copy',
+        attributes: { 'data-role': 'statistics-debtors-description' }
+      });
+    }
+
     function renderSummary(root, summary, formatters) {
       var cards = root.querySelectorAll('.statistics-kpi-card[data-kpi]');
       if (!cards || !cards.length) return;
@@ -188,7 +316,10 @@
         table.appendChild(tbody);
       }
       clearElement(tbody);
-      if (!portfolio || !portfolio.length) return;
+      if (!portfolio || !portfolio.length) {
+        appendEmptyRow(tbody, 6, '표시할 데이터 없음');
+        return;
+      }
       function mapTypeLabel(type) {
         if (type === 'Loan') return '대출';
         if (type === 'Claim') return '채권';
@@ -197,18 +328,12 @@
       for (var i = 0; i < portfolio.length; i++) {
         var row = portfolio[i] || {};
         var tr = document.createElement('tr');
-        [
-          mapTypeLabel(row.type),
-          formatters.number(row.count || 0),
-          formatters.currency(row.total || 0),
-          formatters.currency(row.paid || 0),
-          formatters.currency(row.planned || 0),
-          formatters.currency(row.overdue || 0)
-        ].forEach(function (text) {
-          var td = document.createElement('td');
-          td.textContent = text;
-          tr.appendChild(td);
-        });
+        appendTextCell(tr, mapTypeLabel(row.type), 'label');
+        appendTextCell(tr, formatters.number(row.count || 0), 'count');
+        appendTextCell(tr, formatters.currency(row.total || 0), 'value');
+        appendTextCell(tr, formatters.currency(row.paid || 0), 'value');
+        appendTextCell(tr, formatters.currency(row.planned || 0), 'value');
+        appendTextCell(tr, formatters.currency(row.overdue || 0), 'value');
         tbody.appendChild(tr);
       }
     }
@@ -224,16 +349,16 @@
       }
       clearElement(tbody);
       var keys = Object.keys(data || {});
+      if (!keys.length) {
+        appendEmptyRow(tbody, 2, '표시할 데이터 없음');
+        return;
+      }
       for (var i = 0; i < keys.length; i++) {
         var label = keys[i];
         var value = data[label];
         var tr = document.createElement('tr');
-        var tdLabel = document.createElement('td');
-        tdLabel.textContent = label;
-        var tdValue = document.createElement('td');
-        tdValue.textContent = typeof valueFormatter === 'function' ? valueFormatter(label, value) : String(value);
-        tr.appendChild(tdLabel);
-        tr.appendChild(tdValue);
+        appendTextCell(tr, label, 'label');
+        appendTextCell(tr, typeof valueFormatter === 'function' ? valueFormatter(label, value) : String(value), getValueCellRole(label));
         tbody.appendChild(tr);
       }
     }
@@ -262,47 +387,30 @@
         seen[amountKey] = true;
       }
 
-      [['schedule-counts', scheduleCounts, formatters.number], ['schedule-amounts', scheduleAmounts, formatters.currency]].forEach(function (config) {
+      [['schedule-counts', scheduleCounts, formatters.number, 'count'], ['schedule-amounts', scheduleAmounts, formatters.currency, 'value']].forEach(function (config) {
         var table = root.querySelector('table.statistics-table[data-table="' + config[0] + '"]');
         if (!table) return;
         var tbody = table.querySelector('tbody') || document.createElement('tbody');
         if (!table.querySelector('tbody')) table.appendChild(tbody);
         clearElement(tbody);
+        if (!codes.length) {
+          appendEmptyRow(tbody, 2, '표시할 데이터 없음');
+          return;
+        }
         for (var j = 0; j < codes.length; j++) {
           var statusCode = codes[j];
           var tr = document.createElement('tr');
-          var tdStatus = document.createElement('td');
-          tdStatus.textContent = getStatusLabel(statusCode);
-          var tdValue = document.createElement('td');
-          tdValue.textContent = config[2](config[1][statusCode] || 0);
-          tr.appendChild(tdStatus);
-          tr.appendChild(tdValue);
+          appendTextCell(tr, getStatusLabel(statusCode), 'label');
+          appendTextCell(tr, config[2](config[1][statusCode] || 0), config[3]);
           tbody.appendChild(tr);
         }
       });
     }
 
-    function syncWeekSemanticsHeader(root, input) {
-      if (!root) return;
-      var ctx = input && input.statistics ? input.statistics : {};
-      var weekSemantics = (ctx && ctx.weekSemantics) || (input && input.meta ? input.meta.weekSemantics : null);
-      var note = buildWeekSemanticsNote(weekSemantics);
-      var header = root.querySelector('.statistics-section-snapshot .statistics-header');
-      if (!header) return;
-      var desc = header.querySelector('.report-section-desc[data-role="statistics-week-note"]');
-      if (!desc) {
-        desc = document.createElement('p');
-        desc.className = 'report-section-desc';
-        desc.setAttribute('data-role', 'statistics-week-note');
-        header.appendChild(desc);
-      }
-      desc.textContent = note;
-    }
-
     function render(root, input) {
       var ctx = input && input.statistics ? input.statistics : {};
       if (!root || !ctx) return;
-      syncWeekSemanticsHeader(root, input || {});
+      syncSectionCopy(root, ctx);
       var formatters = getFormatters(input || {});
       renderSummary(root, ctx.summary || {}, formatters);
       renderPortfolioTable(root, ctx.portfolio || [], formatters);
