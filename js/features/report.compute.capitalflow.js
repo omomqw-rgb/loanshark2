@@ -115,11 +115,12 @@
     var getDueDate = helpers && helpers.getScheduleDueDate ? helpers.getScheduleDueDate : function (schedule) { return toDate(schedule && schedule.dueDate); };
     var getPaidAmount = helpers && helpers.getSchedulePaidAmount ? helpers.getSchedulePaidAmount : function () { return 0; };
     var getRemaining = helpers && helpers.getScheduleRemaining ? helpers.getScheduleRemaining : function () { return 0; };
+    var getStatus = helpers && helpers.getScheduleStatus ? helpers.getScheduleStatus : function (schedule) { return String(schedule && schedule.status || 'PLANNED').toUpperCase(); };
 
     for (var si = 0; si < schedules.length; si++) {
       var schedule = schedules[si];
       if (!schedule) continue;
-      var status = String(schedule.status || 'PLANNED').toUpperCase();
+      var status = getStatus(schedule);
       var amount = Number(schedule.amount) || 0;
       var paidAmount = getPaidAmount(schedule);
       var remaining = getRemaining(schedule);

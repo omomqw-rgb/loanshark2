@@ -668,63 +668,62 @@ function computePortfolioSummary(scope, dateRange) {
     scope = scope || 'debt';
     // v010 claim portfolio summary: card + schedule hybrid
     if (scope === 'claim') {
-      var claims = (App.state && App.state.claims) ? App.state.claims.slice() : [];
-      var claimTotal = 0;
-      for (var ci = 0; ci < claims.length; ci++) {
-        var c = claims[ci];
-        if (!c) continue;
-        claimTotal += Number(c.amount) || 0;
-      }
-
-      var schedulesForClaim = [];
-      if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
+      var claimSummary = null;
+      if (App.schedulesEngine && typeof App.schedulesEngine.getAllClaimSummary === 'function') {
         try {
-          schedulesForClaim = (App.schedulesEngine.getAll() || []).slice();
+          claimSummary = App.schedulesEngine.getAllClaimSummary();
         } catch (e) {
-          schedulesForClaim = [];
-        }
-      }
-      var todayStrClaim = null;
-      if (App.util && typeof App.util.formatDate === 'function') {
-        todayStrClaim = App.util.formatDate(new Date());
-      }
-      // 스케줄 상태 정규화
-      if (typeof normalizeAllSchedules === 'function') {
-        normalizeAllSchedules(todayStrClaim);
-      }
-
-      var fromClaim = dateRange && dateRange.from ? dateRange.from : null;
-      var toClaim = dateRange && dateRange.to ? dateRange.to : null;
-
-      var paidClaim = 0;
-      for (var si = 0; si < schedulesForClaim.length; si++) {
-        var sc = schedulesForClaim[si];
-        if (!sc || sc.kind !== 'claim') continue;
-
-        var due = sc.dueDate || sc.due_date || null;
-        if (fromClaim && due && due < fromClaim) continue;
-        if (toClaim && due && due > toClaim) continue;
-
-        var amt = Number(sc.amount) || 0;
-        if (!amt) continue;
-
-        var st = (sc.status || '').toUpperCase();
-        // 채권은 부분 회수 개념이 없으므로 PAID만 회수금으로 취급
-        if (st === 'PAID') {
-          paidClaim += amt;
+          claimSummary = null;
         }
       }
 
-      var outstandingClaim = claimTotal - paidClaim;
-      if (outstandingClaim < 0) outstandingClaim = 0;
+      if (!claimSummary) {
+        var claims = (App.state && App.state.claims) ? App.state.claims.slice() : [];
+        var claimTotal = 0;
+        for (var ci = 0; ci < claims.length; ci++) {
+          var c = claims[ci];
+          if (!c) continue;
+          claimTotal += Number(c.amount) || 0;
+        }
+
+        var paidClaim = 0;
+        var schedulesForClaim = [];
+        if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
+          try {
+            schedulesForClaim = (App.schedulesEngine.getAll() || []).slice();
+          } catch (e2) {
+            schedulesForClaim = [];
+          }
+        }
+        for (var si = 0; si < schedulesForClaim.length; si++) {
+          var sc = schedulesForClaim[si];
+          if (!sc || sc.kind !== 'claim') continue;
+          if (String(sc.status || '').toUpperCase() !== 'PAID') continue;
+          paidClaim += Number(sc.amount) || 0;
+        }
+
+        var outstandingClaim = claimTotal - paidClaim;
+        if (outstandingClaim < 0) outstandingClaim = 0;
+        claimSummary = {
+          totalAmount: claimTotal,
+          paidAmount: paidClaim,
+          remainingAmount: outstandingClaim,
+          outstandingAmount: outstandingClaim,
+          plannedAmount: outstandingClaim,
+          overdueAmount: 0,
+          partialAmount: 0
+        };
+      }
 
       return {
         scope: scope,
-        plannedAmount: 0,
-        paidAmount: paidClaim,
+        plannedAmount: Number(claimSummary.plannedAmount != null ? claimSummary.plannedAmount : claimSummary.remainingAmount) || 0,
+        paidAmount: Number(claimSummary.paidAmount != null ? claimSummary.paidAmount : claimSummary.collectedAmount) || 0,
         partialAmount: 0,
-        overdueAmount: outstandingClaim,
-        totalAmount: claimTotal
+        overdueAmount: 0,
+        totalAmount: Number(claimSummary.totalAmount) || 0,
+        remainingAmount: Number(claimSummary.remainingAmount != null ? claimSummary.remainingAmount : claimSummary.outstandingAmount) || 0,
+        outstandingAmount: Number(claimSummary.outstandingAmount != null ? claimSummary.outstandingAmount : claimSummary.remainingAmount) || 0
       };
     }
 
@@ -1166,13 +1165,33 @@ App.data.getLoanSummary = function(dateRange){
 };
 
 App.data.getClaimSummary = function(dateRange){
+  if (App.schedulesEngine && typeof App.schedulesEngine.getAllClaimSummary === 'function') {
+    try {
+      var engineSummary = App.schedulesEngine.getAllClaimSummary() || {};
+      var totalAmount = Number(engineSummary.totalAmount) || 0;
+      var paidAmount = Number(engineSummary.paidAmount != null ? engineSummary.paidAmount : engineSummary.collectedAmount) || 0;
+      var outstandingAmount = Number(engineSummary.outstandingAmount != null ? engineSummary.outstandingAmount : engineSummary.remainingAmount) || 0;
+      return {
+        totalAmount: totalAmount,
+        paidAmount: paidAmount,
+        partialAmount: 0,
+        plannedAmount: outstandingAmount,
+        overdueAmount: 0,
+        remainingAmount: outstandingAmount,
+        outstandingAmount: outstandingAmount
+      };
+    } catch (e) {
+      // fall through to compatibility path
+    }
+  }
+
   var claims = (App.state && App.state.claims)? App.state.claims.slice():[];
   var claimTotal = claims.reduce(function(s,c){ return s+(Number(c.amount)||0); },0);
   var schedules = [];
   if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
     try {
       schedules = (App.schedulesEngine.getAll() || []).slice();
-    } catch (e) {
+    } catch (e2) {
       schedules = [];
     }
   }
@@ -1184,7 +1203,15 @@ App.data.getClaimSummary = function(dateRange){
   });
   var outstanding = claimTotal - collected;
   if(outstanding<0) outstanding=0;
-  return {totalAmount:claimTotal, paidAmount:collected, partialAmount:0, plannedAmount:0, overdueAmount:outstanding};
+  return {
+    totalAmount:claimTotal,
+    paidAmount:collected,
+    partialAmount:0,
+    plannedAmount:outstanding,
+    overdueAmount:0,
+    remainingAmount:outstanding,
+    outstandingAmount:outstanding
+  };
 };
 
 App.data.getPortfolioSummary = function(dateRange){

@@ -34,6 +34,10 @@
     { value: 'PARTIAL', label: '부분납' },
     { value: 'OVERDUE', label: '미납' }
   ];
+  var CLAIM_SCHEDULE_STATUS_OPTIONS = [
+    { value: 'PLANNED', label: '예정' },
+    { value: 'PAID', label: '완납' }
+  ];
 
   // 모달 UI 전용: "사실상 완납" 판정 (status/저장/도메인 로직 변경 없음)
   function isFullyPaidUI(s) {
@@ -189,7 +193,13 @@
               }
             }
 
-            if (st === 'PAID' || isFullyPaidUI(sForUI)) {
+            if (kind === 'schedule-claim') {
+              if (st === 'PAID' || isFullyPaidUI(sForUI)) {
+                tr.classList.add('is-paid');
+              } else {
+                tr.classList.add('is-planned');
+              }
+            } else if (st === 'PAID' || isFullyPaidUI(sForUI)) {
               tr.classList.add('is-paid');
             } else if (st === 'PARTIAL') {
               tr.classList.add('is-partial');
@@ -1042,10 +1052,6 @@ function openLoanModal(mode, context) {
         }
         if (s.status === 'PAID' || isFullyPaidUI(s)) {
           rowClasses.push('is-paid');
-        } else if (s.status === 'PARTIAL') {
-          rowClasses.push('is-partial');
-        } else if (s.status === 'OVERDUE') {
-          rowClasses.push('is-overdue');
         } else {
           rowClasses.push('is-planned');
         }
@@ -1324,8 +1330,8 @@ function openLoanModal(mode, context) {
         select.name = 'schedule-status';
         select.setAttribute('data-schedule-id', String(s.id));
         var currentStatus = s.status || 'PLANNED';
-        for (var k = 0; k < SCHEDULE_STATUS_OPTIONS.length; k++) {
-          var opt = SCHEDULE_STATUS_OPTIONS[k];
+        for (var k = 0; k < CLAIM_SCHEDULE_STATUS_OPTIONS.length; k++) {
+          var opt = CLAIM_SCHEDULE_STATUS_OPTIONS[k];
           var optEl = document.createElement('option');
           optEl.value = opt.value;
           optEl.textContent = opt.label;

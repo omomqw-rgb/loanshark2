@@ -37,6 +37,58 @@
     return n;
   }
 
+  function getScheduleKind(sc) {
+    if (!sc) return '';
+    if (sc.kind != null) return String(sc.kind).toLowerCase();
+    if (sc.type != null) return String(sc.type).toLowerCase();
+    if (sc.claimId != null || sc.claim_id != null) return 'claim';
+    if (sc.loanId != null || sc.loan_id != null) return 'loan';
+    return '';
+  }
+
+  function resolveClaimId(claimOrId) {
+    if (claimOrId == null) return null;
+    if (typeof claimOrId === 'object') {
+      if (claimOrId.id != null) return toStr(claimOrId.id);
+      if (claimOrId.claimId != null) return toStr(claimOrId.claimId);
+      if (claimOrId.claim_id != null) return toStr(claimOrId.claim_id);
+      return null;
+    }
+    return toStr(claimOrId);
+  }
+
+  function findClaimTotalById(claimId) {
+    if (claimId == null) return 0;
+    var state = App.state || {};
+    var claims = Array.isArray(state.claims) ? state.claims : [];
+    for (var i = 0; i < claims.length; i++) {
+      var claim = claims[i];
+      if (!claim) continue;
+      if (toStr(claim.id) === claimId) {
+        return toNonNegativeNumber(claim.amount);
+      }
+    }
+    return 0;
+  }
+
+  function buildClaimSummary(totalAmount, collectedAmount) {
+    var total = toNonNegativeNumber(totalAmount);
+    var collected = toNonNegativeNumber(collectedAmount);
+    if (collected > total && total > 0) collected = total;
+    var outstanding = total - collected;
+    if (!isFinite(outstanding) || outstanding < 0) outstanding = 0;
+    return {
+      totalAmount: total,
+      collectedAmount: collected,
+      outstandingAmount: outstanding,
+      paidAmount: collected,
+      remainingAmount: outstanding,
+      plannedAmount: outstanding,
+      overdueAmount: 0,
+      partialAmount: 0
+    };
+  }
+
   var engine = {
     list: [],
     _initialized: false,
@@ -95,15 +147,37 @@
     _normalizeScheduleStatus: function (sc, todayStr) {
       if (!sc) return;
 
-      // PARTIAL 상태는 사용자가 설정한 값을 그대로 유지한다.
+      var kind = getScheduleKind(sc);
       var currentStatus = (sc.status || '').toUpperCase();
-      if (currentStatus === 'PARTIAL') {
-        return;
-      }
-
       var due = sc.dueDate || sc.due_date || sc.date || null;
       var amount = Number(sc.amount) || 0;
       var paidAmt = Number(sc.paidAmount != null ? sc.paidAmount : sc.partialPaidAmount || 0);
+
+      if (kind === 'claim') {
+        if (!amount) {
+          sc.status = 'PLANNED';
+          sc.paidAmount = 0;
+          sc.partialPaidAmount = 0;
+          return;
+        }
+
+        if (currentStatus === 'PAID' || paidAmt >= amount) {
+          sc.status = 'PAID';
+          sc.paidAmount = amount;
+          sc.partialPaidAmount = 0;
+          return;
+        }
+
+        sc.status = 'PLANNED';
+        sc.paidAmount = 0;
+        sc.partialPaidAmount = 0;
+        return;
+      }
+
+      // PARTIAL 상태는 사용자가 설정한 값을 그대로 유지한다.
+      if (currentStatus === 'PARTIAL') {
+        return;
+      }
 
       if (!amount || !due || !todayStr) {
         return;
@@ -220,7 +294,17 @@
               next.amount = nextAmount;
             }
 
-            if (prevStatus === 'PAID') {
+            if (kind === 'claim') {
+              if (prevStatus === 'PAID') {
+                next.status = 'PAID';
+                next.paidAmount = nextAmount;
+                next.partialPaidAmount = 0;
+              } else {
+                next.paidAmount = 0;
+                next.partialPaidAmount = 0;
+                next.status = 'PLANNED';
+              }
+            } else if (prevStatus === 'PAID') {
               next.status = 'PAID';
               next.paidAmount = nextAmount;
               next.partialPaidAmount = 0;
@@ -246,11 +330,7 @@
         } else {
           var claimAmount = toNonNegativeNumber(next.amount);
           next.amount = claimAmount;
-          if ((String(next.status || '').toUpperCase() === 'PARTIAL') && claimAmount <= 0) {
-            next.status = 'PLANNED';
-            next.paidAmount = 0;
-            next.partialPaidAmount = 0;
-          }
+          this._normalizeScheduleStatus(next, todayStr);
         }
 
         out.push(next);
@@ -550,7 +630,7 @@
         }
       }
 
-      // 2단계: 상태(select)를 기준으로 PLANNED / PAID / OVERDUE 만 처리
+      // 2단계: 상태(select)를 기준으로 claim은 PLANNED / PAID 두 의미만 처리
       var selects = form.querySelectorAll('select[data-schedule-id]');
       for (var k = 0; k < selects.length; k++) {
         var sel = selects[k];
@@ -568,12 +648,7 @@
               sc2.status = 'PAID';
               sc2.paidAmount = amount2;
               sc2.partialPaidAmount = 0;
-            } else if (status === 'OVERDUE') {
-              sc2.status = 'OVERDUE';
-              sc2.paidAmount = 0;
-              sc2.partialPaidAmount = 0;
             } else {
-              // PARTIAL 등 그 외 값은 모두 PLANNED 로 정규화
               sc2.status = 'PLANNED';
               sc2.paidAmount = 0;
               sc2.partialPaidAmount = 0;
@@ -742,6 +817,52 @@
 
       return result;
     }
+  };
+
+  engine.getClaimSummary = function (claimOrId, totalAmount) {
+    this._ensureInitialized();
+
+    var claimId = resolveClaimId(claimOrId);
+    var resolvedTotal = totalAmount;
+    if (!isFinite(Number(resolvedTotal))) {
+      resolvedTotal = findClaimTotalById(claimId);
+    }
+    resolvedTotal = toNonNegativeNumber(resolvedTotal);
+
+    var collected = 0;
+    var list = this.list || [];
+    for (var i = 0; i < list.length; i++) {
+      var sc = list[i];
+      if (!sc) continue;
+      if (getScheduleKind(sc) !== 'claim') continue;
+      if (claimId != null && toStr(sc.claimId != null ? sc.claimId : sc.claim_id) !== claimId) continue;
+      if (String(sc.status || '').toUpperCase() !== 'PAID') continue;
+      collected += toNonNegativeNumber(sc.amount);
+    }
+
+    return buildClaimSummary(resolvedTotal, collected);
+  };
+
+  engine.getAllClaimSummary = function () {
+    this._ensureInitialized();
+
+    var claims = (App.state && Array.isArray(App.state.claims)) ? App.state.claims : [];
+    var totalAmount = 0;
+    for (var i = 0; i < claims.length; i++) {
+      totalAmount += toNonNegativeNumber(claims[i] && claims[i].amount);
+    }
+
+    var collected = 0;
+    var list = this.list || [];
+    for (var j = 0; j < list.length; j++) {
+      var sc = list[j];
+      if (!sc) continue;
+      if (getScheduleKind(sc) !== 'claim') continue;
+      if (String(sc.status || '').toUpperCase() !== 'PAID') continue;
+      collected += toNonNegativeNumber(sc.amount);
+    }
+
+    return buildClaimSummary(totalAmount, collected);
   };
 
   App.schedulesEngine = engine;

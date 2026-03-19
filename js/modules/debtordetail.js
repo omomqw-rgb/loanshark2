@@ -90,12 +90,25 @@
   }
 
     function computeClaimSummary(claim) {
-    var schedules = [];
+    var total = Number(claim && claim.amount) || 0;
 
+    if (App.schedulesEngine && typeof App.schedulesEngine.getClaimSummary === 'function') {
+      try {
+        var summary = App.schedulesEngine.getClaimSummary(claim, total) || {};
+        return {
+          paid: Number(summary.paidAmount != null ? summary.paidAmount : summary.collectedAmount) || 0,
+          remaining: Number(summary.remainingAmount != null ? summary.remainingAmount : summary.outstandingAmount) || 0
+        };
+      } catch (e) {
+        // fall through to local compatibility path
+      }
+    }
+
+    var schedules = [];
     if (App.schedulesEngine && typeof App.schedulesEngine.getByClaimId === 'function') {
       try {
         schedules = App.schedulesEngine.getByClaimId(claim.id) || [];
-      } catch (e) {
+      } catch (e2) {
         schedules = [];
       }
     }
@@ -103,11 +116,11 @@
     var paid = 0;
     for (var i = 0; i < schedules.length; i++) {
       var s = schedules[i];
-      if (s.status === 'PAID' || s.status === 'PARTIAL') {
-        paid += Number(s.amount) || 0;
-      }
+      if (!s) continue;
+      if (String(s.status || '').toUpperCase() !== 'PAID') continue;
+      paid += Number(s.amount) || 0;
     }
-    var total = Number(claim.amount) || 0;
+
     var remaining = total - paid;
     if (!isFinite(remaining) || remaining < 0) remaining = 0;
     return {

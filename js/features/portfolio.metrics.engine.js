@@ -107,7 +107,11 @@
 
   function getScheduleStatus(schedule) {
     var raw = schedule && schedule.status ? String(schedule.status) : 'PLANNED';
-    return raw.toUpperCase();
+    var status = raw.toUpperCase();
+    if (getScheduleKind(schedule) === 'claim') {
+      return status === 'PAID' ? 'PAID' : 'PLANNED';
+    }
+    return status;
   }
 
   function getScheduleKind(schedule) {
@@ -127,6 +131,9 @@
     var partialPaid = clampNonNegative(schedule.partialPaidAmount);
     var paidRaw = clampNonNegative(schedule.paidAmount);
 
+    if (getScheduleKind(schedule) === 'claim') {
+      return status === 'PAID' ? amount : 0;
+    }
     if (status === 'PAID') return amount;
     if (status === 'PARTIAL') {
       var partial = partialPaid > 0 ? partialPaid : paidRaw;
@@ -254,6 +261,7 @@
       var dueDate = getScheduleDueDate(schedule);
       if (!dueDate) continue;
       if (dueDate >= today) continue;
+      if (getScheduleKind(schedule) === 'claim') continue;
 
       var remaining = getScheduleRemaining(schedule);
       if (remaining > 0) {
@@ -343,6 +351,9 @@
       var remaining = getScheduleRemaining(schedule);
       var dueDate = getScheduleDueDate(schedule);
       var duePassed = !!(dueDate && dueDate < today);
+      if (kind === 'claim') {
+        duePassed = false;
+      }
       var debtorId = toKey(
         schedule.debtorId != null ? schedule.debtorId :
         schedule.loanDebtorId != null ? schedule.loanDebtorId :
@@ -632,7 +643,8 @@
       getTodayDate: getTodayDate,
       getSchedulePaidTraceDate: getSchedulePaidTraceDate,
       getDebtorLastPaymentTraceDate: getDebtorLastPaymentTraceDate,
-      computeConsecutiveMissCount: computeConsecutiveMissCount
+      computeConsecutiveMissCount: computeConsecutiveMissCount,
+      getScheduleStatus: getScheduleStatus
     }
   };
 
