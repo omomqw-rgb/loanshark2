@@ -1,0 +1,16 @@
+{
+  "version": "v3.2.41_report_context_ssot_phase1",
+  "base": "LoanShark_v3.2.40_report_render_split_phase1.zip",
+  "changes": [
+    "Added js/features/report.context.js with buildReportContext-style read model generator.",
+    "Reworked js/features/report.js to build shared report context and pass it to overview/recovery/statistics/capitalflow/risk sections.",
+    "Updated overview, risk, capitalflow, recovery, and statistics renderers to accept shared context inputs.",
+    "Kept capital flow, risk, overview, and recovery calculation semantics unchanged.",
+    "Registered new report.context.js in index.html script load order."
+  ],
+  "qa_notes": [
+    "Static syntax checked with node --check on modified JS files.",
+    "No CSS files changed.",
+    "No report meaning redesign, week anchor change, or mobile layout change applied."
+  ]
+}

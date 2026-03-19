@@ -21,7 +21,9 @@
         rawMonthlyMap: null,
         rawYearMap: null
       },
-      summaryController: null
+      weekSemantics: null,
+      summaryController: null,
+      eventsBoundRoot: null
     };
 
     function getSchedules() {
@@ -38,6 +40,20 @@
       if (!s || !s.length) return [];
       return s.slice();
     }
+
+    function getReportWeekSemantics() {
+      if (App.reportCompute && typeof App.reportCompute.getWeekSemantics === 'function') {
+        return App.reportCompute.getWeekSemantics();
+      }
+      return {
+        weekStartsOn: 1,
+        weekAnchor: 'monday',
+        label: '월요일 시작 주간 기준',
+        shortLabel: '월요일 시작',
+        description: 'Report 전체 주간 해석은 월요일 시작(Monday anchor) 기준입니다.'
+      };
+    }
+
 
     function ymd(date) {
       var y = date.getFullYear();
@@ -563,10 +579,59 @@
       addLine('전체 기간 회수율: ' + totalRate);
     }
 
+    function syncModeButtons(root) {
+      if (!root) return;
+      var switchHost = root.querySelector('.recovery-interval-switch');
+      if (!switchHost) return;
+      var btns = switchHost.querySelectorAll('.switch-btn');
+      for (var i = 0; i < btns.length; i++) {
+        var btn = btns[i];
+        var mode = btn.getAttribute('data-mode') || 'daily';
+        var isActive = (mode === state.mode);
+        if (btn.classList) {
+          if (btn.classList.toggle) {
+            btn.classList.toggle('active', isActive);
+            btn.classList.toggle('is-active', isActive);
+          } else if (isActive && btn.className.indexOf('active') === -1) {
+            btn.className += ' active';
+          }
+        }
+      }
+    }
+
+    function resetViewportState() {
+      state.mode = 'daily';
+      state.offsets.daily = 0;
+      state.offsets.monthly = 0;
+      state.offsets.yearly = 0;
+    }
+
+    function destroyChart() {
+      if (!state.chart || typeof state.chart.destroy !== 'function') {
+        state.chart = null;
+        return;
+      }
+      try {
+        state.chart.destroy();
+      } catch (e) {
+      }
+      state.chart = null;
+    }
+
+    function setSummaryController(summaryController) {
+      state.summaryController = summaryController || null;
+    }
+
+    function update() {
+      buildRecoveryCache();
+      render();
+    }
+
     function render() {
       if (!state.root) return;
 
       var root = state.root;
+      syncModeButtons(root);
 
       var dailySeries = buildDailySeries();
       var monthlySeries = buildMonthlySeries();
@@ -601,41 +666,23 @@
       renderInsights(root, state.cache, dailySeries, monthlySeries);
     }
 
-        function wireEvents() {
+    function wireEvents() {
       if (!state.root) return;
       var root = state.root;
+      syncModeButtons(root);
+      if (state.eventsBoundRoot === root) return;
+      state.eventsBoundRoot = root;
 
       var switchHost = root.querySelector('.recovery-interval-switch');
       if (switchHost) {
         var btns = switchHost.querySelectorAll('.switch-btn');
-
-        var applyActiveMode = function () {
-          for (var j = 0; j < btns.length; j++) {
-            var btn = btns[j];
-            var mode = btn.getAttribute('data-mode') || 'daily';
-            var isActive = (mode === state.mode);
-            if (btn.classList) {
-              if (btn.classList.toggle) {
-                btn.classList.toggle('active', isActive);
-                btn.classList.toggle('is-active', isActive);
-              } else {
-                if (isActive) {
-                  btn.className += ' active';
-                }
-              }
-            }
-          }
-        };
-
-        applyActiveMode();
-
         for (var i = 0; i < btns.length; i++) {
           (function (btn) {
             btn.addEventListener('click', function () {
               var mode = btn.getAttribute('data-mode') || 'daily';
               if (mode === state.mode) return;
               state.mode = mode;
-              applyActiveMode();
+              syncModeButtons(root);
               render();
             });
           })(btns[i]);
@@ -672,38 +719,43 @@
       }
     }
 
-
     function init(root, options) {
       if (!root) return null;
 
+      var isNewRoot = state.root !== root;
+      if (isNewRoot && state.root) {
+        destroyChart();
+        state.eventsBoundRoot = null;
+        resetViewportState();
+      }
+
       state.root = root;
-      state.summaryController = options && options.summaryController ? options.summaryController : null;
+      if (isNewRoot && !state.eventsBoundRoot) {
+        resetViewportState();
+      }
+      setSummaryController(options && options.summaryController ? options.summaryController : null);
+      state.weekSemantics = getReportWeekSemantics();
 
-      buildRecoveryCache();
-      state.mode = 'daily';
-      state.offsets.daily = 0;
-      state.offsets.monthly = 0;
-      state.offsets.yearly = 0;
-
+      update();
       wireEvents();
-      render();
 
       return {
         root: root,
         render: render,
-        update: function () {
-          buildRecoveryCache();
-          render();
-        }
+        update: update,
+        setSummaryController: setSummaryController,
+        getWeekSemantics: getReportWeekSemantics
       };
     }
 
     function getState() {
+      state.weekSemantics = getReportWeekSemantics();
       return state;
     }
 
     return {
       init: init,
+      update: update,
       getState: getState
     };
   })();

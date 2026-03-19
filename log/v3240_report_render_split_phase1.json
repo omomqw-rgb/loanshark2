@@ -1,0 +1,32 @@
+{
+  "version": "LoanShark_v3.2.40_report_render_split_phase1",
+  "base": "LoanShark_v3.2.39_report_css_cleanup_lock.zip",
+  "changes": {
+    "added": [
+      "js/features/report.render.overview.js",
+      "js/features/report.render.risk.js"
+    ],
+    "updated": [
+      "index.html",
+      "js/features/report.js",
+      "js/features/report.render.capitalflow.js",
+      "js/features/report.render.recovery.js"
+    ]
+  },
+  "notes": [
+    "risk renderer responsibility moved out of report.render.capitalflow.js into report.render.risk.js",
+    "overview renderer entrypoint introduced as App.reportRender.overview.render(...) with KPI and overview-metrics responsibilities",
+    "report.js now orchestrates overview, recovery, statistics, capitalflow, and risk section renders via section-level helpers",
+    "report.render.recovery.js kept lifecycle behavior and added render/sync public aliases for orchestration-friendly calls",
+    "capitalflow render semantics were preserved; no report compute engine redesign or CSS redesign was performed"
+  ],
+  "checks": {
+    "node_check": [
+      "js/features/report.js",
+      "js/features/report.render.overview.js",
+      "js/features/report.render.risk.js",
+      "js/features/report.render.capitalflow.js",
+      "js/features/report.render.recovery.js"
+    ]
+  }
+}

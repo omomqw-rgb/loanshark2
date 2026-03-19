@@ -1,0 +1,11 @@
+{
+  "version": "v3.2.37A_capitalflow_polish_hotfix",
+  "base": "LoanShark_v3.2.37_capitalflow_cashlog_basis.zip",
+  "changes": [
+    "weekly bucket moved to monday-anchor keys",
+    "explicit trend ranges zero-fill missing buckets",
+    "capitalflow summary basis/empty-state copy polished",
+    "capitalflow range apply normalizes reversed dates",
+    "capitalflow control markup/style polished"
+  ]
+}

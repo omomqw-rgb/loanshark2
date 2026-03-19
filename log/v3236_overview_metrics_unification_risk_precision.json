@@ -1,0 +1,11 @@
+{
+  "version": "v3.2.36_overview_metrics_unification_risk_precision",
+  "base": "LoanShark_v3.2.35_report_metrics_risk_ssot.zip",
+  "changes": [
+    "report overview donut/legend/cards now use portfolio metrics snapshot only",
+    "portfolio metrics engine risk precision upgraded for consecutive miss/payment stop/partial pattern reasons",
+    "risk top debtors sorted by risk score and show shared reasons",
+    "monitoring risk alerts sorted by risk score and use shared reason preview",
+    "data.js legacy computePortfolioSummary note updated"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "version": "v3.2.37",
+  "patch": "capitalflow_cashlog_basis",
+  "base": "LoanShark_v3.2.36A_risk_trace_hotfix.zip",
+  "changes": [
+    "computeTrendSeries switched to cashLogs/effectiveLogs basis",
+    "daily/weekly/monthly period buckets enabled via getTrendBucketKey",
+    "trend date range now filters capital flow logs by log.date",
+    "capital flow header now includes period buttons and date range apply controls",
+    "capital flow renderer now updates dynamic basis text and empty state"
+  ],
+  "notes": [
+    "AUTO_ADJUST, MANUAL_IN, MANUAL_OUT, INIT excluded from main chart series",
+    "Inflow uses AUTO_IN for loan/claim refs only",
+    "Outflow uses LOAN_EXECUTION only"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "patch": "v3.2.36A_risk_trace_hotfix",
+  "base": "LoanShark_v3.2.36_overview_metrics_unification_risk_precision.zip",
+  "changes": [
+    "payment trace candidate filtering and latest-date selection",
+    "debtor-level recent payment trace helper",
+    "consecutive miss count refinement",
+    "risk reason preview UI polish"
+  ]
+}

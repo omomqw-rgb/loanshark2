@@ -1,0 +1,12 @@
+{
+  "version": "v3.2.35",
+  "title": "report_metrics_risk_ssot",
+  "status": "applied",
+  "notes": [
+    "Added shared portfolio metrics engine",
+    "Statistics now consumes shared finance snapshot",
+    "Report risk consumes shared risk snapshot",
+    "Monitoring risk alerts now consume shared debtor risk summary",
+    "Capital flow series left as legacy phase-1 behavior"
+  ]
+}

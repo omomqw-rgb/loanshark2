@@ -1,0 +1,47 @@
+{
+  "version": "v3.2.42_report_context_strict_ssot_lock",
+  "base": "LoanShark_v3.2.41_report_context_ssot_phase1.zip",
+  "timestamp": "2026-03-18T18:25:37.180630Z",
+  "changes": {
+    "js/core/state.js": [
+      "App.meta.version synced to v3.2.42_report_context_strict_ssot_lock"
+    ],
+    "js/features/report.context.js": [
+      "Removed large debtors/loans/claims deep-clone payloads from report context",
+      "Kept meta/ui/format/portfolio/overview/statistics/capitalflow/risk read model shape",
+      "Slimmed portfolio payload to metrics/aggregates/counts/source"
+    ],
+    "js/features/report.js": [
+      "Locked report render path to single App.reportContext.build() entry",
+      "Preserved UI event orchestration and invalidate flow"
+    ],
+    "js/features/report.render.overview.js": [
+      "Removed duplicate getOverviewMetrics helper definitions",
+      "Removed App.reportContext.build/App.state/report state fallback paths from overview render flow",
+      "Normalized overview rendering around context + context.format"
+    ],
+    "js/features/report.render.risk.js": [
+      "Removed internal context rebuild fallback",
+      "Locked rendering to context.risk + context.format inputs"
+    ],
+    "js/features/report.render.capitalflow.js": [
+      "Removed internal context rebuild fallback",
+      "Locked rendering to context.capitalflow + context.format inputs"
+    ],
+    "js/features/statistics.engine.js": [
+      "Render path now prefers full report context + context.format",
+      "BuildContext retained for report.context usage"
+    ],
+    "js/features/report.render.recovery.js": [
+      "Polished context-aware public API while preserving ensure/update lifecycle"
+    ]
+  },
+  "qa_targets": [
+    "Verify app version label and snapshot/appVersion string alignment",
+    "Verify report.js builds context once per render and distributes full context",
+    "Verify no renderer rebuilds report context internally",
+    "Verify overview/risk/capitalflow/statistics visual output parity",
+    "Verify recovery buttons remain stable after rerender",
+    "Verify mobile report layout and invalidate flow remain intact"
+  ]
+}

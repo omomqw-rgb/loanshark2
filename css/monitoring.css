@@ -305,6 +305,15 @@
   text-align: left;
 }
 
+#monitoring-root .monitoring-risk-reasons {
+  white-space: normal;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+}
+
 /* Risk Alerts: keep section full width but constrain card width for readability */
 #monitoring-root .monitoring-section[data-section="risk"] .monitoring-debtor {
   max-width: 85%;

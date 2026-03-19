@@ -375,8 +375,21 @@
   <div class="report-section-header">
     <div class="report-section-header-main">
       <h3 class="report-section-title">Capital Flow Timeline</h3>
+      <p class="report-section-desc">실제 자금 이동 로그 기준 대출 실행·회수 흐름</p>
     </div>
-
+    <div class="capitalflow-filter-bar" data-role="capitalflow-controls">
+      <div class="capitalflow-filter-group" role="group" aria-label="Capital Flow period" data-role="capitalflow-period-group">
+        <button type="button" class="capitalflow-filter-btn" data-filter-value="daily" aria-pressed="false">일</button>
+        <button type="button" class="capitalflow-filter-btn" data-filter-value="weekly" aria-pressed="false">주</button>
+        <button type="button" class="capitalflow-filter-btn is-active" data-filter-value="monthly" aria-pressed="true">월</button>
+      </div>
+      <div class="report-period-controls" data-period-target="capitalflow" data-role="capitalflow-range-group">
+        <input type="date" class="period-input period-from" placeholder="시작일" />
+        <span class="period-separator">~</span>
+        <input type="date" class="period-input period-to" placeholder="종료일" />
+        <button type="button" class="period-apply-btn" data-action="apply-capitalflow-period" data-role="capitalflow-apply">적용</button>
+      </div>
+    </div>
   </div>
 
   <div class="report-section-body">
@@ -387,7 +400,7 @@
 
       <div class="capitalflow-chart-wrapper">
         <canvas id="capitalflow-main-chart"></canvas>
-        
+        <div class="capitalflow-empty-state" data-capitalflow-empty data-role="capitalflow-empty" hidden>해당 기간의 자본 흐름 로그가 없습니다</div>
       </div>
 
       <div class="capitalflow-legend" data-capitalflow-legend>
@@ -424,7 +437,7 @@
         </div>
         <div class="capitalflow-summary-card">
           <div class="capitalflow-summary-label">기준</div>
-          <div class="capitalflow-summary-value">월 기준 자본 흐름</div>
+          <div class="capitalflow-summary-value" data-summary="basis">월 기준 실제 자본 흐름</div>
         </div>
       </div>
     </div>
@@ -452,7 +465,7 @@
 
     <div class="risk-kpi-row">
       <div class="risk-kpi-card" data-risk-kpi="overdue-amount">
-        <div class="risk-kpi-label">총 미납금액</div>
+        <div class="risk-kpi-label">총 기한경과 잔액</div>
         <div class="risk-kpi-value">--원</div>
       </div>
       <div class="risk-kpi-card" data-risk-kpi="overdue-rate">
@@ -624,9 +637,13 @@
 <script src="js/features/debtors.handlers.js"></script>
 <script src="js/features/debtors.js"></script>
 <script src="js/features/calendar.js"></script>
+<script src="js/features/portfolio.metrics.engine.js"></script>
 <script src="js/features/monitoring.js"></script>
 <script src="js/features/report.state.js"></script>
 <script src="js/features/report.compute.capitalflow.js"></script>
+<script src="js/features/report.context.js"></script>
+<script src="js/features/report.render.overview.js"></script>
+<script src="js/features/report.render.risk.js"></script>
 <script src="js/features/report.render.capitalflow.js"></script>
     <script src="js/features/recovery.summary.engine.js"></script>
     <script src="js/features/capitalflow.engine.js"></script>

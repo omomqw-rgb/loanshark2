@@ -106,6 +106,15 @@
         var nameB = getGroupName(b);
         var nameDiff = nameA.localeCompare(nameB, 'ko');
 
+        if (sectionKey === 'risk') {
+          var scoreDiff = (Number(b && b.riskScore) || 0) - (Number(a && a.riskScore) || 0);
+          if (scoreDiff !== 0) return scoreDiff;
+          if (amountDiff !== 0) return amountDiff;
+          var daysDiff = (Number(b && (b.maxOverdueDays || b.overdueDays)) || 0) - (Number(a && (a.maxOverdueDays || a.overdueDays)) || 0);
+          if (daysDiff !== 0) return daysDiff;
+          return nameDiff;
+        }
+
         if (sortBy === 'amount') {
           if (amountDiff !== 0) return amountDiff;
           return nameDiff;
@@ -451,53 +460,62 @@
       };
     }
 
+
     function buildRiskAlerts() {
       var alerts = [];
-      var debtors = getDebtors();
-      if (!debtors.length) return alerts;
+      if (!(App.portfolioMetrics && typeof App.portfolioMetrics.build === 'function')) {
+        return alerts;
+      }
 
+      var metrics = App.portfolioMetrics.build();
+      var risk = metrics && metrics.risk ? metrics.risk : null;
+      if (!risk || !Array.isArray(risk.debtors) || !risk.debtors.length) {
+        return alerts;
+      }
+
+      var debtorMap = Object.create(null);
+      var debtors = getDebtors();
       for (var i = 0; i < debtors.length; i++) {
         var debtor = debtors[i];
         if (!debtor || debtor.id == null) continue;
-        var debtorId = debtor.id;
+        debtorMap[String(debtor.id)] = debtor;
+      }
 
-        var reasons = [];
-        var schedules = [];
-
-        var cMiss = detectConsecutiveMiss(debtorId);
-        if (cMiss) {
-          reasons.push('연속 미납 ' + cMiss.count + '회');
-          schedules = schedules.concat(cMiss.schedules);
-        }
-
-        var pStop = detectPaymentStop(debtorId);
-        if (pStop) {
-          reasons.push('최근 30일 상환 중단');
-          schedules = schedules.concat(pStop.schedules);
-        }
-
-        var pPattern = detectPartialPattern(debtorId);
-        if (pPattern) {
-          reasons.push('부분납 ' + pPattern.count + '회');
-          schedules = schedules.concat(pPattern.schedules);
-        }
-
-        if (!reasons.length) continue;
-
-        schedules = dedupeSchedules(schedules);
-        var summary = summarizeSchedules(schedules);
-
+      for (var j = 0; j < risk.debtors.length; j++) {
+        var item = risk.debtors[j];
+        if (!item || !item.reasons || !item.reasons.length) continue;
+        var debtorObj = debtorMap[String(item.debtorId)] || { id: item.debtorId, name: item.name };
+        var reasons = Array.isArray(item.primaryReasons) && item.primaryReasons.length
+          ? item.primaryReasons.slice(0, 2)
+          : item.reasons.slice(0, 2);
         alerts.push({
-          debtor: debtor,
+          debtor: debtorObj,
           reason: reasons.join(' · '),
-          schedules: schedules,
-          totalAmount: summary.totalRemaining,
-          maxOverdueDays: summary.maxOverdueDays
+          schedules: dedupeSchedules(item.schedules || []),
+          totalAmount: Number(item.operationalExposure) || 0,
+          maxOverdueDays: Number(item.maxOverdueDays) || 0,
+          overdueDays: Number(item.maxOverdueDays) || 0,
+          riskScore: Number(item.riskScore) || 0,
+          riskReasons: Array.isArray(item.reasons) ? item.reasons.slice() : []
         });
       }
 
+      alerts.sort(function (a, b) {
+        if ((b.riskScore || 0) !== (a.riskScore || 0)) {
+          return (b.riskScore || 0) - (a.riskScore || 0);
+        }
+        if ((b.totalAmount || 0) !== (a.totalAmount || 0)) {
+          return (b.totalAmount || 0) - (a.totalAmount || 0);
+        }
+        if ((b.maxOverdueDays || 0) !== (a.maxOverdueDays || 0)) {
+          return (b.maxOverdueDays || 0) - (a.maxOverdueDays || 0);
+        }
+        return getGroupName(a).localeCompare(getGroupName(b), 'ko');
+      });
+
       return alerts;
     }
+
 
     function buildEnforcementAlerts() {
       var alerts = [];
@@ -687,6 +705,9 @@
       if (!summaryText) summaryText = '-';
 
       var subtitleEl = createEl('div', 'monitoring-debtor-subtitle', summaryText);
+      if (mode === 'risk') {
+        subtitleEl.classList.add('monitoring-risk-reasons');
+      }
 
       // Info block wrapper: centered within the card, left-aligned text.
       var infoWrap = createEl('div', 'monitoring-debtor-info');

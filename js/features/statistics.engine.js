@@ -6,184 +6,114 @@
 
   App.features.statisticsEngine = (function () {
 
-    function buildContext(agg) {
-      agg = agg || {};
-      var totals = agg.totals || {};
-      var counts = agg.counts || {};
-      var statusBuckets = agg.statusBuckets || {};
-
-      var schedules = [];
-
-      if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
-        try {
-          schedules = App.schedulesEngine.getAll() || [];
-        } catch (e) {
-          schedules = [];
-        }
+    function getMetrics(agg) {
+      if (agg && agg.metrics) return agg.metrics;
+      if (App.portfolioMetrics && typeof App.portfolioMetrics.build === 'function') {
+        return App.portfolioMetrics.build();
       }
+      return null;
+    }
 
-      var overdue = computeOverdueMetrics(schedules);
+    function clonePlain(value) {
+      if (!value || typeof value !== 'object') return value;
+      return JSON.parse(JSON.stringify(value));
+    }
 
-      // 1) Summary snapshot
-      var summary = {
-        debttotal: Number(totals.debtTotal) || 0,
-        debtpaid: Number(totals.allCollectedTotal) || 0,
-        debtplanned: Number(totals.allOutstandingTotal) || 0,
-        debtoverdue: overdue.overdueOutstandingTotal || 0
-      };
-
-      // 2) Portfolio (Loan / Claim)
-      var loanTotalRepay = Number(totals.loanTotalRepay) || 0;
-      var loanOutstanding = Number(totals.loanOutstanding) || 0;
-      var loanPaid = loanTotalRepay - loanOutstanding;
-      if (!isFinite(loanPaid)) loanPaid = 0;
-
-      var claimAmount = Number(totals.claimAmount) || 0;
-      var claimCollectedTotal = Number(totals.claimCollectedTotal) || 0;
-      var claimOutstanding = Number(totals.claimOutstanding) || 0;
-
-      // Fallback: if claimOutstanding is not provided, derive from amount - collected
-      if (!claimOutstanding && claimAmount && claimCollectedTotal != null) {
-        claimOutstanding = Math.max(0, claimAmount - claimCollectedTotal);
-      }
-
-      var loanPlanned = loanOutstanding;
-      var claimPlanned = claimOutstanding;
-      var debtPlanned = loanPlanned + claimPlanned;
-      summary.debtplanned = debtPlanned;
-
-      var portfolio = [
-        {
-          type: 'Loan',
-          count: counts.totalLoans || 0,
-          total: loanTotalRepay,
-          paid: loanPaid,
-          planned: loanPlanned,
-          overdue: overdue.overdueLoanAmount || 0
-        },
-        {
-          type: 'Claim',
-          count: counts.totalClaims || 0,
-          total: claimAmount,
-          paid: claimCollectedTotal,
-          planned: claimPlanned,
-          overdue: overdue.overdueClaimAmount || 0
-        }
-      ];
-
-      // 3) Loan Structure
-      var loanStructure = {
-        '대출원리금합계': loanTotalRepay,
-        '대출상환금합계': loanPaid,
-        '대출상환예정금합계': loanPlanned,
-        '대출미납금합계': overdue.overdueLoanAmount || 0,
-        '대출건수': counts.totalLoans || 0,
-        '미납대출건수': overdue.overdueLoanCount || 0
-      };
-
-      // 4) Claim Structure
-      var claimStructure = {
-        '채권금합계': claimAmount,
-        '회수금합계': claimCollectedTotal,
-        '회수예정금합계': claimPlanned,
-        '채권건수': counts.totalClaims || 0,
-        '진행중채권건수': counts.activeClaims || 0
-      };
-
-      // 5) Schedule state summary
-      var scheduleCounts = {};
-      var scheduleAmounts = {};
-
-      if (statusBuckets) {
-        for (var key in statusBuckets) {
-          if (!Object.prototype.hasOwnProperty.call(statusBuckets, key)) continue;
-          var bucket = statusBuckets[key] || {};
-          scheduleCounts[key] = Number(bucket.count) || 0;
-          scheduleAmounts[key] = Number(bucket.amount) || 0;
-        }
-      }
-
-      var debtors = {
-        total: counts.totalDebtors || 0,
-        active: counts.activeDebtors || 0
-      };
-
+    function getDefaultWeekSemantics() {
       return {
-        summary: summary,
-        portfolio: portfolio,
-        loanStructure: loanStructure,
-        claimStructure: claimStructure,
-        scheduleCounts: scheduleCounts,
-        scheduleAmounts: scheduleAmounts,
-        debtors: debtors
+        weekStartsOn: 1,
+        weekAnchor: 'monday',
+        label: '월요일 시작 주간 기준',
+        shortLabel: '월요일 시작',
+        description: 'Report 전체 주간 해석은 월요일 시작(Monday anchor) 기준입니다.'
       };
     }
 
-    function computeOverdueMetrics(schedules) {
-      var metrics = {
-        overdueOutstandingTotal: 0,
-        overdueLoanAmount: 0,
-        overdueClaimAmount: 0,
-        overdueLoanCount: 0,
-        overdueClaimCount: 0
+    function resolveWeekSemantics(value) {
+      if (!value || typeof value !== 'object') return getDefaultWeekSemantics();
+      return {
+        weekStartsOn: Number(value.weekStartsOn) || 1,
+        weekAnchor: value.weekAnchor || 'monday',
+        label: value.label || '월요일 시작 주간 기준',
+        shortLabel: value.shortLabel || '월요일 시작',
+        description: value.description || 'Report 전체 주간 해석은 월요일 시작(Monday anchor) 기준입니다.'
+      };
+    }
+
+    function buildWeekSemanticsNote(weekSemantics) {
+      var resolved = resolveWeekSemantics(weekSemantics);
+      return '주간 해석은 ' + (resolved.label || '월요일 시작 주간 기준') + '을 따릅니다.';
+    }
+
+
+    function buildContext(agg, options) {
+      var metrics = getMetrics(agg) || {
+        finance: {
+          loan: { total: 0, paid: 0, planned: 0, overdue: 0, remaining: 0 },
+          claim: { total: 0, paid: 0, outstanding: 0, duePassedOutstanding: 0 },
+          debt: { total: 0, paid: 0, planned: 0, overdue: 0 }
+        },
+        scheduleStatus: { counts: {}, amounts: {} },
+        counts: { totalDebtors: 0, activeDebtors: 0, totalLoans: 0, activeLoans: 0, totalClaims: 0, activeClaims: 0 }
       };
 
-      if (!schedules || !schedules.length) {
-        return metrics;
-      }
+      var finance = metrics.finance || {};
+      var loan = finance.loan || {};
+      var claim = finance.claim || {};
+      var debt = finance.debt || {};
+      var counts = metrics.counts || {};
+      var scheduleStatus = metrics.scheduleStatus || {};
+      var weekSemantics = resolveWeekSemantics(options && options.weekSemantics);
 
-      var seenLoanIds = Object.create(null);
-      var seenClaimIds = Object.create(null);
-
-      for (var i = 0; i < schedules.length; i++) {
-        var sc = schedules[i];
-        if (!sc) continue;
-
-        var amount = Number(sc.amount) || 0;
-        var status = (sc.status || '').toUpperCase();
-        var partialPaid = Number(sc.partialPaidAmount) || 0;
-
-        var paidAmt = 0;
-        if (status === 'PAID') {
-          paidAmt = amount;
-        } else if (status === 'PARTIAL') {
-          paidAmt = partialPaid;
-        }
-
-        var remaining = amount - paidAmt;
-        if (!isFinite(remaining) || remaining < 0) {
-          remaining = 0;
-        }
-
-        if (status !== 'OVERDUE' || !remaining) continue;
-
-        metrics.overdueOutstandingTotal += remaining;
-
-        var kind = sc.kind || '';
-        if (kind === 'loan') {
-          metrics.overdueLoanAmount += remaining;
-          var loanId = sc.loanId;
-          if (loanId != null) {
-            var loanKey = String(loanId);
-            if (!seenLoanIds[loanKey]) {
-              seenLoanIds[loanKey] = true;
-              metrics.overdueLoanCount += 1;
-            }
+      return {
+        summary: {
+          debttotal: Number(debt.total) || 0,
+          debtpaid: Number(debt.paid) || 0,
+          debtplanned: Number(debt.planned) || 0,
+          debtoverdue: Number(debt.overdue) || 0
+        },
+        portfolio: [
+          {
+            type: 'Loan',
+            count: counts.totalLoans || 0,
+            total: Number(loan.total) || 0,
+            paid: Number(loan.paid) || 0,
+            planned: Number(loan.planned) || 0,
+            overdue: Number(loan.overdue) || 0
+          },
+          {
+            type: 'Claim',
+            count: counts.totalClaims || 0,
+            total: Number(claim.total) || 0,
+            paid: Number(claim.paid) || 0,
+            planned: Number(claim.outstanding) || 0,
+            overdue: 0
           }
-        } else if (kind === 'claim') {
-          metrics.overdueClaimAmount += remaining;
-          var claimId = sc.claimId;
-          if (claimId != null) {
-            var claimKey = String(claimId);
-            if (!seenClaimIds[claimKey]) {
-              seenClaimIds[claimKey] = true;
-              metrics.overdueClaimCount += 1;
-            }
-          }
+        ],
+        loanStructure: {
+          '대출원리금합계': Number(loan.total) || 0,
+          '대출상환금합계': Number(loan.paid) || 0,
+          '대출상환예정금합계': Number(loan.planned) || 0,
+          '대출미납금합계': Number(loan.overdue) || 0,
+          '대출건수': counts.totalLoans || 0,
+          '활성대출건수': counts.activeLoans || 0
+        },
+        claimStructure: {
+          '채권금합계': Number(claim.total) || 0,
+          '회수금합계': Number(claim.paid) || 0,
+          '회수예정금합계': Number(claim.outstanding) || 0,
+          '채권건수': counts.totalClaims || 0,
+          '진행중채권건수': counts.activeClaims || 0
+        },
+        scheduleCounts: scheduleStatus.counts || {},
+        scheduleAmounts: scheduleStatus.amounts || {},
+        weekSemantics: clonePlain(weekSemantics),
+        periodDescription: buildWeekSemanticsNote(weekSemantics),
+        debtors: {
+          '전체 채무자 수': counts.totalDebtors || 0,
+          '활성 채무자 수': counts.activeDebtors || 0
         }
-      }
-
-      return metrics;
+      };
     }
 
     function clearElement(el) {
@@ -193,22 +123,24 @@
       }
     }
 
-    function formatNumber(value) {
-      var util = App.util || {};
-      if (util.formatNumber) {
-        return util.formatNumber(value);
-      }
-      var n = Number(value) || 0;
-      return String(n);
-    }
-
-    function formatCurrency(value) {
-      var util = App.util || {};
-      var n = Number(value) || 0;
-      if (!util.formatCurrency) {
-        return String(n);
-      }
-      return util.formatCurrency(n);
+    function getFormatters(input) {
+      var format = input && input.format ? input.format : {};
+      return {
+        number: typeof format.number === 'function'
+          ? format.number
+          : function (value) {
+              var util = App.util || {};
+              if (typeof util.formatNumber === 'function') return util.formatNumber(value);
+              return String(Number(value) || 0);
+            },
+        currency: typeof format.currency === 'function'
+          ? format.currency
+          : function (value) {
+              var util = App.util || {};
+              if (typeof util.formatCurrency === 'function') return util.formatCurrency(Number(value) || 0);
+              return String(Number(value) || 0);
+            }
+      };
     }
 
     function getStatusLabel(code) {
@@ -221,43 +153,33 @@
       return map[code] || code;
     }
 
-    function renderSummary(root, summary) {
+    function renderSummary(root, summary, formatters) {
       var cards = root.querySelectorAll('.statistics-kpi-card[data-kpi]');
       if (!cards || !cards.length) return;
-
-      var LABEL_MAP = {
+      var labelMap = {
         debttotal: '채무금합계',
         debtpaid: '채무상환금합계',
         debtplanned: '채무상환예정금합계',
         debtoverdue: '미납금합계'
       };
-
       for (var i = 0; i < cards.length; i++) {
         var card = cards[i];
         var key = card.getAttribute('data-kpi');
-        if (!key) continue;
-
+        var label = labelMap[key] || key || '';
+        var rawValue = summary && Object.prototype.hasOwnProperty.call(summary, key) ? summary[key] : 0;
         clearElement(card);
-
-        var label = LABEL_MAP[key] || key;
-        var rawValue = summary && Object.prototype.hasOwnProperty.call(summary, key)
-          ? summary[key]
-          : 0;
-
         var labelEl = document.createElement('div');
         labelEl.className = 'statistics-kpi-label';
         labelEl.textContent = label;
-
         var valueEl = document.createElement('div');
         valueEl.className = 'statistics-kpi-value';
-        valueEl.textContent = formatCurrency(rawValue);
-
+        valueEl.textContent = formatters.currency(rawValue);
         card.appendChild(labelEl);
         card.appendChild(valueEl);
       }
     }
 
-    function renderPortfolioTable(root, portfolio) {
+    function renderPortfolioTable(root, portfolio, formatters) {
       var table = root.querySelector('.statistics-section-portfolio table.statistics-table[data-table="portfolio"]');
       if (!table) return;
       var tbody = table.querySelector('tbody');
@@ -266,43 +188,27 @@
         table.appendChild(tbody);
       }
       clearElement(tbody);
-
       if (!portfolio || !portfolio.length) return;
-
       function mapTypeLabel(type) {
         if (type === 'Loan') return '대출';
         if (type === 'Claim') return '채권';
         return type || '';
       }
-
       for (var i = 0; i < portfolio.length; i++) {
-        var row = portfolio[i];
+        var row = portfolio[i] || {};
         var tr = document.createElement('tr');
-
-        var tdType = document.createElement('td');
-        tdType.textContent = mapTypeLabel(row.type);
-        tr.appendChild(tdType);
-
-        var tdCount = document.createElement('td');
-        tdCount.textContent = formatNumber(row.count || 0);
-        tr.appendChild(tdCount);
-
-        var tdTotal = document.createElement('td');
-        tdTotal.textContent = formatCurrency(row.total || 0);
-        tr.appendChild(tdTotal);
-
-        var tdPaid = document.createElement('td');
-        tdPaid.textContent = formatCurrency(row.paid || 0);
-        tr.appendChild(tdPaid);
-
-        var tdPlanned = document.createElement('td');
-        tdPlanned.textContent = formatCurrency(row.planned || 0);
-        tr.appendChild(tdPlanned);
-
-        var tdOverdue = document.createElement('td');
-        tdOverdue.textContent = formatCurrency(row.overdue || 0);
-        tr.appendChild(tdOverdue);
-
+        [
+          mapTypeLabel(row.type),
+          formatters.number(row.count || 0),
+          formatters.currency(row.total || 0),
+          formatters.currency(row.paid || 0),
+          formatters.currency(row.planned || 0),
+          formatters.currency(row.overdue || 0)
+        ].forEach(function (text) {
+          var td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        });
         tbody.appendChild(tr);
       }
     }
@@ -317,53 +223,27 @@
         table.appendChild(tbody);
       }
       clearElement(tbody);
-
-      data = data || {};
-      var keys = Object.keys(data);
+      var keys = Object.keys(data || {});
       for (var i = 0; i < keys.length; i++) {
         var label = keys[i];
         var value = data[label];
-
         var tr = document.createElement('tr');
-
         var tdLabel = document.createElement('td');
         tdLabel.textContent = label;
-        tr.appendChild(tdLabel);
-
         var tdValue = document.createElement('td');
-        if (typeof valueFormatter === 'function') {
-          tdValue.textContent = valueFormatter(label, value);
-        } else {
-          tdValue.textContent = String(value);
-        }
+        tdValue.textContent = typeof valueFormatter === 'function' ? valueFormatter(label, value) : String(value);
+        tr.appendChild(tdLabel);
         tr.appendChild(tdValue);
-
         tbody.appendChild(tr);
       }
     }
 
-    function structureValueFormatter(label, value) {
-      if (label.indexOf('건수') !== -1) {
-        return formatNumber(value || 0);
-      }
-      return formatCurrency(value || 0);
-    }
-
-    function debtorValueFormatter(label, value) {
-      if (label === '채무자 수' || label.indexOf('수') !== -1) {
-        return formatNumber(value || 0);
-      }
-      return formatCurrency(value || 0);
-    }
-
-    function renderScheduleTables(root, scheduleCounts, scheduleAmounts) {
+    function renderScheduleTables(root, scheduleCounts, scheduleAmounts, formatters) {
       scheduleCounts = scheduleCounts || {};
       scheduleAmounts = scheduleAmounts || {};
-
+      var order = ['PLANNED', 'PARTIAL', 'PAID', 'OVERDUE'];
       var codes = [];
       var seen = Object.create(null);
-      var order = ['PLANNED', 'PARTIAL', 'PAID', 'OVERDUE'];
-
       for (var i = 0; i < order.length; i++) {
         var code = order[i];
         if (scheduleCounts[code] != null || scheduleAmounts[code] != null) {
@@ -371,82 +251,71 @@
           seen[code] = true;
         }
       }
-
       for (var key in scheduleCounts) {
-        if (!Object.prototype.hasOwnProperty.call(scheduleCounts, key)) continue;
-        if (!seen[key]) {
-          codes.push(key);
-          seen[key] = true;
-        }
+        if (!Object.prototype.hasOwnProperty.call(scheduleCounts, key) || seen[key]) continue;
+        codes.push(key);
+        seen[key] = true;
       }
-      for (var key2 in scheduleAmounts) {
-        if (!Object.prototype.hasOwnProperty.call(scheduleAmounts, key2)) continue;
-        if (!seen[key2]) {
-          codes.push(key2);
-          seen[key2] = true;
-        }
+      for (var amountKey in scheduleAmounts) {
+        if (!Object.prototype.hasOwnProperty.call(scheduleAmounts, amountKey) || seen[amountKey]) continue;
+        codes.push(amountKey);
+        seen[amountKey] = true;
       }
 
-      var countsTable = root.querySelector('table.statistics-table[data-table="schedule-counts"]');
-      if (countsTable) {
-        var countsBody = countsTable.querySelector('tbody') || document.createElement('tbody');
-        if (!countsTable.querySelector('tbody')) {
-          countsTable.appendChild(countsBody);
-        }
-        clearElement(countsBody);
-
+      [['schedule-counts', scheduleCounts, formatters.number], ['schedule-amounts', scheduleAmounts, formatters.currency]].forEach(function (config) {
+        var table = root.querySelector('table.statistics-table[data-table="' + config[0] + '"]');
+        if (!table) return;
+        var tbody = table.querySelector('tbody') || document.createElement('tbody');
+        if (!table.querySelector('tbody')) table.appendChild(tbody);
+        clearElement(tbody);
         for (var j = 0; j < codes.length; j++) {
           var statusCode = codes[j];
-          var countVal = scheduleCounts[statusCode] || 0;
-          var trCount = document.createElement('tr');
-
-          var tdStatusLabel = document.createElement('td');
-          tdStatusLabel.textContent = getStatusLabel(statusCode);
-          trCount.appendChild(tdStatusLabel);
-
-          var tdCountVal = document.createElement('td');
-          tdCountVal.textContent = formatNumber(countVal);
-          trCount.appendChild(tdCountVal);
-
-          countsBody.appendChild(trCount);
+          var tr = document.createElement('tr');
+          var tdStatus = document.createElement('td');
+          tdStatus.textContent = getStatusLabel(statusCode);
+          var tdValue = document.createElement('td');
+          tdValue.textContent = config[2](config[1][statusCode] || 0);
+          tr.appendChild(tdStatus);
+          tr.appendChild(tdValue);
+          tbody.appendChild(tr);
         }
-      }
-
-      var amountsTable = root.querySelector('table.statistics-table[data-table="schedule-amounts"]');
-      if (amountsTable) {
-        var amountsBody = amountsTable.querySelector('tbody') || document.createElement('tbody');
-        if (!amountsTable.querySelector('tbody')) {
-          amountsTable.appendChild(amountsBody);
-        }
-        clearElement(amountsBody);
-
-        for (var k = 0; k < codes.length; k++) {
-          var statusCode2 = codes[k];
-          var amountVal = scheduleAmounts[statusCode2] || 0;
-          var trAmt = document.createElement('tr');
-
-          var tdStatusLabel2 = document.createElement('td');
-          tdStatusLabel2.textContent = getStatusLabel(statusCode2);
-          trAmt.appendChild(tdStatusLabel2);
-
-          var tdAmountVal = document.createElement('td');
-          tdAmountVal.textContent = formatCurrency(amountVal);
-          trAmt.appendChild(tdAmountVal);
-
-          amountsBody.appendChild(trAmt);
-        }
-      }
+      });
     }
 
-    function render(root, ctx) {
-      if (!root || !ctx) return;
+    function syncWeekSemanticsHeader(root, input) {
+      if (!root) return;
+      var ctx = input && input.statistics ? input.statistics : {};
+      var weekSemantics = (ctx && ctx.weekSemantics) || (input && input.meta ? input.meta.weekSemantics : null);
+      var note = buildWeekSemanticsNote(weekSemantics);
+      var header = root.querySelector('.statistics-section-snapshot .statistics-header');
+      if (!header) return;
+      var desc = header.querySelector('.report-section-desc[data-role="statistics-week-note"]');
+      if (!desc) {
+        desc = document.createElement('p');
+        desc.className = 'report-section-desc';
+        desc.setAttribute('data-role', 'statistics-week-note');
+        header.appendChild(desc);
+      }
+      desc.textContent = note;
+    }
 
-      renderSummary(root, ctx.summary || {});
-      renderPortfolioTable(root, ctx.portfolio || []);
-      renderKeyValueTable(root, 'loan-structure', ctx.loanStructure || {}, structureValueFormatter);
-      renderKeyValueTable(root, 'claim-structure', ctx.claimStructure || {}, structureValueFormatter);
-      renderScheduleTables(root, ctx.scheduleCounts || {}, ctx.scheduleAmounts || {});
-      renderKeyValueTable(root, 'debtors', ctx.debtors || {}, debtorValueFormatter);
+    function render(root, input) {
+      var ctx = input && input.statistics ? input.statistics : {};
+      if (!root || !ctx) return;
+      syncWeekSemanticsHeader(root, input || {});
+      var formatters = getFormatters(input || {});
+      renderSummary(root, ctx.summary || {}, formatters);
+      renderPortfolioTable(root, ctx.portfolio || [], formatters);
+      renderKeyValueTable(root, 'loan-structure', ctx.loanStructure || {}, function (label, value) {
+        return label.indexOf('건수') !== -1 ? formatters.number(value || 0) : formatters.currency(value || 0);
+      });
+      renderKeyValueTable(root, 'claim-structure', ctx.claimStructure || {}, function (label, value) {
+        return label.indexOf('건수') !== -1 ? formatters.number(value || 0) : formatters.currency(value || 0);
+      });
+      renderScheduleTables(root, ctx.scheduleCounts || {}, ctx.scheduleAmounts || {}, formatters);
+      renderKeyValueTable(root, 'debtors', ctx.debtors || {}, function (label, value) {
+        return formatters.number(value || 0);
+      });
     }
 
     return {

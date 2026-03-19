@@ -39,8 +39,27 @@
     return (typeof value === 'string' && value) ? value : null;
   }
 
+  function normalizeRangePair(dateFrom, dateTo) {
+    var from = normalizeDateValue(dateFrom);
+    var to = normalizeDateValue(dateTo);
+    if (from && to && from > to) {
+      var swapped = from;
+      from = to;
+      to = swapped;
+    }
+    return {
+      dateFrom: from,
+      dateTo: to
+    };
+  }
+
   function normalizeLegendBoolean(value, fallbackValue) {
     return (typeof value === 'boolean') ? value : !!fallbackValue;
+  }
+
+  function sanitizeTrendPeriod(value, fallbackValue) {
+    var next = (typeof value === 'string' && value) ? value : fallbackValue;
+    return (next === 'daily' || next === 'weekly' || next === 'monthly') ? next : (fallbackValue || 'monthly');
   }
 
   function sanitizeLegendGroup(defaultGroup, currentGroup) {
@@ -85,17 +104,17 @@
     if (!isObject(report.trend)) {
       report.trend = defaults.trend;
     }
-    report.trend.period = (typeof report.trend.period === 'string' && report.trend.period)
-      ? report.trend.period
-      : defaults.trend.period;
-    report.trend.dateFrom = normalizeDateValue(report.trend.dateFrom);
-    report.trend.dateTo = normalizeDateValue(report.trend.dateTo);
+    report.trend.period = sanitizeTrendPeriod(report.trend.period, defaults.trend.period);
+    var normalizedTrendRange = normalizeRangePair(report.trend.dateFrom, report.trend.dateTo);
+    report.trend.dateFrom = normalizedTrendRange.dateFrom;
+    report.trend.dateTo = normalizedTrendRange.dateTo;
 
     if (!isObject(report.risk)) {
       report.risk = defaults.risk;
     }
-    report.risk.dateFrom = normalizeDateValue(report.risk.dateFrom);
-    report.risk.dateTo = normalizeDateValue(report.risk.dateTo);
+    var normalizedRiskRange = normalizeRangePair(report.risk.dateFrom, report.risk.dateTo);
+    report.risk.dateFrom = normalizedRiskRange.dateFrom;
+    report.risk.dateTo = normalizedRiskRange.dateTo;
 
     report.legendVisibility = sanitizeLegendVisibility(defaults, report.legendVisibility);
 
@@ -145,20 +164,22 @@
     return ensureReportState().trend;
   };
   App.reportState.setTrendPeriod = function (value) {
-    ensureReportState().trend.period = (typeof value === 'string' && value) ? value : 'monthly';
+    ensureReportState().trend.period = sanitizeTrendPeriod(value, 'monthly');
   };
   App.reportState.setTrendRange = function (dateFrom, dateTo) {
     var trend = ensureReportState().trend;
-    trend.dateFrom = normalizeDateValue(dateFrom);
-    trend.dateTo = normalizeDateValue(dateTo);
+    var normalized = normalizeRangePair(dateFrom, dateTo);
+    trend.dateFrom = normalized.dateFrom;
+    trend.dateTo = normalized.dateTo;
   };
   App.reportState.getRisk = function () {
     return ensureReportState().risk;
   };
   App.reportState.setRiskRange = function (dateFrom, dateTo) {
     var risk = ensureReportState().risk;
-    risk.dateFrom = normalizeDateValue(dateFrom);
-    risk.dateTo = normalizeDateValue(dateTo);
+    var normalized = normalizeRangePair(dateFrom, dateTo);
+    risk.dateFrom = normalized.dateFrom;
+    risk.dateTo = normalized.dateTo;
   };
   App.reportState.getLegendGroup = function (groupKey) {
     var report = ensureReportState();
@@ -195,9 +216,15 @@
       set: function (value) {
         if (!isObject(value)) return;
         var trend = ensureReportState().trend;
-        if (typeof value.period === 'string' && value.period) trend.period = value.period;
-        if (Object.prototype.hasOwnProperty.call(value, 'dateFrom')) trend.dateFrom = normalizeDateValue(value.dateFrom);
-        if (Object.prototype.hasOwnProperty.call(value, 'dateTo')) trend.dateTo = normalizeDateValue(value.dateTo);
+        if (Object.prototype.hasOwnProperty.call(value, 'period')) {
+          trend.period = sanitizeTrendPeriod(value.period, trend.period || 'monthly');
+        }
+        var nextTrendRange = normalizeRangePair(
+          Object.prototype.hasOwnProperty.call(value, 'dateFrom') ? value.dateFrom : trend.dateFrom,
+          Object.prototype.hasOwnProperty.call(value, 'dateTo') ? value.dateTo : trend.dateTo
+        );
+        trend.dateFrom = nextTrendRange.dateFrom;
+        trend.dateTo = nextTrendRange.dateTo;
       }
     });
 
@@ -210,8 +237,12 @@
       set: function (value) {
         if (!isObject(value)) return;
         var risk = ensureReportState().risk;
-        if (Object.prototype.hasOwnProperty.call(value, 'dateFrom')) risk.dateFrom = normalizeDateValue(value.dateFrom);
-        if (Object.prototype.hasOwnProperty.call(value, 'dateTo')) risk.dateTo = normalizeDateValue(value.dateTo);
+        var nextRiskRange = normalizeRangePair(
+          Object.prototype.hasOwnProperty.call(value, 'dateFrom') ? value.dateFrom : risk.dateFrom,
+          Object.prototype.hasOwnProperty.call(value, 'dateTo') ? value.dateTo : risk.dateTo
+        );
+        risk.dateFrom = nextRiskRange.dateFrom;
+        risk.dateTo = nextRiskRange.dateTo;
       }
     });
 

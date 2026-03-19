@@ -1,0 +1,19 @@
+{
+  "version": "v3.2.38_report_hotfix_stability_lock",
+  "base": "LoanShark_v3.2.37A_capitalflow_polish_hotfix.zip",
+  "patchedFiles": [
+    "js/core/state.js",
+    "js/features/report.state.js",
+    "js/features/report.js",
+    "js/features/report.render.recovery.js",
+    "js/features/capitalflow.engine.js",
+    "css/report.css"
+  ],
+  "focus": [
+    "version sync",
+    "report range normalization",
+    "recovery lifecycle hardening",
+    "capitalflow event bind guard",
+    "report css cleanup"
+  ]
+}

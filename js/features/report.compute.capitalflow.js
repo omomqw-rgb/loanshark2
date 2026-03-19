@@ -3,526 +3,445 @@
   var App = window.App || (window.App = {});
   App.reportCompute = App.reportCompute || {};
 
-function computeReportAggregates() {
-  var state = App.state || {};
-  var loans = state.loans || [];
-  var claims = state.claims || [];
-  var schedules = [];
+  function clonePlain(value) {
+    if (!value || typeof value !== 'object') return value;
+    return JSON.parse(JSON.stringify(value));
+  }
 
-  if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
-    try {
-      schedules = App.schedulesEngine.getAll() || [];
-    } catch (e) {
-      schedules = [];
+  function getWeekSemantics() {
+    return {
+      weekStartsOn: 1,
+      weekAnchor: 'monday',
+      label: '월요일 시작 주간 기준',
+      shortLabel: '월요일 시작',
+      description: 'Report 전체 주간 해석은 월요일 시작(Monday anchor) 기준입니다.'
+    };
+  }
+
+  function toDate(value) {
+    if (!value) return null;
+    var date = new Date(value);
+    if (isNaN(date.getTime())) return null;
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function computeReportAggregates() {
+    var state = App.state || {};
+    var loans = Array.isArray(state.loans) ? state.loans : [];
+    var claims = Array.isArray(state.claims) ? state.claims : [];
+    var debtors = Array.isArray(state.debtors) ? state.debtors : [];
+    var schedules = [];
+
+    if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
+      try {
+        schedules = App.schedulesEngine.getAll() || [];
+      } catch (e) {
+        schedules = [];
+      }
     }
-  }
 
-  var debtors = state.debtors || [];
-  var util = App.util || {};
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    var weekStart = getWeekStart(today);
+    var weekEnd = getWeekEnd(weekStart);
 
-  function toDate(d) {
-    if (!d) return null;
-    var x = new Date(d);
-    if (isNaN(x.getTime())) return null;
-    x.setHours(0, 0, 0, 0);
-    return x;
-  }
+    var riskRange = null;
+    if (App.reportState && typeof App.reportState.getRisk === 'function') {
+      riskRange = App.reportState.getRisk();
+    } else if (App.reportRiskState) {
+      riskRange = App.reportRiskState;
+    }
 
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
-  var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    var metrics = (App.portfolioMetrics && typeof App.portfolioMetrics.build === 'function')
+      ? App.portfolioMetrics.build({ riskRange: riskRange })
+      : null;
 
-  // Week: Sunday 00:00 ~ Saturday 23:59
-  var weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - today.getDay());
-  weekStart.setHours(0, 0, 0, 0);
-  var weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  weekEnd.setHours(23, 59, 59, 999);
+    var finance = metrics && metrics.finance ? metrics.finance : {
+      loan: { total: 0, paid: 0, planned: 0, overdue: 0, remaining: 0 },
+      claim: { total: 0, paid: 0, outstanding: 0, duePassedOutstanding: 0 },
+      debt: { total: 0, paid: 0, planned: 0, overdue: 0 }
+    };
+    var countsMetrics = metrics && metrics.counts ? metrics.counts : {};
+    var scheduleMetrics = metrics && metrics.scheduleStatus ? metrics.scheduleStatus : { counts: {}, amounts: {} };
 
-  var totals = {
-    loanPrincipal: 0,
-    loanTotalRepay: 0,
-    claimAmount: 0,
-    debtTotal: 0,
-    claimCollectedTotal: 0,
-    allCollectedTotal: 0,
-    allOutstandingTotal: 0,
-    loanOutstanding: 0,
-    claimOutstanding: 0
-  };
+    var totals = {
+      loanPrincipal: 0,
+      loanTotalRepay: Number(finance.loan.total) || 0,
+      claimAmount: Number(finance.claim.total) || 0,
+      debtTotal: Number(finance.debt.total) || 0,
+      claimCollectedTotal: Number(finance.claim.paid) || 0,
+      allCollectedTotal: Number(finance.debt.paid) || 0,
+      allOutstandingTotal: (Number(finance.loan.remaining) || 0) + (Number(finance.claim.outstanding) || 0),
+      loanOutstanding: Number(finance.loan.remaining) || 0,
+      claimOutstanding: Number(finance.claim.outstanding) || 0
+    };
 
-  loans.forEach(function (loan) {
-    var p = Number(loan.principal) || 0;
-    var t = Number(loan.totalRepayAmount) || 0;
-    totals.loanPrincipal += p;
-    totals.loanTotalRepay += t;
-  });
+    for (var li = 0; li < loans.length; li++) {
+      totals.loanPrincipal += Number(loans[li] && loans[li].principal) || 0;
+    }
 
-  claims.forEach(function (claim) {
-    var a = Number(claim.amount) || 0;
-    totals.claimAmount += a;
-  });
+    var statusBuckets = {
+      PLANNED: { count: 0, amount: 0 },
+      PAID: { count: 0, amount: 0 },
+      PARTIAL: { count: 0, amount: 0, partialAmount: 0 },
+      OVERDUE: { count: 0, amount: 0 }
+    };
+    var statusDays = {
+      PLANNED: { totalDays: 0, count: 0 },
+      PAID: { totalDays: 0, count: 0 },
+      PARTIAL: { totalDays: 0, count: 0 },
+      OVERDUE: { totalDays: 0, count: 0 }
+    };
+    var ageBuckets = {
+      bucket0_30: { count: 0, amount: 0 },
+      bucket31_60: { count: 0, amount: 0 },
+      bucket61_90: { count: 0, amount: 0 },
+      bucket90p: { count: 0, amount: 0 }
+    };
+    var period = {
+      weekPlanned: 0,
+      weekExpected: 0,
+      weekCollected: 0,
+      monthPlanned: 0,
+      monthExpected: 0,
+      monthCollected: 0,
+      weekClaimCollected: 0,
+      monthClaimCollected: 0
+    };
 
-  totals.debtTotal = totals.loanTotalRepay + totals.claimAmount;
+    var helpers = App.portfolioMetrics && App.portfolioMetrics.helpers ? App.portfolioMetrics.helpers : null;
+    var getDueDate = helpers && helpers.getScheduleDueDate ? helpers.getScheduleDueDate : function (schedule) { return toDate(schedule && schedule.dueDate); };
+    var getPaidAmount = helpers && helpers.getSchedulePaidAmount ? helpers.getSchedulePaidAmount : function () { return 0; };
+    var getRemaining = helpers && helpers.getScheduleRemaining ? helpers.getScheduleRemaining : function () { return 0; };
 
-  var statusBuckets = {
-    PLANNED: { count: 0, amount: 0 },
-    PAID: { count: 0, amount: 0 },
-    PARTIAL: { count: 0, amount: 0, partialAmount: 0 },
-    OVERDUE: { count: 0, amount: 0 }
-  };
+    for (var si = 0; si < schedules.length; si++) {
+      var schedule = schedules[si];
+      if (!schedule) continue;
+      var status = String(schedule.status || 'PLANNED').toUpperCase();
+      var amount = Number(schedule.amount) || 0;
+      var paidAmount = getPaidAmount(schedule);
+      var remaining = getRemaining(schedule);
+      var due = getDueDate(schedule);
 
-  var statusDays = {
-    PLANNED: { totalDays: 0, count: 0 },
-    PAID: { totalDays: 0, count: 0 },
-    PARTIAL: { totalDays: 0, count: 0 },
-    OVERDUE: { totalDays: 0, count: 0 }
-  };
-
-  var ageBuckets = {
-    bucket0_30: { count: 0, amount: 0 },
-    bucket31_60: { count: 0, amount: 0 },
-    bucket61_90: { count: 0, amount: 0 },
-    bucket90p: { count: 0, amount: 0 }
-  };
-
-  var period = {
-    weekPlanned: 0,
-    weekExpected: 0,
-    weekCollected: 0,
-    monthPlanned: 0,
-    monthExpected: 0,
-    monthCollected: 0,
-    weekClaimCollected: 0,
-    monthClaimCollected: 0
-  };
-
-  var activeLoanIds = {};
-  var activeClaimIds = {};
-
-  schedules.forEach(function (sch) {
-    var amt = Number(sch.amount) || 0;
-    var status = sch.status || 'PLANNED';
-    var partialPaid = Number(sch.partialPaidAmount) || 0;
-    var due = toDate(sch.dueDate);
-
-    var paidAmt = 0;
-    if (status === 'PAID') paidAmt = amt;
-    else if (status === 'PARTIAL') paidAmt = partialPaid;
-
-    var remaining = amt - paidAmt;
-    if (remaining < 0) remaining = 0;
-
-    if (statusBuckets[status]) {
-      statusBuckets[status].count += 1;
-      statusBuckets[status].amount += amt;
+      if (!Object.prototype.hasOwnProperty.call(statusBuckets, status)) {
+        statusBuckets[status] = { count: 0, amount: 0 };
+      }
+      statusBuckets[status].count = (scheduleMetrics.counts && scheduleMetrics.counts[status]) || statusBuckets[status].count;
+      statusBuckets[status].amount = (scheduleMetrics.amounts && scheduleMetrics.amounts[status]) || statusBuckets[status].amount;
       if (status === 'PARTIAL') {
-        statusBuckets[status].partialAmount += paidAmt;
+        statusBuckets[status].partialAmount = (statusBuckets[status].partialAmount || 0) + paidAmount;
       }
-    }
 
-    // 상태별 평균 경과일 계산용 (dueDate 기준, 오늘보다 지난 경우만)
-    if (due && statusDays[status]) {
-      var diffMs = today.getTime() - due.getTime();
-      var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays > 0) {
-        statusDays[status].totalDays += diffDays;
-        statusDays[status].count += 1;
-
-        // 연체 구간 통계 (전체 기준)
-        var bucket = null;
-        if (diffDays <= 30) bucket = ageBuckets.bucket0_30;
-        else if (diffDays <= 60) bucket = ageBuckets.bucket31_60;
-        else if (diffDays <= 90) bucket = ageBuckets.bucket61_90;
-        else bucket = ageBuckets.bucket90p;
-        if (bucket) {
+      if (due && statusDays[status]) {
+        var diff = Math.floor((today.getTime() - due.getTime()) / 86400000);
+        if (diff > 0) {
+          statusDays[status].totalDays += diff;
+          statusDays[status].count += 1;
+          var bucket = diff <= 30 ? ageBuckets.bucket0_30 : diff <= 60 ? ageBuckets.bucket31_60 : diff <= 90 ? ageBuckets.bucket61_90 : ageBuckets.bucket90p;
           bucket.count += 1;
-          bucket.amount += amt;
+          bucket.amount += remaining > 0 ? remaining : amount;
         }
       }
-    }
 
-    totals.allCollectedTotal += paidAmt;
-    totals.allOutstandingTotal += remaining;
-
-    if (sch.kind === 'claim') {
-      totals.claimCollectedTotal += paidAmt;
-    }
-
-    if (sch.kind === 'loan') {
-      if (remaining > 0) {
-        activeLoanIds[sch.loanId] = true;
-        totals.loanOutstanding += remaining;
-      }
-    } else if (sch.kind === 'claim') {
-      if (remaining > 0) {
-        activeClaimIds[sch.claimId] = true;
-        totals.claimOutstanding += remaining;
-      }
-    }
-
-    if (due) {
-      var inWeek = (due >= weekStart && due <= weekEnd);
-      var inMonth = (due >= monthStart && due <= today);
-
-      if (inWeek) {
-        period.weekExpected += amt;
-        period.weekCollected += paidAmt;
-        if (sch.kind === 'claim') {
-          period.weekClaimCollected += paidAmt;
-        }
-      }
-      if (inMonth) {
-        period.monthExpected += amt;
-        period.monthCollected += paidAmt;
-        if (sch.kind === 'claim') {
-          period.monthClaimCollected += paidAmt;
-        }
-      }
-    }
-  });
-
-  var counts = {
-    totalLoans: loans.length,
-    totalClaims: claims.length,
-    activeLoans: Object.keys(activeLoanIds).length,
-    activeClaims: Object.keys(activeClaimIds).length,
-    totalDebtors: debtors.length
-  };
-
-  return {
-    today: today,
-    monthStart: monthStart,
-    weekStart: weekStart,
-    weekEnd: weekEnd,
-    totals: totals,
-    statusBuckets: statusBuckets,
-    statusDays: statusDays,
-    ageBuckets: ageBuckets,
-    period: period,
-    counts: counts
-  };
-}function formatCurrencySafe(util, value) {
-  var n = Number(value) || 0;
-  if (!util || !util.formatCurrency) return String(n);
-  return util.formatCurrency(n);
-}
-
-function formatNumberSafe(util, value) {
-  var n = Number(value) || 0;
-  if (!util || !util.formatNumber) return String(n);
-  return util.formatNumber(n);
-}
-
-function updateOverviewKPI(root, agg) {
-  var util = App.util || {};
-  var totals = agg.totals;
-  var period = agg.period;
-
-  // ① 대출규모 – 전체 누적 기준
-  var loanCard = root.querySelector('.report-kpi-card[data-kpi="loan"]');
-  if (loanCard) {
-    var mainValue = loanCard.querySelector('.report-kpi-main .report-kpi-value');
-    if (mainValue) {
-      // 대출원리금합계 = 전체 대출 totalRepayAmount 합
-      mainValue.textContent = formatCurrencySafe(util, totals.loanTotalRepay);
-    }
-    var subs = loanCard.querySelectorAll('.report-kpi-submetrics .submetric');
-    subs.forEach(function (s) {
-      var labelEl = s.querySelector('.submetric-label');
-      var valueEl = s.querySelector('.submetric-value');
-      if (!labelEl || !valueEl) return;
-      var label = labelEl.textContent.trim();
-      if (label.indexOf('대출원금합계') !== -1) {
-        valueEl.textContent = formatCurrencySafe(util, totals.loanPrincipal);
-      }
-    });
-  }
-
-  // ② 채권규모 – 전체 누적 기준
-  var claimCard = root.querySelector('.report-kpi-card[data-kpi="claim"]');
-  if (claimCard) {
-    var mainValue2 = claimCard.querySelector('.report-kpi-main .report-kpi-value');
-    if (mainValue2) {
-      // 채권금액합계 = 전체 채권 amount 합
-      mainValue2.textContent = formatCurrencySafe(util, totals.claimAmount);
-    }
-    var subs2 = claimCard.querySelectorAll('.report-kpi-submetrics .submetric');
-    subs2.forEach(function (s) {
-      var labelEl = s.querySelector('.submetric-label');
-      var valueEl = s.querySelector('.submetric-value');
-      if (!labelEl || !valueEl) return;
-      var label = labelEl.textContent.trim();
-      if (label.indexOf('채권회수금액합계') !== -1) {
-        // 전체 채권 회수금액 합계
-        valueEl.textContent = formatCurrencySafe(util, totals.claimCollectedTotal);
-      }
-    });
-  }
-
-  // ③ 운영현황 – 이번달 기준 신규대출/신규채권 (금액/건수)
-  var opsCard = root.querySelector('.report-kpi-card[data-kpi="ops"]');
-  if (opsCard) {
-    var subsOps = opsCard.querySelectorAll('.report-kpi-submetrics .submetric');
-    subsOps.forEach(function (s) {
-      var labelEl = s.querySelector('.submetric-label');
-      var valueEl = s.querySelector('.submetric-value');
-      if (!labelEl || !valueEl) return;
-      var label = labelEl.textContent.trim();
-
-      if (label.indexOf('신규대출금액') !== -1) {
-        var amountLoan = 0;
-        var countLoan = 0;
-        var loans = (App.state && App.state.loans) || [];
-        loans.forEach(function (loan) {
-          var created = (function (d) {
-            if (!d) return null;
-            var x = new Date(d);
-            if (isNaN(x.getTime())) return null;
-            x.setHours(0, 0, 0, 0);
-            return x;
-          })(loan.createdAt || loan.startDate);
-          if (created && created >= agg.monthStart && created <= agg.today) {
-            amountLoan += Number(loan.principal) || 0;
-            countLoan += 1;
+      if (due) {
+        var inWeek = due >= weekStart && due <= weekEnd;
+        var inMonth = due >= monthStart && due <= today;
+        if (inWeek) {
+          period.weekExpected += amount;
+          period.weekCollected += paidAmount;
+          if ((schedule.kind || '').toLowerCase() === 'claim') {
+            period.weekClaimCollected += paidAmount;
           }
-        });
-        valueEl.textContent = formatCurrencySafe(util, amountLoan) + ' / ' + formatNumberSafe(util, countLoan) + '건';
-      } else if (label.indexOf('신규채권금액') !== -1) {
-        var amountClaim = 0;
-        var countClaim = 0;
-        var claims = (App.state && App.state.claims) || [];
-        claims.forEach(function (claim) {
-          var created = (function (d) {
-            if (!d) return null;
-            var x = new Date(d);
-            if (isNaN(x.getTime())) return null;
-            x.setHours(0, 0, 0, 0);
-            return x;
-          })(claim.createdAt || claim.startDate);
-          if (created && created >= agg.monthStart && created <= agg.today) {
-            amountClaim += Number(claim.amount) || 0;
-            countClaim += 1;
+        }
+        if (inMonth) {
+          period.monthExpected += amount;
+          period.monthCollected += paidAmount;
+          if ((schedule.kind || '').toLowerCase() === 'claim') {
+            period.monthClaimCollected += paidAmount;
           }
-        });
-        valueEl.textContent = formatCurrencySafe(util, amountClaim) + ' / ' + formatNumberSafe(util, countClaim) + '건';
+        }
       }
-    });
-  }
-
-  // ④ 가용자산(data-kpi="avail")은 아직 공식 확정 전이라, v151에서는 건드리지 않는다.
-}
-
-  function updateRecoveryTiles(root, agg) {
-  var util = App.util || {};
-  var tiles = root.querySelectorAll('.recovery-kpi-card');
-  tiles.forEach(function (tile) {
-    var labelEl = tile.querySelector('.kpi-label');
-    var valueEl = tile.querySelector('.kpi-value');
-    if (!labelEl || !valueEl) return;
-    var label = labelEl.textContent.trim();
-    if (label.indexOf('이번주 회수 예정금액') !== -1) {
-      valueEl.textContent = formatCurrencySafe(util, agg.period.weekExpected);
-    } else if (label.indexOf('이번달 회수 예정금액') !== -1) {
-      valueEl.textContent = formatCurrencySafe(util, agg.period.monthExpected);
-    } else if (label.indexOf('이번주 회수액') !== -1) {
-      valueEl.textContent = formatCurrencySafe(util, agg.period.weekCollected);
-    } else if (label.indexOf('이번달 회수액') !== -1) {
-      valueEl.textContent = formatCurrencySafe(util, agg.period.monthCollected);
     }
-  });
-}
 
-
-var trendChartInstance = null;
-
-function getTrendBucketKey(date, period) {
-  if (!date) return '';
-  var y = date.getFullYear();
-  var m = date.getMonth() + 1;
-  var d = date.getDate();
-  function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  if (period === 'daily') {
-    return y + '-' + pad(m) + '-' + pad(d);
-  } else if (period === 'weekly') {
-    var oneJan = new Date(y, 0, 1);
-    oneJan.setHours(0, 0, 0, 0);
-    var diff = (date - oneJan) / 86400000;
-    var week = Math.floor(diff / 7) + 1;
-    return y + '-W' + pad(week);
-  }
-  // default monthly
-  return y + '-' + pad(m);
-}
-
-function computeTrendSeries(period) {
-  var state = App.state || {};
-  var loans = state.loans || [];
-  var schedules = [];
-
-  if (App.schedulesEngine && typeof App.schedulesEngine.getAll === 'function') {
-    try {
-      schedules = App.schedulesEngine.getAll() || [];
-    } catch (e) {
-      schedules = [];
+    for (var statusKey in (scheduleMetrics.counts || {})) {
+      if (!Object.prototype.hasOwnProperty.call(scheduleMetrics.counts, statusKey)) continue;
+      if (!Object.prototype.hasOwnProperty.call(statusBuckets, statusKey)) {
+        statusBuckets[statusKey] = { count: 0, amount: 0 };
+      }
+      statusBuckets[statusKey].count = scheduleMetrics.counts[statusKey] || 0;
+      statusBuckets[statusKey].amount = (scheduleMetrics.amounts && scheduleMetrics.amounts[statusKey]) || 0;
     }
+
+    var counts = {
+      totalLoans: countsMetrics.totalLoans != null ? countsMetrics.totalLoans : loans.length,
+      totalClaims: countsMetrics.totalClaims != null ? countsMetrics.totalClaims : claims.length,
+      activeLoans: countsMetrics.activeLoans || 0,
+      activeClaims: countsMetrics.activeClaims || 0,
+      totalDebtors: countsMetrics.totalDebtors != null ? countsMetrics.totalDebtors : debtors.length,
+      activeDebtors: countsMetrics.activeDebtors || 0
+    };
+
+    return {
+      today: today,
+      monthStart: monthStart,
+      weekStart: weekStart,
+      weekEnd: weekEnd,
+      weekSemantics: clonePlain(getWeekSemantics()),
+      totals: totals,
+      statusBuckets: statusBuckets,
+      statusDays: statusDays,
+      ageBuckets: ageBuckets,
+      period: period,
+      counts: counts,
+      metrics: metrics
+    };
   }
 
-
-  function toDate(d) {
-    if (!d) return null;
-    var x = new Date(d);
-    if (isNaN(x.getTime())) return null;
-    x.setHours(0, 0, 0, 0);
-    return x;
+  function pad2(value) {
+    return value < 10 ? '0' + value : '' + value;
   }
 
-  // 월간 고정
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
+  function formatDateKey(date) {
+    if (!date) return '';
+    return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+  }
 
-  var trendState = App.reportTrendState || {};
-  var fromDate = trendState.dateFrom ? toDate(trendState.dateFrom) : null;
-  var toDateLimit = trendState.dateTo ? toDate(trendState.dateTo) : null;
+  function getWeekStart(date) {
+    var base = toDate(date);
+    if (!base) return null;
+    var weekday = (base.getDay() + 6) % 7;
+    base.setDate(base.getDate() - weekday);
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }
 
-  var buckets = {};
-  // v2.3: Buckets are created from recorded events (cashLogs / schedules).
+  function getWeekEnd(date) {
+    var start = getWeekStart(date);
+    if (!start) return null;
+    var end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return end;
+  }
 
-  function getBucketKey(date) {
+  function getMonthStart(date) {
+    var base = toDate(date);
+    if (!base) return null;
+    base.setDate(1);
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }
+
+  function getTrendBucketStart(date, period) {
     if (!date) return null;
-    var y = date.getFullYear();
-    var m = date.getMonth() + 1;
-    var mm = m < 10 ? '0' + m : '' + m;
-    return y + '-' + mm; // YYYY-MM
+    if (period === 'daily') return toDate(date);
+    if (period === 'weekly') return getWeekStart(date);
+    return getMonthStart(date);
   }
 
-  // 1) 대출 실행 = 자본 유출 (Outflow)
-  // v2.3: Source of Truth is cashLogs (LOAN_EXECUTION).
-  var cashLogs = Array.isArray(state.cashLogs) ? state.cashLogs : [];
-  cashLogs.forEach(function (row) {
-    if (!row) return;
-    if (row.type !== 'LOAN_EXECUTION') return;
+  function getTrendBucketKey(date, period) {
+    var start = getTrendBucketStart(date, period);
+    if (!start) return '';
+    if (period === 'daily') {
+      return formatDateKey(start);
+    }
+    if (period === 'weekly') {
+      return formatDateKey(start);
+    }
+    return start.getFullYear() + '-' + pad2(start.getMonth() + 1);
+  }
 
-    var amt = Number(row.amount) || 0;
-    if (!amt) return;
-    if (amt < 0) amt = -amt;
+  function incrementTrendBucket(cursor, period) {
+    var base = getTrendBucketStart(cursor, period) || toDate(cursor);
+    if (!base) return null;
+    var next = new Date(base);
+    if (period === 'daily') {
+      next.setDate(next.getDate() + 1);
+    } else if (period === 'weekly') {
+      next.setDate(next.getDate() + 7);
+    } else {
+      next = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+    }
+    next.setHours(0, 0, 0, 0);
+    return next;
+  }
 
-    var date = toDate(row.date || null);
-    if (!date) return;
-    if (date > today) return;
-    if (fromDate && date < fromDate) return;
-    if (toDateLimit && date > toDateLimit) return;
+  function normalizeBucketLabel(bucketKey, period) {
+    if (!bucketKey) return '';
+    if (period === 'daily') {
+      return bucketKey.length >= 10 ? bucketKey.slice(5) : bucketKey;
+    }
+    if (period === 'weekly') {
+      return bucketKey.length >= 10 ? (bucketKey.slice(5) + ' 주간') : (bucketKey + ' 주간');
+    }
+    return bucketKey;
+  }
 
-    var key = getBucketKey(date);
-    if (!key) return;
+  function getTrendLogDate(value) {
+    return toDate(value);
+  }
 
-    var bucket = buckets[key];
-    if (!bucket) {
-      bucket = buckets[key] = { inflow: 0, outflow: 0, net: 0 };
+  function getCapitalFlowSourceLogs() {
+    if (App.cashLedger && typeof App.cashLedger.getEffectiveLogs === 'function') {
+      try {
+        var effective = App.cashLedger.getEffectiveLogs();
+        if (Array.isArray(effective)) return effective;
+      } catch (e) {}
+    }
+    var state = App.state || {};
+    return Array.isArray(state.cashLogs) ? state.cashLogs : [];
+  }
+
+  function getTrendRangeState() {
+    if (App.reportState && typeof App.reportState.getTrend === 'function') {
+      return App.reportState.getTrend() || {};
+    }
+    return App.reportTrendState || {};
+  }
+
+  function isLoanOrClaimRef(log) {
+    var ref = '';
+    if (log && log.refKind != null) ref = String(log.refKind).toLowerCase();
+    else if (log && log.refType != null) ref = String(log.refType).toLowerCase();
+    return ref === 'loan' || ref === 'claim';
+  }
+
+  function computeTrendSeries(period) {
+    var resolvedPeriod = (period === 'daily' || period === 'weekly' || period === 'monthly') ? period : 'monthly';
+    var trendState = getTrendRangeState();
+    var fromDate = trendState && trendState.dateFrom ? getTrendLogDate(trendState.dateFrom) : null;
+    var toDateLimit = trendState && trendState.dateTo ? getTrendLogDate(trendState.dateTo) : null;
+    if (fromDate && toDateLimit && fromDate > toDateLimit) {
+      var swapped = fromDate;
+      fromDate = toDateLimit;
+      toDateLimit = swapped;
+    }
+    var logs = getCapitalFlowSourceLogs();
+    var buckets = {};
+    var sourceLogCount = Array.isArray(logs) ? logs.length : 0;
+    var matchedLogCount = 0;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var hasExplicitRange = !!(fromDate && toDateLimit);
+
+    function ensureBucket(key) {
+      if (!key) return null;
+      if (!buckets[key]) {
+        buckets[key] = { inflow: 0, outflow: 0, net: 0 };
+      }
+      return buckets[key];
     }
 
-    bucket.outflow += amt;
-  });
+    for (var i = 0; i < logs.length; i++) {
+      var row = logs[i];
+      if (!row) continue;
+      var type = String(row.type || '').toUpperCase();
+      var date = getTrendLogDate(row.date || row.createdAt || null);
+      if (!date) continue;
+      if (date > today) continue;
+      if (fromDate && date < fromDate) continue;
+      if (toDateLimit && date > toDateLimit) continue;
 
-  // 2) 스케줄 기반 자본 유입 (대출 상환 + 채권 회수)
-  schedules.forEach(function (sch) {
-    if (!sch) return;
-    var amt = Number(sch.amount) || 0;
-    if (!amt) return;
-
-    var kind = sch.kind || sch.type || 'loan';
-    var status = (sch.status || 'PLANNED').toUpperCase();
-
-    var due = toDate(sch.dueDate || sch.due_date || sch.due || null);
-    if (!due) return;
-    if (due > today) return;
-    if (fromDate && due < fromDate) return;
-    if (toDateLimit && due > toDateLimit) return;
-
-    var key = getBucketKey(due);
-    if (!key) return;
-
-    var bucket = buckets[key];
-    if (!bucket) {
-      bucket = buckets[key] = { inflow: 0, outflow: 0, net: 0 };
-    }
-
-    // 대출 상환 inflow
-    if (kind === 'loan') {
-      var partialPaid = Number(sch.partialPaidAmount) || 0;
-      var paidRaw = Number(sch.paidAmount) || 0;
-      var paidAmt = 0;
-
-      if (status === 'PAID') {
-        paidAmt = amt;
-      } else if (status === 'PARTIAL') {
-        paidAmt = partialPaid > 0 ? partialPaid : paidRaw;
+      var includeInflow = false;
+      var includeOutflow = false;
+      if (type === 'LOAN_EXECUTION') {
+        includeOutflow = true;
+      } else if (type === 'AUTO_IN' && isLoanOrClaimRef(row)) {
+        includeInflow = true;
       } else {
-        paidAmt = paidRaw;
+        continue;
       }
 
-      if (paidAmt > 0) {
-        bucket.inflow += paidAmt;
+      var amount = Number(row.amount) || 0;
+      if (!amount) continue;
+      amount = Math.abs(amount);
+      matchedLogCount += 1;
+
+      var key = getTrendBucketKey(date, resolvedPeriod);
+      var bucket = ensureBucket(key);
+      if (!bucket) continue;
+      if (includeOutflow) bucket.outflow += amount;
+      if (includeInflow) bucket.inflow += amount;
+    }
+
+    var isZeroFilled = false;
+    if (hasExplicitRange) {
+      var startCursor = getTrendBucketStart(fromDate, resolvedPeriod);
+      var endCursor = getTrendBucketStart(toDateLimit, resolvedPeriod);
+      var guard = 0;
+      while (startCursor && endCursor && startCursor <= endCursor && guard < 2000) {
+        ensureBucket(getTrendBucketKey(startCursor, resolvedPeriod));
+        startCursor = incrementTrendBucket(startCursor, resolvedPeriod);
+        guard += 1;
       }
+      isZeroFilled = true;
     }
 
-    // 채권 회수 inflow (채권은 PARTIAL 없음, PAID만)
-    if (kind === 'claim') {
-      if (status === 'PAID') {
-        bucket.inflow += amt;
-      }
-    }
-  });
+    var keys = Object.keys(buckets).sort();
+    var labels = [];
+    var inflow = [];
+    var outflow = [];
+    var net = [];
+    var velocity = [];
 
-  var keys = Object.keys(buckets).sort();
-  var labels = [];
-  var inflow = [];
-  var outflow = [];
-  var net = [];
-  var velocity = [];
-
-  keys.forEach(function (k) {
-    var b = buckets[k] || { inflow: 0, outflow: 0, net: 0 };
-    b.net = (b.inflow || 0) - (b.outflow || 0);
-
-    var v = 0;
-    if (b.outflow > 0) {
-      v = (b.inflow / b.outflow) * 100;
+    for (var k = 0; k < keys.length; k++) {
+      var key = keys[k];
+      var bucket = buckets[key] || { inflow: 0, outflow: 0, net: 0 };
+      bucket.net = (bucket.inflow || 0) - (bucket.outflow || 0);
+      var v = bucket.outflow > 0 ? (bucket.inflow / bucket.outflow) * 100 : 0;
+      labels.push(normalizeBucketLabel(key, resolvedPeriod));
+      inflow.push(bucket.inflow || 0);
+      outflow.push(bucket.outflow || 0);
+      net.push(bucket.net || 0);
+      velocity.push(v);
     }
 
-    labels.push(k);
-    inflow.push(b.inflow || 0);
-    outflow.push(b.outflow || 0);
-    net.push(b.net || 0);
-    velocity.push(v);
-  });
-
-  return {
-    labels: labels,
-    inflow: inflow,
-    outflow: outflow,
-    net: net,
-    velocity: velocity
-  };
-}
-function computeTrendSummary(velocitySeries) {
-  var arr = (velocitySeries || []).filter(function (v) {
-    return typeof v === 'number' && !isNaN(v);
-  });
-  if (!arr.length) {
-    return { peak: 0, min: 0, avg3: 0 };
+    return {
+      period: resolvedPeriod,
+      basis: 'cashlogs',
+      dateFrom: fromDate ? formatDateKey(fromDate) : null,
+      dateTo: toDateLimit ? formatDateKey(toDateLimit) : null,
+      bucketKeys: keys,
+      labels: labels,
+      inflow: inflow,
+      outflow: outflow,
+      net: net,
+      velocity: velocity,
+      bucketCount: keys.length,
+      hasExplicitRange: hasExplicitRange,
+      isZeroFilled: isZeroFilled,
+      sourceLogCount: sourceLogCount,
+      matchedLogCount: matchedLogCount,
+      weekSemantics: clonePlain(getWeekSemantics())
+    };
   }
-  var peak = Math.max.apply(null, arr);
-  var min = Math.min.apply(null, arr);
-  var recent = arr.slice(-3);
-  var sum = recent.reduce(function (acc, v) { return acc + v; }, 0);
-  var avg3 = sum / recent.length;
-  return { peak: peak, min: min, avg3: avg3 };
-}
+
+  function computeTrendSummary(velocitySeries) {
+    var arr = (velocitySeries || []).filter(function (value) {
+      return typeof value === 'number' && !isNaN(value);
+    });
+    if (!arr.length) {
+      return { peak: 0, min: 0, avg3: 0 };
+    }
+    var peak = Math.max.apply(null, arr);
+    var min = Math.min.apply(null, arr);
+    var recent = arr.slice(-3);
+    var sum = recent.reduce(function (acc, value) { return acc + value; }, 0);
+    return {
+      peak: peak,
+      min: min,
+      avg3: sum / recent.length
+    };
+  }
 
   App.reportCompute.computeAggregates = computeReportAggregates;
+  App.reportCompute.getWeekSemantics = getWeekSemantics;
+  App.reportCompute.getWeekStart = getWeekStart;
   App.reportCompute.getTrendBucketKey = getTrendBucketKey;
   App.reportCompute.computeTrendSeries = computeTrendSeries;
   App.reportCompute.computeTrendSummary = computeTrendSummary;
+  App.reportCompute.incrementTrendBucket = incrementTrendBucket;
+  App.reportCompute.normalizeTrendBucketLabel = normalizeBucketLabel;
 })(window);

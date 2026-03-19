@@ -29,6 +29,11 @@
     return (typeof value === 'string' && value) ? value : null;
   }
 
+  function sanitizeTrendPeriod(value, fallbackValue) {
+    var next = (typeof value === 'string' && value) ? value : fallbackValue;
+    return (next === 'daily' || next === 'weekly' || next === 'monthly') ? next : (fallbackValue || 'monthly');
+  }
+
   // Managed UI SSOT surface. stateIO may orchestrate apply flow, but only this module owns
   // the managed UI subtree shape/default/sanitize/clone/apply rules.
   var MANAGED_UI_KEYS = ['debtorPanel', 'monitoring', 'report'];
@@ -141,7 +146,7 @@
       if (typeof src.report.portfolioMode === 'string') dst.report.portfolioMode = src.report.portfolioMode;
       if (isObject(src.report.trend)) {
         dst.report.trend = dst.report.trend || {};
-        if (typeof src.report.trend.period === 'string') dst.report.trend.period = src.report.trend.period;
+        if (Object.prototype.hasOwnProperty.call(src.report.trend, 'period')) dst.report.trend.period = sanitizeTrendPeriod(src.report.trend.period, dst.report.trend.period || 'monthly');
         if (Object.prototype.hasOwnProperty.call(src.report.trend, 'dateFrom')) dst.report.trend.dateFrom = src.report.trend.dateFrom;
         if (Object.prototype.hasOwnProperty.call(src.report.trend, 'dateTo')) dst.report.trend.dateTo = src.report.trend.dateTo;
       }
@@ -216,7 +221,7 @@
     report.portfolioMode = (report.portfolioMode === 'claim' || report.portfolioMode === 'loan') ? report.portfolioMode : defaults.portfolioMode;
 
     report.trend = isObject(report.trend) ? report.trend : {};
-    report.trend.period = (typeof report.trend.period === 'string' && report.trend.period) ? report.trend.period : defaults.trend.period;
+    report.trend.period = sanitizeTrendPeriod(report.trend.period, defaults.trend.period);
     report.trend.dateFrom = normalizeNullableDateString(report.trend.dateFrom);
     report.trend.dateTo = normalizeNullableDateString(report.trend.dateTo);
 

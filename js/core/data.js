@@ -661,6 +661,9 @@ function normalizeAllSchedules(todayStr) {
 
 
 
+// Compatibility note: report/statistics primary metrics moved to portfolio.metrics.engine.js in v3.2.35.
+// computePortfolioSummary remains for legacy/compatibility only.
+// Report overview/render path no longer uses this as its primary metrics source.
 function computePortfolioSummary(scope, dateRange) {
     scope = scope || 'debt';
     // v010 claim portfolio summary: card + schedule hybrid

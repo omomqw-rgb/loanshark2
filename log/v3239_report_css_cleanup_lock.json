@@ -1,0 +1,13 @@
+{
+  "patch": "LoanShark_v3.2.39_report_css_cleanup_lock",
+  "base": "LoanShark_v3.2.38_report_hotfix_stability_lock.zip",
+  "modified_files": [
+    "css/report.css"
+  ],
+  "notes": [
+    "Rewrote report.css into sectioned structure with comments.",
+    "Removed broken/orphan fragments and duplicate selector blocks from prior file.",
+    "Kept JS and non-report CSS files untouched.",
+    "App.meta.version remains v3.2.38 because this patch intentionally avoids JS changes."
+  ]
+}
